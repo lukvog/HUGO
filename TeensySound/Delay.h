@@ -1,5 +1,5 @@
 /* 
- * *** firstAudioObject.h ****
+ * *** Delay.h ****
  *
  * created by Lukas Vogel 31.03.14
  * 
@@ -57,15 +57,15 @@ protected:
 	size_t mWritePtr;
 };
 
-class firstAudioOnject : public AudioStream
+class Delay : public AudioStream
 {
 public:
-	firstAudioOnject() :
+	Delay() :
 	AudioStream(1,inputQueueArray),
 	mDelay(8192+AUDIO_BLOCK_SAMPLES),
 	mHold(false)
 	{}
-	~firstAudioOnject() {}
+	~Delay() {}
 
 	virtual void update(void);
 	void hold(bool hold) {

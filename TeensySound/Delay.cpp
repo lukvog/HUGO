@@ -1,11 +1,11 @@
 /* 
- * *** firstAudioObject.cpp ****
+ * *** Delay.cpp ****
  *
  * created by Lukas Vogel 31.03.14
  * 
  */
  
- #include "firstAudioObject.h"
+ #include "Delay.h"
  
 void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
  {
@@ -91,7 +91,7 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 
  }
  
-  void firstAudioOnject::update(void)
+  void Delay::update(void)
  {
 
 	audio_block_t* block;
