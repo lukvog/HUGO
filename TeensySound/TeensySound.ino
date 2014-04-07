@@ -90,15 +90,27 @@ void setup() {
 // audio volume
 int volume = 0;
 
+unsigned long last_time = millis();
+
 void loop()
 {
-	int cpuUsage = AudioProcessorUsageMax();
-	
-	Serial.print("cpuUsage: ");
-	Serial.print(cpuUsage);
-	Serial.print("%\n");
-	
-	delay(100);
+  //////////////////
+  //Mem and CPU Usage  
+  // Change this to if(1) for measurement output and to if(0) to stop it
+  if(1) {
+    if(millis() - last_time >= 5000) {
+      Serial.print("Proc = ");
+      Serial.print(AudioProcessorUsage());
+      Serial.print(" (");    
+      Serial.print(AudioProcessorUsageMax());
+      Serial.print("),  Mem = ");
+      Serial.print(AudioMemoryUsage());
+      Serial.print(" (");    
+      Serial.print(AudioMemoryUsageMax());
+      Serial.println(")");
+      last_time = millis();
+    }
+  }
 	
   // Volume control
   int n = analogRead(15);
