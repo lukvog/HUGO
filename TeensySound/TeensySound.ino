@@ -64,7 +64,7 @@ AudioControlSGTL5000 audioShield;
 void setup() {
   
   Serial.begin(9600);
-  while (!Serial) ;
+  //while (!Serial) ;
   delay(3000);
 
   pinMode(PASSTHRU_PIN,INPUT_PULLUP);
