@@ -44,15 +44,15 @@ AudioControlSGTL5000 audioShield;
 #endif
 
 // nRF24L01(+) radio using the Getting Started board
-//RF24 radio(9,10);
-RF24 radio(2,6);
+RF24 radio(9,10);
+//RF24 radio(2,6);
 RF24Network network(radio);
 
 // Our node address
 uint16_t this_node;
 
 // Delay manager to send pings regularly
-const unsigned long interval = 2000; // ms
+const unsigned long interval = 100; // ms
 unsigned long last_time_sent;
 
 // Array of nodes we are aware of
@@ -86,8 +86,8 @@ void setup()
   //___________________________________________________________________________________
   //RF24
  ///SPI Setup
- SPI.setMOSI(7);
-  SPI.setSCK(14);
+// SPI.setMOSI(7);
+  //SPI.setSCK(14);
   
   //
   // Print preamble
