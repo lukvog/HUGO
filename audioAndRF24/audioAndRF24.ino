@@ -1,3 +1,32 @@
+/*
+
+PINS Audioboad:
+ 6 - MEMCS
+ 7 - MOSI
+ 9 - BCLK
+10 - SDCS
+11 - MCLK
+12 - MISO
+13 - RX
+14 - SCLK
+15 - VOL
+18 - SDA
+19 - SCL
+22 - TX
+23 - LRCLK
+
+PINS RF24
+GND  1 --> GND
+Vin  2 --> 3.3V
+CE   3 --> 2
+CSN  4 --> 6
+SCK  5 --> 14
+MOSI 6 --> 7
+MISO 7 --> 12
+
+*/
+
+
 #include <Audio.h>
 #include <Wire.h>
 #include <stdio.h>
@@ -11,8 +40,8 @@
 /////////////////////////
 //AUDIO
 
-//const int myInput = AUDIO_INPUT_LINEIN;
-const int myInput = AUDIO_INPUT_MIC;
+const int myInput = AUDIO_INPUT_LINEIN;
+//const int myInput = AUDIO_INPUT_MIC;
 
 // Create the Audio components.  These should be created in the
 // order data flows, inputs/sources -> processing -> outputs
@@ -44,8 +73,8 @@ AudioControlSGTL5000 audioShield;
 #endif
 
 // nRF24L01(+) radio using the Getting Started board
-RF24 radio(9,10);
-//RF24 radio(2,6);
+//RF24 radio(9,10);
+RF24 radio(2,6);
 RF24Network network(radio);
 
 // Our node address
@@ -70,6 +99,16 @@ void add_node(uint16_t node);
 
 
 //___________________________________________________________________________________
+/////////////////////////
+//Light
+
+int led = 5;           // the pin that the LED is attached to
+int brightness = 0;    // how bright the LED is
+int fadeAmount = 1;    // how many points to fade the LED by
+
+
+
+//___________________________________________________________________________________
 void setup() 
 {
   
@@ -86,15 +125,15 @@ void setup()
   //___________________________________________________________________________________
   //RF24
  ///SPI Setup
-// SPI.setMOSI(7);
-  //SPI.setSCK(14);
+  SPI.setMOSI(7);
+  SPI.setSCK(14);
   
   //
   // Print preamble
   //
   Serial.begin(57600);
   //printf_begin();
-  delay(5000);
+  delay(2000);
   Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
   Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
   
@@ -111,13 +150,38 @@ void setup()
   radio.begin();
   network.begin(/*channel*/ 100, /*node address*/ this_node );
   
+  //___________________________________________________________________________________
+  //LIGHT
+  
+  pinMode(led, OUTPUT);
   
 }
 
 elapsedMillis volmsec=0;
+elapsedMillis dimmsec=0;
 unsigned long last_time = millis();
 
 void loop() {
+  
+  
+   //___________________________________________________________________________________
+  //LIGHT
+  
+ if (dimmsec > 40) {
+    
+        // set the brightness of pin 9:
+  analogWrite(led, brightness);
+
+  // change the brightness for next time through the loop:
+  brightness = brightness + fadeAmount;
+  // reverse the direction of the fading at the ends of the fade:
+  if (brightness == 0 || brightness == 255) {
+    fadeAmount = -fadeAmount ;
+  }
+  volmsec = 0;
+  }
+
+  
   
    //___________________________________________________________________________________
   //AUDIO
@@ -150,6 +214,9 @@ if(1) {
     Serial.println(")");
     last_time = millis();
   }
+  
+  
+
 }
   
     
@@ -220,6 +287,7 @@ if(1) {
     // Base node sends the current active nodes out
     else
       ok = send_N(to);
+ //     ok = send_V(to);
 
     // Notify us of the result
     if (ok)
@@ -253,6 +321,26 @@ bool send_T(uint16_t to)
   return network.write(header,&message,sizeof(unsigned long));
 }
 
+
+
+/**
+ * Send a 'V' message, the current time
+ */
+
+
+//bool send_V(uint16_t to)
+//{
+  //RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
+  
+ // The 'V' message is a value message
+//  unsigned long message = millis();
+//  Serial.printf_P(PSTR("---------------------------------\n\r"));
+//  Serial.printf_P(PSTR("%lu: APP Sending %lu to 0%o...\n\r"),millis(),message,to);
+//  return network.write(header,&message,sizeof(unsigned long));
+//}
+
+
+
 /**
  * Send an 'N' message, the active node list
  */
@@ -281,6 +369,23 @@ void handle_T(RF24NetworkHeader& header)
   if ( header.from_node != this_node || header.from_node > 00 )
     add_node(header.from_node);
 }
+
+/**
+ * Handle a 'V' message
+ *
+ * Add the node to the list of active nodes
+ */
+//void handle_V(RF24NetworkHeader& header)
+//{
+  // The 'T' message is just a ulong, containing the time
+//  unsigned long message;
+//  network.read(header,&message,sizeof(unsigned long));
+//  Serial.printf_P(PSTR("%lu: APP Received %lu from 0%o\n\r"),millis(),message,header.from_node);
+
+  // If this message is from ourselves or the base, don't bother adding it to the active nodes.
+ // if ( header.from_node != this_node || header.from_node > 00 )
+//    add_node(header.from_node);
+//}
 
 /**
  * Handle an 'N' message, the active node list
