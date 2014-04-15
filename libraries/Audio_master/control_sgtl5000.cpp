@@ -801,7 +801,7 @@ unsigned char AudioControlSGTL5000::calcVol(float n, unsigned char range)
 
 
 // if(SGTL5000_PEQ) quantization_unit=524288; if(AudioFilterBiquad) quantization_unit=2147483648;
-void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float BW, uint32_t quantization_unit, uint32_t fS, int *coef)
+void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float Q, uint32_t quantization_unit, uint32_t fS, int *coef)
 {
 
 // I used resources like http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
@@ -814,10 +814,10 @@ void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float BW, uint32_t 
   float W0 = 2*3.14159265358979323846*fC/fS; 
   float cosw=cos(W0);
   float sinw=sin(W0);
-  float alpha = sinw*sinh((log(2)/2)*BW*W0/sinw);
-  float beta = sqrt(2*A);
-  //float alpha = sinw / (2 * Q); 
-  //float beta = sqrt(A)/Q;
+  //float alpha = sinw*sinh((log(2)/2)*BW*W0/sinw);
+  //float beta = sqrt(2*A);
+  float alpha = sinw / (2 * Q); 
+  float beta = sqrt(A)/Q;
   float b0,b1,b2,a0,a1,a2;
 
   switch(filtertype) {

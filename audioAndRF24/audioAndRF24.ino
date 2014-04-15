@@ -1,5 +1,4 @@
 /*
-
 PINS Audioboad:
  6 - MEMCS
  7 - MOSI
@@ -23,6 +22,10 @@ CSN  4 --> 6
 SCK  5 --> 14
 MOSI 6 --> 7
 MISO 7 --> 12
+
+LIGHTPIN
+
+PWM --> 5
 
 */
 
@@ -160,8 +163,9 @@ void setup()
   
 }
 
-elapsedMillis volmsec=0;
-elapsedMillis dimmsec=0;
+// audio volume
+int volume = 0;
+
 unsigned long last_time = millis();
 
 Metro ReadMetro = Metro(10);
@@ -174,7 +178,7 @@ void loop() {
    //___________________________________________________________________________________
   //LIGHT
   
-// if (dimmsec > 40) {
+	if (ReadMetro.check() == 1) {
     
         // set the brightness of pin 9:
   analogWrite(led, brightness);
@@ -186,12 +190,9 @@ void loop() {
     fadeAmount = -fadeAmount ;
   }
   
-  delay(40);
-  //volmsec = 0;
- // }
+ }
 
-  return;
-  
+
   
    //___________________________________________________________________________________
   //AUDIO
