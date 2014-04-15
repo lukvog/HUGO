@@ -163,6 +163,10 @@ elapsedMillis volmsec=0;
 elapsedMillis dimmsec=0;
 unsigned long last_time = millis();
 
+Metro ReadMetro = Metro(10);
+Metro WriteMetro = Metro(10);
+
+
 void loop() {
   
   
