@@ -63,11 +63,15 @@ void setup() {
 	setSopranA();
 
 	Serial.println("setup done");
+	
+	test.push_back(firstFormantSeq);
+	test.push_back(secondFormantSeq);
 }
 
 // audio volume
 int volume = 0;
 int oldValue = 0;
+int activeSeq = 0;
 
 Metro MonitorMetro = Metro(1000);
 Metro ReadMetro = Metro(10);
@@ -103,20 +107,18 @@ void loop()
 	
 	if (TimingMetro.check() == 1) {
 	
-		if (firstFormantSeq.seqCounter <= firstFormantSeq.seqLength)
+		if (test[activeSeq].seqCounter <= test[activeSeq].seqLength)
 		{		
-			firstFormantSeq.seqProceed();
+			test[activeSeq].seqProceed();
 		}
 		else
 		{
-			if (firstFormantSeq.loop == true)
+			if (test[activeSeq].loop == true)
 			{
-				firstFormantSeq.reset();
-				firstFormantSeq.seqProceed();
+				test[activeSeq].reset();
+				test[activeSeq].seqProceed();
 			}			
-		}
-
-		
+		}		
 	}
 	
 	
@@ -139,12 +141,12 @@ void loop()
 	// if pin0 is grounded
 	if(b_test0.fallingEdge()) {
 		staticDelay.hold(true);
-		firstFormantSeq.speed = 2;
+		activeSeq = 1;
 	}
 	// if pin 0 is open
 	if(b_test0.risingEdge()) {
 		staticDelay.hold(false);
-		firstFormantSeq.speed = 1;
+		activeSeq = 0;
 	}
 }
 

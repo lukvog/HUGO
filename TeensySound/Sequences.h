@@ -8,6 +8,8 @@
 #ifndef Sequences_h_
 #define Sequences_h_
 
+#include <vector>
+
 #define a1 0
 #define e1 1
 #define i1 2
@@ -70,5 +72,8 @@ int testSeq2[8] = { a1, 1000, i1, 2000, a1, 500, i1, 500};
 FormantFilterSequence firstFormantSeq(testSeq, 2);
 
 FormantFilterSequence secondFormantSeq(testSeq2, 4);
+
+std::vector<FormantFilterSequence> test;
+
 
 #endif
