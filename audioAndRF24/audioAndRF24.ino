@@ -35,6 +35,7 @@ MISO 7 --> 12
 #include <RF24Network.h>
 #include <RF24.h>
 #include "nodeconfig.h"
+#include <Metro.h>
 
 
 //___________________________________________________________________________________
@@ -194,13 +195,15 @@ void loop() {
   
    //___________________________________________________________________________________
   //AUDIO
-  // every 50 ms, adjust the volume
-  if (volmsec > 50) {
-    float vol = analogRead(15);
-    vol = vol / 10.24;
-    audioShield.volume(vol);
-    volmsec = 0;
-    }
+  // volume control
+  // every 10 ms, check for adjustment
+	if (ReadMetro.check() == 1) {
+		int n = analogRead(15);
+		if (n != volume) {
+			volume = n;
+			audioShield.volume((float)n / 10.23);
+		}
+	}
     
     //////////////////
     //Mem and CPU Usage
