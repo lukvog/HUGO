@@ -7,12 +7,16 @@
 
 #include <Metro.h>
 
+#define MOD_RATE 10 // modulation rate in ms
+
 #include "Delay.h"
 #include "FormantFilter.h"
 #include "Sequences.h"
 
 #define Test1_PIN 1
 #define Test0_PIN 0
+
+
 
 Bounce b_test1 = Bounce(Test1_PIN,15);
 Bounce b_test0   = Bounce(Test0_PIN,15);
@@ -67,7 +71,7 @@ int oldValue = 0;
 
 Metro MonitorMetro = Metro(1000);
 Metro ReadMetro = Metro(10);
-Metro TimingMetro = Metro(10);
+Metro TimingMetro = Metro(MOD_RATE);
 
 void loop()
 {
@@ -99,22 +103,20 @@ void loop()
 	
 	if (TimingMetro.check() == 1) {
 	
-		if (testSeqCounter <= testSeqLength)
+		if (firstFormantSeq.seqCounter <= firstFormantSeq.seqLength)
 		{		
-			testSeqProced();
+			firstFormantSeq.seqProceed();
 		}
 		else
 		{
-			if (testSeqLoop == true)
+			if (firstFormantSeq.loop == true)
 			{
-				pTestSeq = testSeq;
-				testSeqCounter = 0;
-				testCounter = 0;
-				testSeqProced();
-			}
-			
+				firstFormantSeq.reset();
+				firstFormantSeq.seqProceed();
+			}			
 		}
-	
+
+		
 	}
 	
 	
@@ -122,7 +124,6 @@ void loop()
 	// update the two buttons
 	b_test0.update();
 	b_test1.update();
-
 
 
 	// if pin1 is grounded
@@ -138,10 +139,12 @@ void loop()
 	// if pin0 is grounded
 	if(b_test0.fallingEdge()) {
 		staticDelay.hold(true);
+		firstFormantSeq.speed = 2;
 	}
 	// if pin 0 is open
 	if(b_test0.risingEdge()) {
 		staticDelay.hold(false);
+		firstFormantSeq.speed = 1;
 	}
 }
 
