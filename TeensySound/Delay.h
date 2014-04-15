@@ -5,8 +5,8 @@
  * 
  */
  
-#ifndef firstAudioObject_h_
-#define firstAudioObject_h_
+#ifndef Delay_h_
+#define Delay_h_
 
 #include "AudioStream.h"
 
