@@ -85,12 +85,8 @@ RF24Network network(radio);
 // Our node address
 uint16_t this_node;
 
-// Delay manager to send pings regularly
-//const unsigned long interval = 100; // ms
-//unsigned long last_time_sent;
-
 // Array of nodes we are aware of
-const short max_active_nodes = 10;
+const short max_active_nodes = 13;
 uint16_t active_nodes[max_active_nodes];
 short num_active_nodes = 0;
 short next_ping_node_index = 0;
@@ -98,8 +94,10 @@ short next_ping_node_index = 0;
 // Prototypes for functions to send & handle messages
 bool send_T(uint16_t to);
 bool send_N(uint16_t to);
+bool send_V(uint16_t to);
 void handle_T(RF24NetworkHeader& header);
 void handle_N(RF24NetworkHeader& header);
+void handle_V(RF24NetworkHeader& header);
 void add_node(uint16_t node);
 
 
@@ -167,7 +165,7 @@ void setup()
 int volume = 0;
 
 Metro UsageMetro = Metro(5000);
-Metro ComMetro = Metro(200);
+Metro ComMetro = Metro(500);
 Metro ReadMetro = Metro(40);
 Metro WriteMetro = Metro(20);
 
@@ -262,6 +260,9 @@ void loop() {
     case 'T':
       handle_T(header);
       break;
+    case 'V':
+      handle_V(header);
+      break;
     case 'N':
       handle_N(header);
       break;
@@ -287,7 +288,10 @@ void loop() {
     {
       // Send to the next active node
       to = active_nodes[next_ping_node_index++];
-
+      if (to == this_node)
+      {
+      to = active_nodes[next_ping_node_index++];
+      }
       // Have we rolled over?
       if ( next_ping_node_index > num_active_nodes )
       {
@@ -302,13 +306,13 @@ void loop() {
     bool ok;
 
     // Normal nodes send a 'T' ping
-    if ( this_node > 00 || to == 00 )
+    if ( this_node > 00 )
+    //if ( this_node > 00 || to == 00 )
       ok = send_T(to);
 
     // Base node sends the current active nodes out
-    else
+    else {
       ok = send_N(to);
-    //     ok = send_V(to);
 
     // Notify us of the result
     if (ok)
@@ -322,6 +326,22 @@ void loop() {
       // Try sending at a different time next time
       //last_time_sent -= 100;
     }
+    
+    ok = send_V(to);
+        // Notify us of the result
+    if (ok)
+    {
+      Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+    }
+    else
+    {
+      Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+
+      // Try sending at a different time next time
+      //last_time_sent -= 100;
+    }
+    }
+   
   }
 
   // Listen for a new node address
@@ -345,20 +365,20 @@ bool send_T(uint16_t to)
 
 
 /**
- * Send a 'V' message, the current time
+ * Send a 'V' message, a value
  */
 
 
-//bool send_V(uint16_t to)
-//{
-//RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
+bool send_V(uint16_t to)
+{
+RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
 
 // The 'V' message is a value message
-//  unsigned long message = millis();
-//  Serial.printf_P(PSTR("---------------------------------\n\r"));
-//  Serial.printf_P(PSTR("%lu: APP Sending %lu to 0%o...\n\r"),millis(),message,to);
-//  return network.write(header,&message,sizeof(unsigned long));
-//}
+  unsigned int message = analogRead(15);
+  Serial.printf_P(PSTR("---------------------------------\n\r"));
+  Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
+  return network.write(header,&message,sizeof(unsigned int));
+}
 
 
 
@@ -384,7 +404,7 @@ void handle_T(RF24NetworkHeader& header)
   // The 'T' message is just a ulong, containing the time
   unsigned long message;
   network.read(header,&message,sizeof(unsigned long));
-  Serial.printf_P(PSTR("%lu: APP Received %lu from 0%o\n\r"),millis(),message,header.from_node);
+  Serial.printf_P(PSTR("%lu: APP Received Time %lu from 0%o\n\r"),millis(),message,header.from_node);
 
   // If this message is from ourselves or the base, don't bother adding it to the active nodes.
   if ( header.from_node != this_node || header.from_node > 00 )
@@ -396,17 +416,17 @@ void handle_T(RF24NetworkHeader& header)
  *
  * Add the node to the list of active nodes
  */
-//void handle_V(RF24NetworkHeader& header)
-//{
-// The 'T' message is just a ulong, containing the time
-//  unsigned long message;
-//  network.read(header,&message,sizeof(unsigned long));
-//  Serial.printf_P(PSTR("%lu: APP Received %lu from 0%o\n\r"),millis(),message,header.from_node);
+void handle_V(RF24NetworkHeader& header)
+{
+// The 'V' contains values
+  unsigned int message;
+  network.read(header,&message,sizeof(unsigned int));
+  Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
 
 // If this message is from ourselves or the base, don't bother adding it to the active nodes.
-// if ( header.from_node != this_node || header.from_node > 00 )
-//    add_node(header.from_node);
-//}
+ if ( header.from_node != this_node || header.from_node > 00 )
+    add_node(header.from_node);
+}
 
 /**
  * Handle an 'N' message, the active node list
@@ -441,8 +461,6 @@ void add_node(uint16_t node)
     active_nodes[num_active_nodes++] = node; 
     Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
   }
-
-
 
 
 }
