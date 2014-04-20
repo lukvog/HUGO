@@ -45,8 +45,8 @@ PINS Audioboad:
 /////////////////////////
 //AUDIO
 
-const int myInput = AUDIO_INPUT_LINEIN;
-//const int myInput = AUDIO_INPUT_MIC;
+//const int myInput = AUDIO_INPUT_LINEIN;
+const int myInput = AUDIO_INPUT_MIC;
 
 // Create the Audio components.  These should be created in the
 // order data flows, inputs/sources -> processing -> outputs
@@ -100,6 +100,9 @@ void handle_N(RF24NetworkHeader& header);
 void handle_V(RF24NetworkHeader& header);
 void add_node(uint16_t node);
 
+//data
+int valueRF = 1;
+
 
 //___________________________________________________________________________________
 /////////////////////////
@@ -118,7 +121,7 @@ void setup()
   //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
-  AudioMemory(12);
+  //AudioMemory(12);
 
   // Enable the audio shield and set the output volume.
   audioShield.enable();
@@ -166,6 +169,7 @@ int volume = 0;
 
 Metro UsageMetro = Metro(5000);
 Metro ComMetro = Metro(500);
+Metro LightMetro = Metro(40);
 Metro ReadMetro = Metro(40);
 Metro WriteMetro = Metro(20);
 
@@ -176,7 +180,7 @@ void loop() {
   //___________________________________________________________________________________
   //LIGHT
 
-  if (ReadMetro.check() == 1) {
+  if (LightMetro.check() == 1) {
 
     // set the brightness of pin 9:
     brightness = constrain(brightness, 0, 255);
@@ -273,6 +277,23 @@ void loop() {
     };
   }
 
+
+//////////////////////////////
+////////////////////////////////
+//////////////////////////
+
+  //Serial.print("valueRF = "); 
+  //Serial.println(valueRF);
+  
+  //int lightChange = map(valueRF, 0, 255, 10, 100); 
+  //LightMetro = Metro(lightChange);
+  
+  
+  //////////////////////////////
+////////////////////////////////
+//////////////////////////
+
+
   // Send a ping to the next node every 'interval' ms
   //unsigned long now = millis();
   if (ComMetro.check() == 1)
@@ -290,7 +311,7 @@ void loop() {
       to = active_nodes[next_ping_node_index++];
       if (to == this_node)
       {
-      to = active_nodes[next_ping_node_index++];
+        to = active_nodes[next_ping_node_index++];
       }
       // Have we rolled over?
       if ( next_ping_node_index > num_active_nodes )
@@ -307,41 +328,41 @@ void loop() {
 
     // Normal nodes send a 'T' ping
     if ( this_node > 00 )
-    //if ( this_node > 00 || to == 00 )
+      //if ( this_node > 00 || to == 00 )
       ok = send_T(to);
 
     // Base node sends the current active nodes out
     else {
       ok = send_N(to);
 
-    // Notify us of the result
-    if (ok)
-    {
-      Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-    }
-    else
-    {
-      Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
 
-      // Try sending at a different time next time
-      //last_time_sent -= 100;
-    }
-    
-    ok = send_V(to);
-        // Notify us of the result
-    if (ok)
-    {
-      Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-    }
-    else
-    {
-      Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+        // Try sending at a different time next time
+        //last_time_sent -= 100;
+      }
 
-      // Try sending at a different time next time
-      //last_time_sent -= 100;
+      ok = send_V(to);
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+
+        // Try sending at a different time next time
+        //last_time_sent -= 100;
+      }
     }
-    }
-   
+
   }
 
   // Listen for a new node address
@@ -371,9 +392,9 @@ bool send_T(uint16_t to)
 
 bool send_V(uint16_t to)
 {
-RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
+  RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
 
-// The 'V' message is a value message
+  // The 'V' message is a value message
   unsigned int message = analogRead(15);
   Serial.printf_P(PSTR("---------------------------------\n\r"));
   Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
@@ -418,15 +439,17 @@ void handle_T(RF24NetworkHeader& header)
  */
 void handle_V(RF24NetworkHeader& header)
 {
-// The 'V' contains values
+  // The 'V' contains values
   unsigned int message;
   network.read(header,&message,sizeof(unsigned int));
   Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
+  valueRF = message;
 
-// If this message is from ourselves or the base, don't bother adding it to the active nodes.
- if ( header.from_node != this_node || header.from_node > 00 )
+  // If this message is from ourselves or the base, don't bother adding it to the active nodes.
+  if ( header.from_node != this_node || header.from_node > 00 )
     add_node(header.from_node);
 }
+
 
 /**
  * Handle an 'N' message, the active node list
@@ -464,6 +487,7 @@ void add_node(uint16_t node)
 
 
 }
+
 
 
 
