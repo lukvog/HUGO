@@ -17,11 +17,11 @@ void setup()
   int count = 0;
   int sum = 0;
 
-//calibration for Walls
+  //calibration for Walls
 
   for(int i=0; i <= 100; i++){
     range = ultrasonic.MeasureInCentimeters();
-    if (range != 0 && range <= 400)
+    if (range != 0 && range <= 450)
     {
       wall[i] = range;
       count++;
@@ -33,6 +33,10 @@ void setup()
   };
 
   wallDist = (sum/count) - 10;
+  if (wallDist < 10)
+  {
+    wallDist = 450;
+  }
 
 }
 
@@ -52,11 +56,12 @@ void loop()
   Serial.println(changed, DEC);
   /*
   Serial.println("The distance to obstacles in front is: ");
-  Serial.print(range);//0~400cm
-  Serial.println(" cm");
-  */
+   Serial.print(range);//0~400cm
+   Serial.println(" cm");
+   */
   delay(50);
 }
+
 
 
 
