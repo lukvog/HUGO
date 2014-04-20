@@ -134,6 +134,8 @@ void setup()
   ///SPI Setup
   SPI.setMOSI(7);
   SPI.setSCK(14);
+  //radio.setDataRate(RF24_1MBPS);
+  //radio.setDataRate(RF24_250KBPS);
 
   //
   // Print preamble
@@ -168,10 +170,10 @@ void setup()
 int volume = 0;
 
 Metro UsageMetro = Metro(5000);
-Metro ComMetro = Metro(500);
+Metro ComMetro = Metro(300);
 Metro LightMetro = Metro(40);
 Metro ReadMetro = Metro(40);
-Metro WriteMetro = Metro(20);
+Metro WriteMetro = Metro(500);
 
 
 void loop() {
@@ -278,20 +280,20 @@ void loop() {
   }
 
 
-//////////////////////////////
-////////////////////////////////
-//////////////////////////
-
-  //Serial.print("valueRF = "); 
-  //Serial.println(valueRF);
-  
-  //int lightChange = map(valueRF, 0, 255, 10, 100); 
-  //LightMetro = Metro(lightChange);
-  
-  
   //////////////////////////////
-////////////////////////////////
-//////////////////////////
+  ////////////////////////////////
+  //////////////////////////
+  if (WriteMetro.check() == 1)
+  {
+    Serial.print("valueRF = "); 
+    Serial.println(valueRF);
+    int lightChange = map(valueRF, 0, 1023, 1, 100); 
+    LightMetro = Metro(lightChange);
+  }
+
+  //////////////////////////////
+  ////////////////////////////////
+  //////////////////////////
 
 
   // Send a ping to the next node every 'interval' ms
@@ -327,10 +329,20 @@ void loop() {
     bool ok;
 
     // Normal nodes send a 'T' ping
-    if ( this_node > 00 )
+    if ( this_node > 00 ) {
       //if ( this_node > 00 || to == 00 )
       ok = send_T(to);
 
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+      }
+    }
     // Base node sends the current active nodes out
     else {
       ok = send_N(to);
@@ -487,6 +499,9 @@ void add_node(uint16_t node)
 
 
 }
+
+
+
 
 
 
