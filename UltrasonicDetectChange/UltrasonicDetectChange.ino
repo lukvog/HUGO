@@ -1,6 +1,6 @@
 #include "Ultrasonic.h"
 
-Ultrasonic ultrasonic(13);
+Ultrasonic ultrasonic(21);
 
 
 int changed;
@@ -25,6 +25,9 @@ void setup()
     {
       wall[i] = range;
       count++;
+      Serial.print(count);
+      Serial.print("range: ");
+      Serial.println(range, DEC);
     }
     delay(50);
   };
@@ -32,8 +35,8 @@ void setup()
     sum = sum + wall[i];
   };
 
-  wallDist = (sum/count) - 10;
-  if (wallDist < 10)
+  wallDist = (sum/count) - 5;
+  if (wallDist < 5)
   {
     wallDist = 450;
   }

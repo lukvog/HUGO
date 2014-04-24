@@ -39,6 +39,8 @@ PINS Audioboad:
 #include <RF24.h>
 #include "nodeconfig.h"
 #include <Metro.h>
+#include "Ultrasonic.h"
+
 
 
 //___________________________________________________________________________________
@@ -114,6 +116,19 @@ int fadeAmount = 1;    // how many points to fade the LED by
 
 
 
+//_________________________________________________________________________________
+//////////////////////
+//Ultrasonic
+
+
+Ultrasonic ultrasonic(21);
+
+int changed;
+int wallDist;
+int range;
+
+
+
 //___________________________________________________________________________________
 void setup() 
 {
@@ -121,7 +136,7 @@ void setup()
   //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
-  //AudioMemory(12);
+  AudioMemory(12);
 
   // Enable the audio shield and set the output volume.
   audioShield.enable();
@@ -164,6 +179,36 @@ void setup()
 
   pinMode(led, OUTPUT);
 
+
+  //___________________________________________________________________________________
+  //Ultrasonic
+
+  //calibration for Walls
+
+  int wall[100];
+  int count = 0;
+  int sum = 0;
+
+  for(int i=0; i <= 100; i++){
+    range = ultrasonic.MeasureInCentimeters();
+    if (range != 0 && range <= 450)
+    {
+      wall[i] = range;
+      count++;
+    }
+    delay(50);
+  };
+  for(int i=0; i <= count; i++){
+    sum = sum + wall[i];
+  };
+
+  wallDist = (sum/count) - 5;
+  if (wallDist < 5)
+  {
+    wallDist = 450;
+  }
+
+
 }
 
 // audio volume
@@ -172,12 +217,33 @@ int volume = 0;
 Metro UsageMetro = Metro(5000);
 Metro ComMetro = Metro(300);
 Metro LightMetro = Metro(40);
-Metro ReadMetro = Metro(40);
+Metro ReadMetro = Metro(50);
 Metro WriteMetro = Metro(500);
 
 
 void loop() {
 
+  //___________________________________________________________________________________
+  //Ultrasonic
+
+  if (ReadMetro.check() == 1) {
+    range = ultrasonic.MeasureInCentimeters();
+
+    if (range != 0 && range < wallDist)
+    {
+      changed = range;
+    }
+  }
+
+
+  if (WriteMetro.check() == 1) {
+
+    Serial.print("wallDist: ");
+    Serial.println(wallDist, DEC);
+    Serial.print("changed: ");
+    Serial.println(changed, DEC);
+
+  }
 
   //___________________________________________________________________________________
   //LIGHT
@@ -265,6 +331,11 @@ void loop() {
     {
     case 'T':
       handle_T(header);
+
+      /////
+      //Switch um Liste aufzubrechen
+      //Switch für Sensor und Light Mapping
+
       break;
     case 'V':
       handle_V(header);
@@ -499,6 +570,8 @@ void add_node(uint16_t node)
 
 
 }
+
+
 
 
 
