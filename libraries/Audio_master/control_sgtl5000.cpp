@@ -801,7 +801,7 @@ unsigned char AudioControlSGTL5000::calcVol(float n, unsigned char range)
 
 
 // if(SGTL5000_PEQ) quantization_unit=524288; if(AudioFilterBiquad) quantization_unit=2147483648;
-void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float BW, uint32_t quantization_unit, uint32_t fS, int *coef)
+void calcBiquad(uint8_t filtertype, float fC, float db_overallGain, float dB_Gain, float BW, uint32_t quantization_unit, uint32_t fS, int *coef)
 {
 
 // I used resources like http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
@@ -810,6 +810,10 @@ void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float BW, uint32_t 
 // to valid results.
 
   float A;
+  float A_overall = pow(10, db_overallGain/20);
+  if (A_overall > 1)
+	A_overall = 1;
+	
   if(filtertype<FILTER_PARAEQ) A=pow(10,dB_Gain/20); else A=pow(10,dB_Gain/40);
   float W0 = 2*3.14159265358979323846*fC/fS; 
   float cosw=cos(W0);
@@ -878,7 +882,7 @@ void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float BW, uint32_t 
     a2 = -((A+1.0F) - ((A-1.0F)*cosw) - (beta*sinw));
   }
 
-  a0=(a0*2)/(float)quantization_unit; // once here instead of five times there...
+  a0=(a0*2)/((float)quantization_unit * A_overall); // once here instead of five times there...
   b0/=a0;
   *coef++=(int)(b0+0.499);
   b1/=a0;

@@ -41,10 +41,10 @@ void setup() {
   audioShield.volume(75);
   audioShield.unmuteLineout();
 
-  calcBiquad(FILTER_PARAEQ,110,0,0.2,2147483648,44100,updateFilter);
+  calcBiquad(FILTER_PARAEQ,110,0,0,0.2,2147483648,44100,updateFilter);
   filterTone_L.updateCoefs(updateFilter); // default set updateCoefs(0,updateFilter);
   filterTone_R.updateCoefs(updateFilter);
-  calcBiquad(FILTER_PARAEQ,4400,0,0.167,2147483648,44100,updateFilter);
+  calcBiquad(FILTER_PARAEQ,4400,0,0,0.167,2147483648,44100,updateFilter);
   filterTone_L.updateCoefs(1,updateFilter);
   filterTone_R.updateCoefs(1,updateFilter);
   
@@ -63,10 +63,10 @@ void loop() {
     if(tone2!=tone1)
     {
       // calcBiquad(FilterType,FrequencyC,dBgain,Q,QuantizationUnit,SampleRate,int*);
-      calcBiquad(FILTER_PARAEQ,110,-tone2,0.2,2147483648,44100,updateFilter);
+      calcBiquad(FILTER_PARAEQ,110,0,-tone2,0.2,2147483648,44100,updateFilter);
       filterTone_L.updateCoefs(updateFilter);
       filterTone_R.updateCoefs(updateFilter);
-      calcBiquad(FILTER_PARAEQ,4400,tone2,0.167,2147483648,44100,updateFilter);
+      calcBiquad(FILTER_PARAEQ,4400,0,tone2,0.167,2147483648,44100,updateFilter);
       filterTone_L.updateCoefs(1,updateFilter);
       filterTone_R.updateCoefs(1,updateFilter);
       tone1=tone2;

@@ -28,18 +28,27 @@ const int myInput = AUDIO_INPUT_LINEIN;
 
 AudioInputI2S       audioInput;         // audio shield: mic or line-in
 Delay 	staticDelay;
-AudioFilterBiquad    formantFilter(ToneFilter);
+AudioFilterBiquad    formantFilter1(ToneFilter1);
+AudioFilterBiquad    formantFilter2(ToneFilter2);
+AudioFilterBiquad    formantFilter3(ToneFilter3);
+AudioMixer4        mixFormants;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
 // Both channels of the audio input go to the FIR filter
-AudioConnection c2(audioInput, 0, staticDelay, 0);
-AudioConnection c3(staticDelay, 0, formantFilter, 0);
-AudioConnection c4(formantFilter, 0, audioOutput, 0);
-AudioConnection c5(formantFilter, 0, audioOutput, 1);
+AudioConnection c1(audioInput, 0, staticDelay, 0);
 
-// AudioConnection c4(staticDelay, 0, audioOutput, 0);
-// AudioConnection c5(staticDelay, 0, audioOutput, 1);
+AudioConnection c2(staticDelay, 0, formantFilter1, 0);
+AudioConnection c3(staticDelay, 0, formantFilter2, 0);
+AudioConnection c4(staticDelay, 0, formantFilter3, 0);
+
+AudioConnection c5(staticDelay, 0, mixFormants, 0);
+AudioConnection c6(formantFilter1, 0, mixFormants, 1);
+AudioConnection c7(formantFilter2, 0, mixFormants, 2);
+AudioConnection c8(formantFilter3, 0, mixFormants, 3);
+
+AudioConnection c9(mixFormants, 0, audioOutput, 0);
+AudioConnection c10(mixFormants, 0, audioOutput, 1);
 
 AudioControlSGTL5000 audioShield;
 
@@ -60,12 +69,17 @@ void setup() {
 	audioShield.inputSelect(myInput);
 	audioShield.volume(90);
 	
+	mixFormants.gain(0, 0.0001);
+	mixFormants.gain(1, 10);
+	mixFormants.gain(2, 10);
+	mixFormants.gain(3, 10);
+	
 	setSopranA();
 
 	Serial.println("setup done");
 	
-	test.push_back(firstFormantSeq);
-	test.push_back(secondFormantSeq);
+	masterSeq.push_back(firstFormantSeq);
+	masterSeq.push_back(secondFormantSeq);
 }
 
 // audio volume
@@ -107,16 +121,16 @@ void loop()
 	
 	if (TimingMetro.check() == 1) {
 	
-		if (test[activeSeq].seqCounter <= test[activeSeq].seqLength)
+		if (masterSeq[activeSeq].seqCounter <= masterSeq[activeSeq].seqLength)
 		{		
-			test[activeSeq].seqProceed();
+			masterSeq[activeSeq].seqProceed();
 		}
 		else
 		{
-			if (test[activeSeq].loop == true)
+			if (masterSeq[activeSeq].loop == true)
 			{
-				test[activeSeq].reset();
-				test[activeSeq].seqProceed();
+				masterSeq[activeSeq].reset();
+				masterSeq[activeSeq].seqProceed();
 			}			
 		}		
 	}
@@ -141,12 +155,12 @@ void loop()
 	// if pin0 is grounded
 	if(b_test0.fallingEdge()) {
 		staticDelay.hold(true);
-		activeSeq = 1;
+		activeSeq = 0;
 	}
 	// if pin 0 is open
 	if(b_test0.risingEdge()) {
 		staticDelay.hold(false);
-		activeSeq = 0;
+		activeSeq = 1;
 	}
 }
 

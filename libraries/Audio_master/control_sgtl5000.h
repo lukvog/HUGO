@@ -103,6 +103,6 @@ public:
   #define FILTER_LOSHELF 5
   #define FILTER_HISHELF 6
 
-void calcBiquad(uint8_t filtertype, float fC, float dB_Gain, float Q, uint32_t quantization_unit, uint32_t fS, int *coef);
+void calcBiquad(uint8_t filtertype, float fC, float db_overallGain, float dB_Gain, float Q, uint32_t quantization_unit, uint32_t fS, int *coef);
 
 #endif
