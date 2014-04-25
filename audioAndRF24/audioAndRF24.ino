@@ -1,30 +1,33 @@
 /*
-
 PINS Audioboad:
  6 - MEMCS
  7 - MOSI
  9 - BCLK
-10 - SDCS
-11 - MCLK
-12 - MISO
-13 - RX
-14 - SCLK
-15 - VOL
-18 - SDA
-19 - SCL
-22 - TX
-23 - LRCLK
-
-PINS RF24
-GND  1 --> GND
-Vin  2 --> 3.3V
-CE   3 --> 2
-CSN  4 --> 6
-SCK  5 --> 14
-MOSI 6 --> 7
-MISO 7 --> 12
-
-*/
+ 10 - SDCS
+ 11 - MCLK
+ 12 - MISO
+ 13 - RX
+ 14 - SCLK
+ 15 - VOL
+ 18 - SDA
+ 19 - SCL
+ 22 - TX
+ 23 - LRCLK
+ 
+ PINS RF24
+ GND  1 --> GND
+ Vin  2 --> 3.3V
+ CE   3 --> 2
+ CSN  4 --> 6
+ SCK  5 --> 14
+ MOSI 6 --> 7
+ MISO 7 --> 12
+ 
+ LIGHTPIN
+ 
+ PWM --> 5
+ 
+ */
 
 
 #include <Audio.h>
@@ -35,14 +38,17 @@ MISO 7 --> 12
 #include <RF24Network.h>
 #include <RF24.h>
 #include "nodeconfig.h"
+#include <Metro.h>
+#include "Ultrasonic.h"
+
 
 
 //___________________________________________________________________________________
 /////////////////////////
 //AUDIO
 
-const int myInput = AUDIO_INPUT_LINEIN;
-//const int myInput = AUDIO_INPUT_MIC;
+//const int myInput = AUDIO_INPUT_LINEIN;
+const int myInput = AUDIO_INPUT_MIC;
 
 // Create the Audio components.  These should be created in the
 // order data flows, inputs/sources -> processing -> outputs
@@ -81,12 +87,8 @@ RF24Network network(radio);
 // Our node address
 uint16_t this_node;
 
-// Delay manager to send pings regularly
-const unsigned long interval = 100; // ms
-unsigned long last_time_sent;
-
 // Array of nodes we are aware of
-const short max_active_nodes = 10;
+const short max_active_nodes = 13;
 uint16_t active_nodes[max_active_nodes];
 short num_active_nodes = 0;
 short next_ping_node_index = 0;
@@ -94,9 +96,14 @@ short next_ping_node_index = 0;
 // Prototypes for functions to send & handle messages
 bool send_T(uint16_t to);
 bool send_N(uint16_t to);
+bool send_V(uint16_t to);
 void handle_T(RF24NetworkHeader& header);
 void handle_N(RF24NetworkHeader& header);
+void handle_V(RF24NetworkHeader& header);
 void add_node(uint16_t node);
+
+//data
+int valueRF = 1;
 
 
 //___________________________________________________________________________________
@@ -109,10 +116,23 @@ int fadeAmount = 1;    // how many points to fade the LED by
 
 
 
+//_________________________________________________________________________________
+//////////////////////
+//Ultrasonic
+
+
+Ultrasonic ultrasonic(21);
+
+int changed;
+int wallDist;
+int range;
+
+
+
 //___________________________________________________________________________________
 void setup() 
 {
-  
+
   //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
@@ -122,14 +142,16 @@ void setup()
   audioShield.enable();
   audioShield.inputSelect(myInput);
   audioShield.volume(60);
-  
+
   //___________________________________________________________________________________
   //RF24
-  
- ///SPI Setup
+
+  ///SPI Setup
   SPI.setMOSI(7);
   SPI.setSCK(14);
-  
+  //radio.setDataRate(RF24_1MBPS);
+  //radio.setDataRate(RF24_250KBPS);
+
   //
   // Print preamble
   //
@@ -138,7 +160,7 @@ void setup()
   delay(2000);
   Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
   Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
-  
+
   //
   // Pull node address out of eeprom 
   //
@@ -151,87 +173,147 @@ void setup()
   SPI.begin();
   radio.begin();
   network.begin(/*channel*/ 100, /*node address*/ this_node );
-  
+
   //___________________________________________________________________________________
   //LIGHT
-  
+
   pinMode(led, OUTPUT);
-  
+
+
+  //___________________________________________________________________________________
+  //Ultrasonic
+
+  //calibration for Walls
+
+  int wall[100];
+  int count = 0;
+  int sum = 0;
+
+  for(int i=0; i <= 100; i++){
+    range = ultrasonic.MeasureInCentimeters();
+    if (range != 0 && range <= 450)
+    {
+      wall[i] = range;
+      count++;
+    }
+    delay(50);
+  };
+  for(int i=0; i <= count; i++){
+    sum = sum + wall[i];
+  };
+
+  wallDist = (sum/count) - 5;
+  if (wallDist < 5)
+  {
+    wallDist = 450;
+  }
+
+
 }
 
-elapsedMillis volmsec=0;
-elapsedMillis dimmsec=0;
-unsigned long last_time = millis();
+// audio volume
+int volume = 0;
 
-Metro ReadMetro = Metro(10);
-Metro WriteMetro = Metro(10);
+Metro UsageMetro = Metro(5000);
+Metro ComMetro = Metro(300);
+Metro LightMetro = Metro(40);
+Metro ReadMetro = Metro(50);
+Metro WriteMetro = Metro(500);
 
 
 void loop() {
-  
-  
-   //___________________________________________________________________________________
-  //LIGHT
-  
-// if (dimmsec > 40) {
-    
-        // set the brightness of pin 9:
-  analogWrite(led, brightness);
 
-  // change the brightness for next time through the loop:
-  brightness = brightness + fadeAmount;
-  // reverse the direction of the fading at the ends of the fade:
-  if (brightness == 0 || brightness == 255) {
-    fadeAmount = -fadeAmount ;
-  }
-  
-  delay(40);
-  //volmsec = 0;
- // }
+  //___________________________________________________________________________________
+  //Ultrasonic
 
-  return;
-  
-  
-   //___________________________________________________________________________________
-  //AUDIO
-  // every 50 ms, adjust the volume
-  if (volmsec > 50) {
-    float vol = analogRead(15);
-    vol = vol / 10.24;
-    audioShield.volume(vol);
-    volmsec = 0;
+  if (ReadMetro.check() == 1) {
+    range = ultrasonic.MeasureInCentimeters();
+
+    if (range != 0 && range < wallDist)
+    {
+      changed = range;
     }
-    
-    //////////////////
-    //Mem and CPU Usage
-    
-    // Change this to if(1) for measurement output
-if(1) {
-/*
-  For PlaySynthMusic this produces:
-  Proc = 20 (21),  Mem = 2 (8)
-*/
-  if(millis() - last_time >= 5000) {
-    Serial.print("Proc = ");
-    Serial.print(AudioProcessorUsage());
-    Serial.print(" (");    
-    Serial.print(AudioProcessorUsageMax());
-    Serial.print("),  Mem = ");
-    Serial.print(AudioMemoryUsage());
-    Serial.print(" (");    
-    Serial.print(AudioMemoryUsageMax());
-    Serial.println(")");
-    last_time = millis();
   }
-  
-  
 
-}
-  
-    
-     //___________________________________________________________________________________
+
+  if (WriteMetro.check() == 1) {
+
+    Serial.print("wallDist: ");
+    Serial.println(wallDist, DEC);
+    Serial.print("changed: ");
+    Serial.println(changed, DEC);
+
+  }
+
+  //___________________________________________________________________________________
+  //LIGHT
+
+  if (LightMetro.check() == 1) {
+
+    // set the brightness of pin 9:
+    brightness = constrain(brightness, 0, 255);
+    analogWrite(led, brightness);
+
+    // change the brightness for next time through the loop:
+    int fadeAmountPWR = 1;
+    if (fadeAmount > 0) { 
+      fadeAmountPWR = fadeAmount + (brightness * 0.1); 
+    }
+    else { 
+      fadeAmountPWR = fadeAmount - (brightness * 0.1); 
+    }
+    brightness = brightness + fadeAmountPWR;
+    // reverse the direction of the fading at the ends of the fade:
+
+    if (brightness <= 0 || brightness >= 255) {
+      fadeAmount = -fadeAmount ;
+    }
+
+  }
+
+
+
+  //___________________________________________________________________________________
+  //AUDIO
+  // volume control
+  // every 10 ms, check for adjustment
+  if (ReadMetro.check() == 1) {
+    int n = analogRead(15);
+    if (n != volume) {
+      volume = n;
+      audioShield.volume((float)n / 10.23);
+    }
+  }
+
+  //////////////////
+  //Mem and CPU Usage
+
+  // Change this to if(1) for measurement output
+  if(1) {
+    /*
+  For PlaySynthMusic this produces:
+     Proc = 20 (21),  Mem = 2 (8)
+     */
+    if (UsageMetro.check() == 1) {
+      Serial.print("Proc = ");
+      Serial.print(AudioProcessorUsage());
+      Serial.print(" (");    
+      Serial.print(AudioProcessorUsageMax());
+      Serial.print("),  Mem = ");
+      Serial.print(AudioMemoryUsage());
+      Serial.print(" (");    
+      Serial.print(AudioMemoryUsageMax());
+      Serial.println(")");
+    }
+
+
+
+  }
+
+
+  //___________________________________________________________________________________
   //RF24
-   ////////////////////
+  ////////////////////
   // Ping out role.  Repeatedly send the current time
   //
   // Pump the network regularly
@@ -249,6 +331,14 @@ if(1) {
     {
     case 'T':
       handle_T(header);
+
+      /////
+      //Switch um Liste aufzubrechen
+      //Switch für Sensor und Light Mapping
+
+      break;
+    case 'V':
+      handle_V(header);
       break;
     case 'N':
       handle_N(header);
@@ -260,56 +350,102 @@ if(1) {
     };
   }
 
-  // Send a ping to the next node every 'interval' ms
-  unsigned long now = millis();
-  if ( now - last_time_sent >= interval )
+
+  //////////////////////////////
+  ////////////////////////////////
+  //////////////////////////
+  if (WriteMetro.check() == 1)
   {
-    last_time_sent = now;
+    Serial.print("valueRF = "); 
+    Serial.println(valueRF);
+    int lightChange = map(valueRF, 0, 1023, 1, 100); 
+    LightMetro = Metro(lightChange);
+  }
+
+  //////////////////////////////
+  ////////////////////////////////
+  //////////////////////////
+
+
+  // Send a ping to the next node every 'interval' ms
+  //unsigned long now = millis();
+  if (ComMetro.check() == 1)
+  {
+    //last_time_sent = now;
 
     // Who should we send to?
     // By default, send to base
     uint16_t to = 00;
-    
+
     // Or if we have active nodes,
     if ( num_active_nodes )
     {
       // Send to the next active node
       to = active_nodes[next_ping_node_index++];
-      
+      if (to == this_node)
+      {
+        to = active_nodes[next_ping_node_index++];
+      }
       // Have we rolled over?
       if ( next_ping_node_index > num_active_nodes )
       {
-	// Next time start at the beginning
-	next_ping_node_index = 0;
+        // Next time start at the beginning
+        next_ping_node_index = 0;
 
-	// This time, send to node 00.
-	to = 00;
+        // This time, send to node 00.
+        to = 00;
       }
     }
 
     bool ok;
 
     // Normal nodes send a 'T' ping
-    if ( this_node > 00 || to == 00 )
+    if ( this_node > 00 ) {
+      //if ( this_node > 00 || to == 00 )
       ok = send_T(to);
-    
+
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+      }
+    }
     // Base node sends the current active nodes out
-    else
+    else {
       ok = send_N(to);
- //     ok = send_V(to);
 
-    // Notify us of the result
-    if (ok)
-    {
-      Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-    }
-    else
-    {
-      Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
 
-      // Try sending at a different time next time
-      last_time_sent -= 100;
+        // Try sending at a different time next time
+        //last_time_sent -= 100;
+      }
+
+      ok = send_V(to);
+      // Notify us of the result
+      if (ok)
+      {
+        Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+      }
+      else
+      {
+        Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+
+        // Try sending at a different time next time
+        //last_time_sent -= 100;
+      }
     }
+
   }
 
   // Listen for a new node address
@@ -322,7 +458,7 @@ if(1) {
 bool send_T(uint16_t to)
 {
   RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
-  
+
   // The 'T' message that we send is just a ulong, containing the time
   unsigned long message = millis();
   Serial.printf_P(PSTR("---------------------------------\n\r"));
@@ -333,20 +469,20 @@ bool send_T(uint16_t to)
 
 
 /**
- * Send a 'V' message, the current time
+ * Send a 'V' message, a value
  */
 
 
-//bool send_V(uint16_t to)
-//{
-  //RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
-  
- // The 'V' message is a value message
-//  unsigned long message = millis();
-//  Serial.printf_P(PSTR("---------------------------------\n\r"));
-//  Serial.printf_P(PSTR("%lu: APP Sending %lu to 0%o...\n\r"),millis(),message,to);
-//  return network.write(header,&message,sizeof(unsigned long));
-//}
+bool send_V(uint16_t to)
+{
+  RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
+
+  // The 'V' message is a value message
+  unsigned int message = analogRead(15);
+  Serial.printf_P(PSTR("---------------------------------\n\r"));
+  Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
+  return network.write(header,&message,sizeof(unsigned int));
+}
 
 
 
@@ -356,7 +492,7 @@ bool send_T(uint16_t to)
 bool send_N(uint16_t to)
 {
   RF24NetworkHeader header(/*to node*/ to, /*type*/ 'N' /*Time*/);
-  
+
   Serial.printf_P(PSTR("---------------------------------\n\r"));
   Serial.printf_P(PSTR("%lu: APP Sending active nodes to 0%o...\n\r"),millis(),to);
   return network.write(header,active_nodes,sizeof(active_nodes));
@@ -372,7 +508,7 @@ void handle_T(RF24NetworkHeader& header)
   // The 'T' message is just a ulong, containing the time
   unsigned long message;
   network.read(header,&message,sizeof(unsigned long));
-  Serial.printf_P(PSTR("%lu: APP Received %lu from 0%o\n\r"),millis(),message,header.from_node);
+  Serial.printf_P(PSTR("%lu: APP Received Time %lu from 0%o\n\r"),millis(),message,header.from_node);
 
   // If this message is from ourselves or the base, don't bother adding it to the active nodes.
   if ( header.from_node != this_node || header.from_node > 00 )
@@ -384,17 +520,19 @@ void handle_T(RF24NetworkHeader& header)
  *
  * Add the node to the list of active nodes
  */
-//void handle_V(RF24NetworkHeader& header)
-//{
-  // The 'T' message is just a ulong, containing the time
-//  unsigned long message;
-//  network.read(header,&message,sizeof(unsigned long));
-//  Serial.printf_P(PSTR("%lu: APP Received %lu from 0%o\n\r"),millis(),message,header.from_node);
+void handle_V(RF24NetworkHeader& header)
+{
+  // The 'V' contains values
+  unsigned int message;
+  network.read(header,&message,sizeof(unsigned int));
+  Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
+  valueRF = message;
 
   // If this message is from ourselves or the base, don't bother adding it to the active nodes.
- // if ( header.from_node != this_node || header.from_node > 00 )
-//    add_node(header.from_node);
-//}
+  if ( header.from_node != this_node || header.from_node > 00 )
+    add_node(header.from_node);
+}
+
 
 /**
  * Handle an 'N' message, the active node list
@@ -429,10 +567,15 @@ void add_node(uint16_t node)
     active_nodes[num_active_nodes++] = node; 
     Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
   }
-  
-  
-  
-		
+
+
 }
+
+
+
+
+
+
+
 
 

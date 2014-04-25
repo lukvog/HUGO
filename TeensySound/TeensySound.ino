@@ -22,8 +22,8 @@ Bounce b_test1 = Bounce(Test1_PIN,15);
 Bounce b_test0   = Bounce(Test0_PIN,15);
 
 
-//const int myInput = AUDIO_INPUT_MIC;
-const int myInput = AUDIO_INPUT_LINEIN;
+const int myInput = AUDIO_INPUT_MIC;
+//const int myInput = AUDIO_INPUT_LINEIN;
 
 
 AudioInputI2S       audioInput;         // audio shield: mic or line-in
