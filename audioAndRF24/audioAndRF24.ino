@@ -132,6 +132,45 @@ int range;
 //___________________________________________________________________________________
 void setup() 
 {
+  
+  Serial.begin(57600);
+
+  //___________________________________________________________________________________
+  //Ultrasonic
+
+  //calibration for Walls
+
+  int wall[100];
+  int count = 0;
+  int sum = 0;
+
+  for(int i=0; i < 100; i++){
+    range = ultrasonic.MeasureInCentimeters();
+    if (range != 0 && range <= 400)
+    {
+      wall[count] = range;
+      //Serial.print(count);
+      //Serial.print("range: ");
+      //Serial.println(range, DEC);
+      count++;
+    }
+    delay(60);
+  };
+
+  //Serial.println(count);
+
+  for(int i=0; i < count; i++){
+    sum += wall[i];
+  };
+
+  //Serial.println(sum);
+
+  wallDist = (sum/count) - 15;
+  if (wallDist < 5)
+  {
+    wallDist = 400;
+  }
+
 
   //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
@@ -154,9 +193,7 @@ void setup()
 
   //
   // Print preamble
-  //
-  Serial.begin(57600);
-  //printf_begin();
+  
   delay(2000);
   Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
   Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
@@ -179,54 +216,25 @@ void setup()
 
   pinMode(led, OUTPUT);
 
-
-  //___________________________________________________________________________________
-  //Ultrasonic
-
-  //calibration for Walls
-
-  int wall[100];
-  int count = 0;
-  int sum = 0;
-
-  for(int i=0; i <= 100; i++){
-    range = ultrasonic.MeasureInCentimeters();
-    if (range != 0 && range <= 450)
-    {
-      wall[i] = range;
-      count++;
-    }
-    delay(50);
-  };
-  for(int i=0; i <= count; i++){
-    sum = sum + wall[i];
-  };
-
-  wallDist = (sum/count) - 5;
-  if (wallDist < 5)
-  {
-    wallDist = 450;
-  }
-
-
 }
 
-// audio volume
-int volume = 0;
-
+//Metros
 Metro UsageMetro = Metro(5000);
 Metro ComMetro = Metro(300);
 Metro LightMetro = Metro(40);
+Metro UltraSonMetro = Metro(50);
 Metro ReadMetro = Metro(50);
 Metro WriteMetro = Metro(500);
 
+// audio volume
+int volume = 0;
 
 void loop() {
 
   //___________________________________________________________________________________
   //Ultrasonic
 
-  if (ReadMetro.check() == 1) {
+  if (UltraSonMetro.check() == 1) {
     range = ultrasonic.MeasureInCentimeters();
 
     if (range != 0 && range < wallDist)
@@ -235,15 +243,6 @@ void loop() {
     }
   }
 
-
-  if (WriteMetro.check() == 1) {
-
-    Serial.print("wallDist: ");
-    Serial.println(wallDist, DEC);
-    Serial.print("changed: ");
-    Serial.println(changed, DEC);
-
-  }
 
   //___________________________________________________________________________________
   //LIGHT
@@ -270,8 +269,6 @@ void loop() {
     }
 
   }
-
-
 
   //___________________________________________________________________________________
   //AUDIO
@@ -331,14 +328,14 @@ void loop() {
     {
     case 'T':
       handle_T(header);
-
+      break;
+    case 'V':
+      handle_V(header); 
+     
       /////
       //Switch um Liste aufzubrechen
       //Switch für Sensor und Light Mapping
-
-      break;
-    case 'V':
-      handle_V(header);
+      
       break;
     case 'N':
       handle_N(header);
@@ -358,7 +355,11 @@ void loop() {
   {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
-    int lightChange = map(valueRF, 0, 1023, 1, 100); 
+    Serial.print("wallDist: ");
+    Serial.println(wallDist, DEC);
+    Serial.print("changed: ");
+    Serial.println(changed, DEC);
+    int lightChange = map(valueRF, 0, 1023, 5, 100); 
     LightMetro = Metro(lightChange);
   }
 
@@ -570,12 +571,4 @@ void add_node(uint16_t node)
 
 
 }
-
-
-
-
-
-
-
-
 
