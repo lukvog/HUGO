@@ -62,7 +62,7 @@ class Delay : public AudioStream
 public:
 	Delay() :
 	AudioStream(1,inputQueueArray),
-	mDelay(8192+AUDIO_BLOCK_SAMPLES),
+	mDelay(512+AUDIO_BLOCK_SAMPLES),
 	mHold(false)
 	{}
 	~Delay() {}

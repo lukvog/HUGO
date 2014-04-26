@@ -101,7 +101,7 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	mDelay.Write((uint32_t*)block->data, AUDIO_BLOCK_SAMPLES, mHold);
 
 		
-	myTap.Read_WR(mDelay, (uint32_t*)block->data, 8192, AUDIO_BLOCK_SAMPLES);
+	myTap.Read_WR(mDelay, (uint32_t*)block->data, 512, AUDIO_BLOCK_SAMPLES);
 	
 	transmit(block);
 	release(block);
