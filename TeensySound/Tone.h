@@ -25,5 +25,6 @@ const unsigned int tune_frequencies2_PGM[128] =
 
 extern AudioSynthWaveform osc1;
 extern AudioSynthWaveform osc2;
+extern AudioSynthWaveform osc3;
 
 #endif

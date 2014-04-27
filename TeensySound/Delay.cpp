@@ -40,55 +40,57 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	}
  }
  
- void DelayTap::Read_WR(DelayBuffer& delayBuffer, uint32_t* outBuffer, float targetDelay, uint32_t bufferSize)
+ void DelayTap::Read_WR(DelayBuffer& delayBuffer, uint32_t* outBuffer, int targetDelay, uint32_t bufferSize, int loopLength)
  {
-	float readEndPtr = (float)delayBuffer.mWritePtr - targetDelay;
+	int readEndPtr = delayBuffer.mWritePtr - targetDelay;
 	// make sure it is within buffer bounds
 	if (readEndPtr < 0)
-		readEndPtr += (float)delayBuffer.mDelayLength;
+		readEndPtr += loopLength;
+		
+	mReadPtr = readEndPtr - bufferSize;
+	
+	if (mReadPtr < 0)
+		mReadPtr += loopLength;
 
 	// Length and stepsize of interpolated read
 	// number of read samples is altered by difference between old and new delay
 	// if target delay hase not changed, step == 1.0
 
-	float length = readEndPtr - mReadPtr;
-	// make sure it is within buffer bounds
+	// float length = readEndPtr - mReadPtr;
+	// // make sure it is within buffer bounds
 
-	if (length < 0)
-		length += delayBuffer.mDelayLength;
-	float step = length / (float)bufferSize;
+	// if (length < 0)
+		// length += delayBuffer.mDelayLength;
+	// float step = length / (float)bufferSize;
 	
 	for (size_t i = 0; i < bufferSize; i++)
 	{
-		size_t readInt = (size_t)mReadPtr;
-		float readFrac = mReadPtr - readInt;
+		// size_t readInt = (size_t)mReadPtr;
+		// float readFrac = mReadPtr - readInt;
 
-		float x1, x2;
-		if (readInt != delayBuffer.mDelayLength - 1)
-		{
-		  x1 = (float)delayBuffer.mContent[readInt];
-		  x2 = (float)delayBuffer.mContent[readInt + 1];
-		}
-		else
-		{
-		  x1 = (float)delayBuffer.mContent[readInt];
-		  x2 = (float)delayBuffer.mContent[0];
-		}
+		// float x1, x2;
+		// if (readInt != delayBuffer.mDelayLength - 1)
+		// {
+		  // x1 = (float)delayBuffer.mContent[readInt];
+		  // x2 = (float)delayBuffer.mContent[readInt + 1];
+		// }
+		// else
+		// {
+		  // x1 = (float)delayBuffer.mContent[readInt];
+		  // x2 = (float)delayBuffer.mContent[0];
+		// }
 
-		//outBuffer[i] = LinearInterpolation(x1, x2, readFrac);
+		// //outBuffer[i] = LinearInterpolation(x1, x2, readFrac);
 
-		//allpass interpolation
-		mOldValue = (readFrac*x2 + x1 - readFrac*mOldValue);
-		outBuffer[i] = (uint32_t) mOldValue;
-
-		mReadPtr += step;
-		if (mReadPtr >= (float)delayBuffer.mDelayLength)
-		  mReadPtr -= (float)delayBuffer.mDelayLength;
-		if (mReadPtr < 0)
-		  mReadPtr += (float)delayBuffer.mDelayLength;
-	}	
-	mReadPtr = readEndPtr;
-
+		// //allpass interpolation
+		// mOldValue = (readFrac*x2 + x1 - readFrac*mOldValue);
+		// outBuffer[i] = (uint32_t) mOldValue;
+		
+		outBuffer[i] = delayBuffer.mContent[mReadPtr++];
+		
+		if (mReadPtr >= loopLength)
+		  mReadPtr -= loopLength;
+	}
  }
  
   void Delay::update(void)
@@ -101,7 +103,7 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	mDelay.Write((uint32_t*)block->data, AUDIO_BLOCK_SAMPLES, mHold);
 
 		
-	myTap.Read_WR(mDelay, (uint32_t*)block->data, 8192, AUDIO_BLOCK_SAMPLES);
+	myTap.Read_WR(mDelay, (uint32_t*)block->data, targetDelay, AUDIO_BLOCK_SAMPLES, loopLength);
 	
 	transmit(block);
 	release(block);

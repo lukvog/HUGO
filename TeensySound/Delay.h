@@ -20,10 +20,10 @@ public:
 	mOldValue(0)
 	{}
 	~DelayTap() {}
-	void Read_WR(DelayBuffer& delayBuffer, uint32_t* outBuffer, float targetDelay, uint32_t bufferSize);
+	void Read_WR(DelayBuffer& delayBuffer, uint32_t* outBuffer, int targetDelay, uint32_t bufferSize, int loopLength);
 	
 private:
-	float mReadPtr;
+	int mReadPtr;
 	float mOldValue;
 };
 
@@ -31,6 +31,7 @@ class DelayBuffer
 {
 
 friend class DelayTap;
+friend class Delay;
 
 public:
 	DelayBuffer(size_t maxDelay)
@@ -63,7 +64,9 @@ public:
 	Delay() :
 	AudioStream(1,inputQueueArray),
 	mDelay(8192+AUDIO_BLOCK_SAMPLES),
-	mHold(false)
+	targetDelay(0),
+	mHold(false),
+	loopLength(mDelay.mDelayLength)
 	{}
 	~Delay() {}
 
@@ -72,11 +75,27 @@ public:
 		mHold = hold;
 	}
 	
+	void setTargetDelay(int _targetDelay)
+	{
+		__disable_irq();
+		targetDelay = _targetDelay;
+		__enable_irq();
+	}
+	
+		void setLoopLength(int _loopLength)
+	{
+		__disable_irq();
+		loopLength = _loopLength;
+		__enable_irq();
+	}
+	
 private:
 	audio_block_t *inputQueueArray[1];
 	DelayBuffer mDelay;
 	DelayTap myTap;
 	bool mHold;
+	int targetDelay;
+	int loopLength;
 };
 
 

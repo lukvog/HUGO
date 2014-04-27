@@ -11,6 +11,194 @@
 #include <vector>
 
 //------------------------------------------------
+//------------------ Tone Volume -----------------
+//------------------------------------------------
+
+extern AudioMixer4 mixSources;
+
+class ToneVolumeSeq
+{
+public:
+	ToneVolumeSeq(int* _seq, int _seqLength)
+		:seq(_seq),
+		pSeq(_seq),
+		seqLength(_seqLength)
+	{}
+	~ToneVolumeSeq() {}
+	
+	void setInterpolation(float _nextGain_dB)
+	{
+		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
+		Serial.print("gain_dB_step: ");
+		Serial.print(gain_dB_step);
+		Serial.print("\n");
+	}
+	
+	void seqProceed()
+	{
+		
+		if (stepCounter == 0)
+		{
+			gain_dB = *pSeq++;
+			Serial.print("gain_dB: ");
+			Serial.print(gain_dB);
+			Serial.print("\n");
+			float gain = pow(10, (float)gain_dB/20.0);
+			Serial.print("gain: ");
+			Serial.print(gain);
+			Serial.print("\n");
+			mixSources.gain(1, gain);
+			mixSources.gain(2, gain);
+			mixSources.gain(3, gain);
+			
+			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			
+			if(seqCounter+1 < seqLength)
+				pSeqNext = pSeq;
+			else
+				pSeqNext = seq;
+				
+			float nextGain_dB= *pSeqNext;
+			setInterpolation(nextGain_dB);
+			Serial.print("nextGain_dB: ");
+			Serial.print(nextGain_dB);
+			Serial.print("\n");
+
+		}
+		else
+		{
+			gain_dB = gain_dB + gain_dB_step;
+			float gain = pow(10, (float)gain_dB/20.0);
+			mixSources.gain(1, gain);
+			mixSources.gain(2, gain);
+			mixSources.gain(3, gain);
+			
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
+		}
+	}
+	
+	void reset()
+	{
+		pSeq = seq;
+		seqCounter = 0;
+		stepCounter = 0;	
+	}
+	
+	float speed = 1.0;
+	int stepCounter = 0;
+	int seqCounter = 0;
+	int* seq;
+	int* pSeq;
+	int* pSeqNext;
+	int seqLength = 0;
+	bool loop = true;
+	
+	float gain_dB;
+	float gain_dB_step;
+};
+
+int toneVolumeSeq1_raw[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
+int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000};
+
+ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
+ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
+
+std::vector<ToneVolumeSeq> masterToneVolSeq;
+
+//------------------------------------------------
+//----------------- Delay State ------------------
+//------------------------------------------------
+
+extern Delay staticDelay;
+extern AudioMixer4 mixSources;
+extern float delayVolume;
+class DelayStateSeq
+{
+public:	
+	DelayStateSeq(int* _seq, int _seqLength)
+		:seq(_seq),
+		pSeq(_seq),
+		seqLength(_seqLength)
+	{}
+	~DelayStateSeq() {}
+
+	void seqProceed()
+	{	
+		if (stepCounter == 0)
+		{
+			switch(*pSeq++)
+			{
+				// delay mute
+				case 0: mixSources.gain(0, 0.00004);
+						staticDelay.hold(false);
+						staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // eqal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+						staticDelay.setTargetDelay(AUDIO_BLOCK_SAMPLES * 64);
+						break;
+				// normal delay mode
+				case 1: mixSources.gain(0, delayVolume);
+						staticDelay.hold(false);
+						staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // eqal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+						staticDelay.setTargetDelay(AUDIO_BLOCK_SAMPLES * 64);
+						break;
+				// delay hold
+				case 2: mixSources.gain(0, delayVolume);
+						staticDelay.hold(true);
+						staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // eqal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+						staticDelay.setTargetDelay(AUDIO_BLOCK_SAMPLES * 32);
+						break;
+				// talkThrough without delay
+				case 3: mixSources.gain(0, delayVolume);
+						staticDelay.hold(false);
+						staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // eqal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+						staticDelay.setTargetDelay(0);
+						break;
+				// delay oneShot mode
+				case 4:	break;
+				default: break;			
+			}			
+			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			Serial.print(speed);
+			Serial.print("\n");
+			Serial.print(stepCounter);
+			Serial.print("\n");
+			seqCounter++;
+		}
+		else
+		{
+			stepCounter--;
+		}
+	}
+
+	void reset()
+	{
+		pSeq = seq;
+		seqCounter = 0;
+		stepCounter = 0;	
+	}
+
+	float speed = 1.0;
+	int stepCounter = 0;
+	int seqCounter = 0;
+	int* seq;
+	int* pSeq;
+	int* pSeqNext;
+	int seqLength = 0;
+	bool loop = true;
+};
+
+int delayStateSeq1_raw[4] = {1, 200, 2, 200};
+int delayStateSeq2_raw[8] = {1, 50, 2, 300, 1, 1000, 2, 300};
+
+
+DelayStateSeq delayStateSeq1(delayStateSeq1_raw, 2);
+DelayStateSeq delayStateSeq2(delayStateSeq2_raw, 4);
+
+std::vector<DelayStateSeq> masterDelayStateSeq;
+
+
+//------------------------------------------------
 //----------------- Formant Filter ---------------
 //------------------------------------------------
 
@@ -80,42 +268,53 @@ public:
 							break;
 				default:	break;
 			}
+			formantInterpolation = *pSeq++;
 			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
-			seqCounter++;
-			if(seqCounter < seqLength)
-				pSeqNext = pSeq;
-			else
-				pSeqNext = seq;
-					
-			switch (*pSeqNext)
+			
+			if(formantInterpolation)
 			{
-				case a1: 	setInterpolation(sopranA_fc, sopranA_gain, sopranA_BW);
-							break;          
-				case e1: 	setInterpolation(sopranE_fc, sopranE_gain, sopranE_BW);
-							break;          
-				case i1: 	setInterpolation(sopranI_fc, sopranI_gain, sopranI_BW);
-							break;          
-				case o1: 	setInterpolation(sopranO_fc, sopranO_gain, sopranO_BW);
-							break;          
-				case u1:	setInterpolation(sopranU_fc, sopranU_gain, sopranU_BW);
-							break;
-				default:	break;
+				if(seqCounter+1 < seqLength)
+					pSeqNext = pSeq;
+				else
+					pSeqNext = seq;
+						
+				switch (*pSeqNext)
+				{
+					case a1: 	setInterpolation(sopranA_fc, sopranA_gain, sopranA_BW);
+								break;          
+					case e1: 	setInterpolation(sopranE_fc, sopranE_gain, sopranE_BW);
+								break;          
+					case i1: 	setInterpolation(sopranI_fc, sopranI_gain, sopranI_BW);
+								break;          
+					case o1: 	setInterpolation(sopranO_fc, sopranO_gain, sopranO_BW);
+								break;          
+					case u1:	setInterpolation(sopranU_fc, sopranU_gain, sopranU_BW);
+								break;
+					default:	break;
+				}
+				formantIsInterpolating = true;
 			}
+			else
+				formantIsInterpolating = false;
 		}
 		else
 		{
-			fc[0] += fc_delta[0];
-			fc[1] += fc_delta[1];
-			fc[2] += fc_delta[2];
-			gain[0] += gain_delta[0];
-			gain[1] += gain_delta[1];
-			gain[2] += gain_delta[2];
-			BW[0] += BW_delta[0];
-			BW[1] += BW_delta[1];
-			BW[2] += BW_delta[2];
-			setFormants(fc, gain, BW);
-			
+			if(formantIsInterpolating)
+			{
+				fc[0] += fc_delta[0];
+				fc[1] += fc_delta[1];
+				fc[2] += fc_delta[2];
+				gain[0] += gain_delta[0];
+				gain[1] += gain_delta[1];
+				gain[2] += gain_delta[2];
+				BW[0] += BW_delta[0];
+				BW[1] += BW_delta[1];
+				BW[2] += BW_delta[2];
+				setFormants(fc, gain, BW);
+			}
 			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 		}
 	}
 	
@@ -134,6 +333,8 @@ public:
 	int* pSeqNext;
 	int seqLength = 0;
 	bool loop = true;
+	bool formantInterpolation = true;
+	bool formantIsInterpolating = false;
 	
 	float fc[3] = {440, 440, 440};
 	float gain[3] = {0, 0, 0};
@@ -162,13 +363,11 @@ public:
 	
 };
 
-int testSeq[16] = { a1, 50, i1, 200, a1, 50, i1, 80, o1, 100, e1, 30, i1, 50, e1, 20};
+int formantSeq1_raw[24] = { a1, 1, 1000, e1, 0, 1000, i1, 1, 1000, o1, 0, 1000, u1, 1, 1000, o1, 0, 1000, i1, 1, 1000, e1, 0, 1000};
+int formantSeq2_raw[3] = { a1, 0, 1000};
 
-int testSeq2[8] = { a1, 1000, i1, 2000, a1, 500, i1, 500};
-
-FormantFilterSequence firstFormantSeq(testSeq, 8);
-
-FormantFilterSequence secondFormantSeq(testSeq2, 4);
+FormantFilterSequence formantSeq1(formantSeq1_raw, 8);
+FormantFilterSequence formantSeq2(formantSeq2_raw, 1);
 
 std::vector<FormantFilterSequence> masterFormantSeq;
 
@@ -232,17 +431,20 @@ public:
 
 int toneSeq1_1_raw[4] = {35, 1000, 0, 300};
 int toneSeq1_2_raw[4] = {42, 1000, 0, 300};
+int toneSeq1_3_raw[4] = {49, 1000, 0, 300};
 
 int toneSeq2_1_raw[8] = {35, 50, 0, 300, 35, 1000, 0, 300};
-int toneSeq2_2_raw[8] = {35, 50, 0, 300, 35, 1000, 0, 300};
+int toneSeq2_2_raw[8] = {42, 50, 0, 300, 35, 1000, 0, 300};
+int toneSeq2_3_raw[8] = {49, 50, 0, 300, 35, 1000, 0, 300};
 
 ToneSequence toneSeq1_1(toneSeq1_1_raw, 2, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq1_2(toneSeq1_2_raw, 2, &osc2, TONE_TYPE_SQUARE);
+ToneSequence toneSeq1_3(toneSeq1_3_raw, 2, &osc3, TONE_TYPE_SQUARE);
 
 ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SQUARE);
+ToneSequence toneSeq2_3(toneSeq2_3_raw, 4, &osc3, TONE_TYPE_SQUARE);
 
 std::vector<ToneSequence> masterToneSeq;
-
 
 #endif
