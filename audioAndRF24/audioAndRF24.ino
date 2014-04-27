@@ -220,10 +220,10 @@ void setup()
 
 //Metros
 Metro UsageMetro = Metro(5000);
-Metro ComMetro = Metro(300);
-Metro LightMetro = Metro(40);
-Metro UltraSonMetro = Metro(50);
-Metro ReadMetro = Metro(50);
+Metro ComMetro = Metro(1000);
+Metro LightMetro = Metro(100);
+Metro UltraSonMetro = Metro(5000);
+Metro ReadMetro = Metro(500);
 Metro WriteMetro = Metro(500);
 
 // audio volume
@@ -360,7 +360,8 @@ void loop() {
     Serial.print("changed: ");
     Serial.println(changed, DEC);
     int lightChange = map(valueRF, 0, 1023, 5, 100); 
-    LightMetro = Metro(lightChange);
+    LightMetro.interval(lightChange);
+     LightMetro.reset();
   }
 
   //////////////////////////////
