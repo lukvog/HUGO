@@ -11,6 +11,7 @@
 
 #include "Delay.h"
 #include "FormantFilter.h"
+#include "Tone.h"
 #include "Sequences.h"
 
 #define Test1_PIN 1
@@ -28,6 +29,9 @@ const int myInput = AUDIO_INPUT_MIC;
 
 AudioInputI2S       audioInput;         // audio shield: mic or line-in
 Delay 	staticDelay;
+AudioSynthWaveform 	osc1;
+AudioSynthWaveform 	osc2;
+AudioMixer4			mixSources;
 AudioFilterBiquad    formantFilter1(ToneFilter1);
 AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
@@ -38,17 +42,20 @@ AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 // Both channels of the audio input go to the FIR filter
 AudioConnection c1(audioInput, 0, staticDelay, 0);
 
-AudioConnection c2(staticDelay, 0, formantFilter1, 0);
-AudioConnection c3(staticDelay, 0, formantFilter2, 0);
-AudioConnection c4(staticDelay, 0, formantFilter3, 0);
+AudioConnection c2(staticDelay, 0, mixSources, 0);
 
-AudioConnection c5(staticDelay, 0, mixFormants, 0);
-AudioConnection c6(formantFilter1, 0, mixFormants, 1);
-AudioConnection c7(formantFilter2, 0, mixFormants, 2);
-AudioConnection c8(formantFilter3, 0, mixFormants, 3);
+AudioConnection c3(osc1, 0, mixSources, 1);
+AudioConnection c12(osc2, 0, mixSources, 2);
+AudioConnection c4(mixSources, 0, formantFilter1, 0);
+AudioConnection c5(mixSources, 0, formantFilter2, 0);
+AudioConnection c6(mixSources, 0, formantFilter3, 0);
 
-AudioConnection c9(mixFormants, 0, audioOutput, 0);
-AudioConnection c10(mixFormants, 0, audioOutput, 1);
+AudioConnection c7(mixSources, 0, mixFormants, 0);
+AudioConnection c8(formantFilter1, 0, mixFormants, 1);
+AudioConnection c9(formantFilter2, 0, mixFormants, 2);
+AudioConnection c10(formantFilter3, 0, mixFormants, 3);
+
+AudioConnection c11(mixFormants, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
@@ -70,22 +77,35 @@ void setup() {
 	audioShield.volume(90);
 	
 	mixFormants.gain(0, 0.0001);
-	mixFormants.gain(1, 10);
-	mixFormants.gain(2, 10);
-	mixFormants.gain(3, 10);
+	mixFormants.gain(1, 0.4);
+	mixFormants.gain(2, 0.4);
+	mixFormants.gain(3, 0.4);
+	
+	mixSources.gain(0, 2);
+	mixSources.gain(1, 0.1);
+	mixSources.gain(2, 0.1);
 	
 	setSopranA();
+	//osc1.begin(0.4,tune_frequencies2_PGM[60], TONE_TYPE_SQUARE);
+	
+	masterFormantSeq.push_back(firstFormantSeq);
+	masterFormantSeq.push_back(secondFormantSeq);
+	masterToneSeq.push_back(toneSeq1_1);
+	masterToneSeq.push_back(toneSeq1_2);
+	masterToneSeq.push_back(toneSeq2_1);
+	masterToneSeq.push_back(toneSeq2_2);
+	
+	osc1.set_ramp_length(88);
+	osc2.set_ramp_length(88);
 
 	Serial.println("setup done");
-	
-	masterSeq.push_back(firstFormantSeq);
-	masterSeq.push_back(secondFormantSeq);
 }
 
 // audio volume
-int volume = 0;
+int mainVolume = 0;
 int oldValue = 0;
 int activeSeq = 0;
+int activeToneSeq = 0;
 
 Metro MonitorMetro = Metro(1000);
 Metro ReadMetro = Metro(10);
@@ -113,26 +133,56 @@ void loop()
 	// every 10 ms, check for adjustment
 	if (ReadMetro.check() == 1) {
 		int n = analogRead(15);
-		if (n != volume) {
-			volume = n;
+		if (n != mainVolume) {
+			mainVolume = n;
 			audioShield.volume((float)n / 10.23);
 		}
 	}
 	
 	if (TimingMetro.check() == 1) {
 	
-		if (masterSeq[activeSeq].seqCounter <= masterSeq[activeSeq].seqLength)
+		if (masterFormantSeq[activeSeq].seqCounter <= masterFormantSeq[activeSeq].seqLength)
 		{		
-			masterSeq[activeSeq].seqProceed();
+			masterFormantSeq[activeSeq].seqProceed();
 		}
 		else
 		{
-			if (masterSeq[activeSeq].loop == true)
+			if (masterFormantSeq[activeSeq].loop == true)
 			{
-				masterSeq[activeSeq].reset();
-				masterSeq[activeSeq].seqProceed();
+				masterFormantSeq[activeSeq].reset();
+				masterFormantSeq[activeSeq].seqProceed();
 			}			
-		}		
+		}
+		
+		
+		// osc1 sequence
+		if (masterToneSeq[activeToneSeq].seqCounter <= masterToneSeq[activeToneSeq].seqLength)
+		{			
+			masterToneSeq[activeToneSeq].seqProceed();
+		}
+		else
+		{
+			if (masterToneSeq[activeToneSeq].loop == true)
+			{
+				masterToneSeq[activeToneSeq].reset();
+				masterToneSeq[activeToneSeq].seqProceed();
+			}			
+		}
+		
+		// osc2 sequence
+		if (masterToneSeq[activeToneSeq+1].seqCounter <= masterToneSeq[activeToneSeq].seqLength)
+		{			
+			masterToneSeq[activeToneSeq+1].seqProceed();
+		}
+		else
+		{
+			if (masterToneSeq[activeToneSeq+1].loop == true)
+			{
+				masterToneSeq[activeToneSeq+1].reset();
+				masterToneSeq[activeToneSeq+1].seqProceed();
+			}			
+		}
+		
 	}
 	
 	

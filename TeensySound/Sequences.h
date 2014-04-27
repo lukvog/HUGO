@@ -10,6 +10,10 @@
 
 #include <vector>
 
+//------------------------------------------------
+//----------------- Formant Filter ---------------
+//------------------------------------------------
+
 #define a1 0
 #define e1 1
 #define i1 2
@@ -56,8 +60,6 @@ public:
 		BW_delta[0] = (_BW[0] - BW[0]) / (float)stepCounter;
 		BW_delta[1] = (_BW[1] - BW[1]) / (float)stepCounter;
 		BW_delta[2] = (_BW[2] - BW[2]) / (float)stepCounter;
-		Serial.print(fc_delta[0]);
-		Serial.print("\n");
 	}
 	
 	void seqProceed()
@@ -141,21 +143,22 @@ public:
 	float gain_delta[3] = {0, 0, 0};
 	float BW_delta[3] = {0, 0, 0};
 	
+	float factor = 0.3;
 	float sopranA_fc[3] = {800, 1150, 2900};
 	float sopranA_gain[3] = {0, -6, -32};
-	float sopranA_BW[3] = {0.5, 0.4, 0.3};
+	float sopranA_BW[3] = {0.5*factor, 0.5*factor, 0.3*factor};
 	float sopranE_fc[3] = {350, 2000, 2800};
 	float sopranE_gain[3] = {0, -20, -15};
-	float sopranE_BW[3] = {0.5, 0.4, 0.3};
+	float sopranE_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
 	float sopranI_fc[3] = {270, 2140, 2950};
-	float sopranI_gain[3] = {0, -10, -26};
-	float sopranI_BW[3] = {0.5, 0.4, 0.3};
+	float sopranI_gain[3] = {0, -12, -26};
+	float sopranI_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
 	float sopranO_fc[3] = {450, 800, 2830};
 	float sopranO_gain[3] = {0, -11, -22};
-	float sopranO_BW[3] = {0.5, 0.4, 0.3};
+	float sopranO_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
 	float sopranU_fc[3] = {325, 700, 2700};
 	float sopranU_gain[3] = {0, -16, -35};
-	float sopranU_BW[3] = {0.5, 0.4, 0.3};
+	float sopranU_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
 	
 };
 
@@ -167,7 +170,79 @@ FormantFilterSequence firstFormantSeq(testSeq, 8);
 
 FormantFilterSequence secondFormantSeq(testSeq2, 4);
 
-std::vector<FormantFilterSequence> masterSeq;
+std::vector<FormantFilterSequence> masterFormantSeq;
+
+
+
+//------------------------------------------------
+//-------------------- Tone Osc ------------------
+//------------------------------------------------
+
+class ToneSequence
+{
+public:	
+	ToneSequence(int* _seq, int _seqLength, AudioSynthWaveform* _osc, short _waveform)
+		:seq(_seq),
+		pSeq(_seq),
+		seqLength(_seqLength),
+		osc(_osc),
+		waveform(_waveform)
+	{}
+	~ToneSequence() {}
+
+	void seqProceed()
+	{
+		if (stepCounter == 0)
+		{
+			if(*pSeq != 0) // start note
+				osc->begin(0.4,tune_frequencies2_PGM[*pSeq++], waveform);
+			else	// stop note
+			{
+				osc->amplitude(0);
+				pSeq++;
+			}
+			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			seqCounter++;
+		}
+		else
+		{
+			stepCounter--;
+		}
+	}
+
+	void reset()
+	{
+		pSeq = seq;
+		seqCounter = 0;
+		stepCounter = 0;	
+	}
+
+	float speed = 1.0;
+	int stepCounter = 0;
+	int seqCounter = 0;
+	int* seq;
+	int* pSeq;
+	int* pSeqNext;
+	int seqLength = 0;
+	bool loop = true;
+
+	short waveform;
+	AudioSynthWaveform* osc;
+};
+
+int toneSeq1_1_raw[4] = {35, 1000, 0, 300};
+int toneSeq1_2_raw[4] = {42, 1000, 0, 300};
+
+int toneSeq2_1_raw[8] = {35, 50, 0, 300, 35, 1000, 0, 300};
+int toneSeq2_2_raw[8] = {35, 50, 0, 300, 35, 1000, 0, 300};
+
+ToneSequence toneSeq1_1(toneSeq1_1_raw, 2, &osc1, TONE_TYPE_SQUARE);
+ToneSequence toneSeq1_2(toneSeq1_2_raw, 2, &osc2, TONE_TYPE_SQUARE);
+
+ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SQUARE);
+ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SQUARE);
+
+std::vector<ToneSequence> masterToneSeq;
 
 
 #endif
