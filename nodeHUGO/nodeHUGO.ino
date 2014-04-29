@@ -296,13 +296,14 @@ void setup()
 //___________________________________________________________
 
 //Metros
-elapsedMillis usageSec=0;
-elapsedMillis comSec=0;
-elapsedMillis lightSec=0;
-unsigned int ligthDur=500;
-elapsedMillis sensSec=0;
-elapsedMillis writeSec=0;
-elapsedMillis volSec=0;
+Metro LightMetro = Metro(400);
+Metro ComMetro = Metro(1000);
+Metro SensMetro = Metro(100);
+Metro WriteMetro = Metro(500);
+Metro MonitorMetro = Metro(1000);
+Metro VolMetro = Metro(10);
+
+Metro TimingMetro = Metro(MOD_RATE);
 
 // audio volume
 int mainVolume = 0;
@@ -312,9 +313,6 @@ int activeToneSeq = 0;
 int actDelStateSeq = 0;
 int actOscVolSeq = 0;
 
-Metro MonitorMetro = Metro(1000);
-Metro ReadMetro = Metro(10);
-Metro TimingMetro = Metro(MOD_RATE);
 
 
 void loop() {
@@ -322,21 +320,20 @@ void loop() {
   //___________________________________________________________________________________
   //Ultrasonic
 
-  if (sensSec > 400) {
+  if (SensMetro.check() == 1) {
     range = analogRead(21);
 
     if (range != 0 && range < wallDist)
     {
       changed = range;
     }
-    sensSec=0;
   }
 
 
   //___________________________________________________________________________________
   //LIGHT
 
-  if (lightSec > ligthDur) {
+  if (LightMetro.check() == 1) {
 
     // set the brightness of pin 9:
     brightness = constrain(brightness, 0, 255);
@@ -356,8 +353,6 @@ void loop() {
     if (brightness <= 0 || brightness >= 255) {
       fadeAmount = -fadeAmount ;
     }
-
-    lightSec=0;
   }
 
   //___________________________________________________________________________________
@@ -367,7 +362,7 @@ void loop() {
   // volume control
   
 	// every 10 ms, check for adjustment
-	if (ReadMetro.check() == 1) {
+	if (VolMetro.check() == 1) {
 		int n = analogRead(15);
 		if (n != mainVolume) {
 			mainVolume = n;
@@ -498,7 +493,7 @@ void loop() {
   For PlaySynthMusic this produces:
    Proc = 20 (21),  Mem = 2 (8)
    */
-  if (usageSec > 5000) {
+  if (MonitorMetro.check() == 1) {
     Serial.print("Proc = ");
     Serial.print(AudioProcessorUsage());
     Serial.print(" (");    
@@ -508,7 +503,6 @@ void loop() {
     Serial.print(" (");    
     Serial.print(AudioMemoryUsageMax());
     Serial.println(")");
-    usageSec=0;
   }
 
 
@@ -556,15 +550,16 @@ void loop() {
   //////////////////////////////
   ////////////////////////////////
   //////////////////////////
-  if (writeSec > 500) {
+  if (WriteMetro.check() == 1) {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
     Serial.print("wallDist: ");
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
     Serial.println(changed, DEC);
-    ligthDur = map(valueRF, 0, 1023, 5, 100); 
-    writeSec=0;
+    //int ligthDur = 
+    LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
+    LightMetro.reset();
   }
 
   //////////////////////////////
@@ -574,7 +569,7 @@ void loop() {
 
   // Send a ping to the next node every 'interval' ms
   //unsigned long now = millis();
-  if (comSec > 1000) {
+  if (ComMetro.check() == 1) {
     //last_time_sent = now;
 
     // Who should we send to?
@@ -649,8 +644,8 @@ void loop() {
         //last_time_sent -= 100;
       }
     }
-    comSec=0;
   }
+
 
   // Listen for a new node address
   nodeconfig_listen();

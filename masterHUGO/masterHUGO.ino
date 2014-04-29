@@ -1,19 +1,4 @@
 /*
-PINS Audioboad:
- 6 - MEMCS
- 7 - MOSI
- 9 - BCLK
- 10 - SDCS
- 11 - MCLK
- 12 - MISO
- 13 - RX
- 14 - SCLK
- 15 - VOL
- 18 - SDA
- 19 - SCL
- 22 - TX
- 23 - LRCLK
- 
  PINS RF24
  GND  1 --> GND
  Vin  2 --> 3.3V
@@ -22,11 +7,6 @@ PINS Audioboad:
  SCK  5 --> 14
  MOSI 6 --> 7
  MISO 7 --> 12
- 
- LIGHTPIN
- 
- PWM --> 5
- 
  */
 
 
@@ -37,68 +17,16 @@ PINS Audioboad:
 #include <SD.h>
 #include <RF24Network.h>
 #include <RF24.h>
-#include <Bounce.h>
 #include "nodeconfig.h"
+//#include "sequences.h"
 
 #include <Metro.h>
-
-
-#define MOD_RATE 5 // modulation rate in ms
-#define MOD_RATE_DIF 0.2
-
-#include "Delay.h"
-#include "FormantFilter.h"
-#include "Tone.h"
-#include "Sequences.h"
-
-#define Test1_PIN 1
-#define Test0_PIN 0
-
-Bounce b_test1 = Bounce(Test1_PIN,15);
-Bounce b_test0   = Bounce(Test0_PIN,15);
 
 
 //___________________________________________________________________________________
 /////////////////////////
 //AUDIO CONFIGURATION
 
-//const int myInput = AUDIO_INPUT_LINEIN;
-const int myInput = AUDIO_INPUT_MIC;
-
-float delayVolume;
-
-AudioInputI2S       audioInput;         // audio shield: mic or line-in
-Delay 	staticDelay;
-AudioSynthWaveform 	osc1;
-AudioSynthWaveform 	osc2;
-AudioSynthWaveform	osc3;
-AudioMixer4			mixSources;
-AudioFilterBiquad    formantFilter1(ToneFilter1);
-AudioFilterBiquad    formantFilter2(ToneFilter2);
-AudioFilterBiquad    formantFilter3(ToneFilter3);
-AudioMixer4        mixFormants;
-AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
-
-// Create Audio connections between the components
-// Both channels of the audio input go to the FIR filter
-AudioConnection c1(audioInput, 0, staticDelay, 0);
-AudioConnection c2(staticDelay, 0, mixSources, 0);
-
-AudioConnection c3(osc1, 0, mixSources, 1);
-AudioConnection c12(osc2, 0, mixSources, 2);
-AudioConnection c13(osc3, 0, mixSources, 3);
-AudioConnection c4(mixSources, 0, formantFilter1, 0);
-AudioConnection c5(mixSources, 0, formantFilter2, 0);
-AudioConnection c6(mixSources, 0, formantFilter3, 0);
-
-AudioConnection c7(mixSources, 0, mixFormants, 0);
-AudioConnection c8(formantFilter1, 0, mixFormants, 1);
-AudioConnection c9(formantFilter2, 0, mixFormants, 2);
-AudioConnection c10(formantFilter3, 0, mixFormants, 3);
-
-AudioConnection c11(mixFormants, 0, audioOutput, 0);
-
-AudioControlSGTL5000 audioShield;
 
 //___________________________________________________________________________________
 /////////////////////////
@@ -138,19 +66,11 @@ void add_node(uint16_t node);
 int valueRF = 1;
 
 
-//___________________________________________________________________________________
-/////////////////////////
-//Light
-
-int led = 5;           // the pin that the LED is attached to
-int brightness = 0;    // how bright the LED is
-int fadeAmount = 1;    // how many points to fade the LED by
-
-
 
 //_________________________________________________________________________________
 //////////////////////
 //Ultrasonic aka IR
+//ULTRASONIC!!!!
 
 
 //Ultrasonic ultrasonic(21);
@@ -206,58 +126,6 @@ void setup()
 
 
   //___________________________________________________________________________________
-  // Audio connections require memory to work.  For more
-  // detailed information, see the MemoryAndCpuUsage example
-  delay(3000);
-
-	pinMode(Test1_PIN,INPUT_PULLUP);
-	pinMode(Test0_PIN,INPUT_PULLUP);
-
-	// It doesn't work properly with any less than 8
-	AudioMemory(12);
-
-	audioShield.enable();
-	audioShield.inputSelect(myInput);
-	audioShield.volume(90);
-	
-	mixFormants.gain(0, 0.0001);
-	mixFormants.gain(1, 0.4);
-	mixFormants.gain(2, 0.4);
-	mixFormants.gain(3, 0.4);
-	
-	delayVolume = 2;
-	
-	mixSources.gain(0, delayVolume);
-	mixSources.gain(1, 0.1);
-	mixSources.gain(2, 0.1);
-	mixSources.gain(3, 0.1);
-	
-	setSopranA();
-	
-	osc1.set_ramp_length(88);
-	osc2.set_ramp_length(88);
-	osc3.set_ramp_length(88);
-	
-	masterFormantSeq.push_back(formantSeq1);
-	masterFormantSeq.push_back(formantSeq2);
-	masterToneSeq.push_back(toneSeq1_1);
-	masterToneSeq.push_back(toneSeq1_2);
-	masterToneSeq.push_back(toneSeq1_3);
-	masterToneSeq.push_back(toneSeq2_1);
-	masterToneSeq.push_back(toneSeq2_2);
-	masterToneSeq.push_back(toneSeq2_3);
-	masterDelayStateSeq.push_back(delayStateSeq1);
-	masterDelayStateSeq.push_back(delayStateSeq2);
-	masterToneVolSeq.push_back(toneVolumeSeq1);
-	masterToneVolSeq.push_back(toneVolumeSeq2);
-	
-	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
-	
-	Serial.println("audio setup done");
-
-  //___________________________________________________________________________________
   //RF24
 
   ///SPI Setup
@@ -286,35 +154,15 @@ void setup()
   radio.begin();
   network.begin(/*channel*/ 100, /*node address*/ this_node );
 
-  //___________________________________________________________________________________
-  //LIGHT
-
-  pinMode(led, OUTPUT);
-
 }
 
 //___________________________________________________________
 
 //Metros
-elapsedMillis usageSec=0;
-elapsedMillis comSec=0;
-elapsedMillis lightSec=0;
-unsigned int ligthDur=500;
-elapsedMillis sensSec=0;
-elapsedMillis writeSec=0;
-elapsedMillis volSec=0;
-
-// audio volume
-int mainVolume = 0;
-int oldValue = 0;
-int actFromSeq = 0;
-int activeToneSeq = 0;
-int actDelStateSeq = 0;
-int actOscVolSeq = 0;
-
-Metro MonitorMetro = Metro(1000);
+Metro ComMetro = Metro(1000);
+Metro SensMetro = Metro(400);
+Metro WriteMetro = Metro(500);
 Metro ReadMetro = Metro(10);
-Metro TimingMetro = Metro(MOD_RATE);
 
 
 void loop() {
@@ -322,195 +170,14 @@ void loop() {
   //___________________________________________________________________________________
   //Ultrasonic
 
-  if (sensSec > 400) {
+  if (SensMetro.check() == 1) {
     range = analogRead(21);
 
     if (range != 0 && range < wallDist)
     {
       changed = range;
     }
-    sensSec=0;
   }
-
-
-  //___________________________________________________________________________________
-  //LIGHT
-
-  if (lightSec > ligthDur) {
-
-    // set the brightness of pin 9:
-    brightness = constrain(brightness, 0, 255);
-    analogWrite(led, brightness);
-
-    // change the brightness for next time through the loop:
-    int fadeAmountPWR = 1;
-    if (fadeAmount > 0) { 
-      fadeAmountPWR = fadeAmount + (brightness * 0.1); 
-    }
-    else { 
-      fadeAmountPWR = fadeAmount - (brightness * 0.1); 
-    }
-    brightness = brightness + fadeAmountPWR;
-    // reverse the direction of the fading at the ends of the fade:
-
-    if (brightness <= 0 || brightness >= 255) {
-      fadeAmount = -fadeAmount ;
-    }
-
-    lightSec=0;
-  }
-
-  //___________________________________________________________________________________
-  //AUDIO
-  // volume control
-  // every 10 ms, check for adjustment
-  // volume control
-  
-	// every 10 ms, check for adjustment
-	if (ReadMetro.check() == 1) {
-		int n = analogRead(15);
-		if (n != mainVolume) {
-			mainVolume = n;
-			audioShield.volume((float)n / 10.23);
-		}
-	}
-	
-	if (TimingMetro.check() == 1) {
-		
-		// formant filter sequence
-		if (masterFormantSeq[actFromSeq].seqCounter < masterFormantSeq[actFromSeq].seqLength)
-		{		
-			masterFormantSeq[actFromSeq].seqProceed();
-		}
-		else
-		{
-			if (masterFormantSeq[actFromSeq].loop == true)
-			{
-				masterFormantSeq[actFromSeq].reset();
-				masterFormantSeq[actFromSeq].seqProceed();
-			}			
-		}
-				
-		// osc1 sequence
-		if (masterToneSeq[activeToneSeq].seqCounter < masterToneSeq[activeToneSeq].seqLength)
-		{			
-			masterToneSeq[activeToneSeq].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq].loop == true)
-			{
-				masterToneSeq[activeToneSeq].reset();
-				masterToneSeq[activeToneSeq].seqProceed();
-			}			
-		}
-		
-		// osc2 sequence
-		if (masterToneSeq[activeToneSeq+1].seqCounter < masterToneSeq[activeToneSeq+1].seqLength)
-		{			
-			masterToneSeq[activeToneSeq+1].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq+1].loop == true)
-			{
-				masterToneSeq[activeToneSeq+1].reset();
-				masterToneSeq[activeToneSeq+1].seqProceed();
-			}			
-		}
-		
-		// osc3 sequence
-		if (masterToneSeq[activeToneSeq+2].seqCounter < masterToneSeq[activeToneSeq+2].seqLength)
-		{			
-			masterToneSeq[activeToneSeq+2].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq+2].loop == true)
-			{
-				masterToneSeq[activeToneSeq+2].reset();
-				masterToneSeq[activeToneSeq+2].seqProceed();
-			}			
-		}
-		
-		// delay state sequence
-		if (masterDelayStateSeq[actDelStateSeq].seqCounter < masterDelayStateSeq[actDelStateSeq].seqLength)
-		{	
-			masterDelayStateSeq[actDelStateSeq].seqProceed();
-		}
-		else
-		{
-			if (masterDelayStateSeq[actDelStateSeq].loop == true)
-			{
-				masterDelayStateSeq[actDelStateSeq].reset();
-				masterDelayStateSeq[actDelStateSeq].seqProceed();
-			}			
-		}
-		
-		
-		// tone volume sequence
-		if (masterToneVolSeq[actOscVolSeq].seqCounter < masterToneVolSeq[actOscVolSeq].seqLength)
-		{	
-			masterToneVolSeq[actOscVolSeq].seqProceed();
-		}
-		else
-		{
-			if (masterToneVolSeq[actOscVolSeq].loop == true)
-			{
-				masterToneVolSeq[actOscVolSeq].reset();
-				masterToneVolSeq[actOscVolSeq].seqProceed();
-			}			
-		}
-
-		
-	}
-	
-	// update the two buttons
-	b_test0.update();
-	b_test1.update();
-
-
-	// if pin1 is grounded
-	if(b_test1.fallingEdge()) {
-		//staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 32);
-	}
-
-	// If pin1 is open
-	if(b_test1.risingEdge()) {
-		//staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 64);
-	}
-
-	// if pin0 is grounded
-	if(b_test0.fallingEdge()) {
-		//staticDelay.hold(false);	
-		//actFromSeq = 1;
-	}
-	// if pin 0 is open
-	if(b_test0.risingEdge()) {
-		//staticDelay.hold(true);	
-		//actFromSeq = 0;
-	}
-
-  //////////////////
-  //Mem and CPU Usage
-
-  /*
-  For PlaySynthMusic this produces:
-   Proc = 20 (21),  Mem = 2 (8)
-   */
-  if (usageSec > 5000) {
-    Serial.print("Proc = ");
-    Serial.print(AudioProcessorUsage());
-    Serial.print(" (");    
-    Serial.print(AudioProcessorUsageMax());
-    Serial.print("),  Mem = ");
-    Serial.print(AudioMemoryUsage());
-    Serial.print(" (");    
-    Serial.print(AudioMemoryUsageMax());
-    Serial.println(")");
-    usageSec=0;
-  }
-
 
 
   //___________________________________________________________________________________
@@ -556,15 +223,13 @@ void loop() {
   //////////////////////////////
   ////////////////////////////////
   //////////////////////////
-  if (writeSec > 500) {
+  if (WriteMetro.check() == 1) {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
     Serial.print("wallDist: ");
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
     Serial.println(changed, DEC);
-    ligthDur = map(valueRF, 0, 1023, 5, 100); 
-    writeSec=0;
   }
 
   //////////////////////////////
@@ -574,7 +239,7 @@ void loop() {
 
   // Send a ping to the next node every 'interval' ms
   //unsigned long now = millis();
-  if (comSec > 1000) {
+  if (ComMetro.check() == 1) {
     //last_time_sent = now;
 
     // Who should we send to?
@@ -649,7 +314,6 @@ void loop() {
         //last_time_sent -= 100;
       }
     }
-    comSec=0;
   }
 
   // Listen for a new node address
