@@ -37,8 +37,8 @@ PINS Audioboad:
 #include <SD.h>
 #include <RF24Network.h>
 #include <RF24.h>
+#include <Bounce.h>
 #include "nodeconfig.h"
-#include <Metro.h>
 #include "Ultrasonic.h"
 
 
@@ -132,7 +132,7 @@ int range;
 //___________________________________________________________________________________
 void setup() 
 {
-  
+
   Serial.begin(57600);
 
   //___________________________________________________________________________________
@@ -193,7 +193,7 @@ void setup()
 
   //
   // Print preamble
-  
+
   delay(2000);
   Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
   Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
@@ -219,12 +219,13 @@ void setup()
 }
 
 //Metros
-Metro UsageMetro = Metro(5000);
-Metro ComMetro = Metro(300);
-Metro LightMetro = Metro(40);
-Metro UltraSonMetro = Metro(50);
-Metro ReadMetro = Metro(50);
-Metro WriteMetro = Metro(500);
+elapsedMillis usageSec=0;
+elapsedMillis comSec=0;
+elapsedMillis lightSec=0;
+unsigned int ligthDur=500;
+elapsedMillis sensSec=0;
+elapsedMillis writeSec=0;
+elapsedMillis volSec=0;
 
 // audio volume
 int volume = 0;
@@ -234,20 +235,21 @@ void loop() {
   //___________________________________________________________________________________
   //Ultrasonic
 
-  if (UltraSonMetro.check() == 1) {
+  if (sensSec > 400) {
     range = ultrasonic.MeasureInCentimeters();
 
     if (range != 0 && range < wallDist)
     {
       changed = range;
     }
+    sensSec=0;
   }
 
 
   //___________________________________________________________________________________
   //LIGHT
 
-  if (LightMetro.check() == 1) {
+  if (lightSec > ligthDur) {
 
     // set the brightness of pin 9:
     brightness = constrain(brightness, 0, 255);
@@ -268,44 +270,42 @@ void loop() {
       fadeAmount = -fadeAmount ;
     }
 
+    lightSec=0;
   }
 
   //___________________________________________________________________________________
   //AUDIO
   // volume control
   // every 10 ms, check for adjustment
-  if (ReadMetro.check() == 1) {
+  if (volSec > 500) {
     int n = analogRead(15);
     if (n != volume) {
       volume = n;
       audioShield.volume((float)n / 10.23);
     }
+    volSec=0;
   }
 
   //////////////////
   //Mem and CPU Usage
 
-  // Change this to if(1) for measurement output
-  if(1) {
-    /*
+  /*
   For PlaySynthMusic this produces:
-     Proc = 20 (21),  Mem = 2 (8)
-     */
-    if (UsageMetro.check() == 1) {
-      Serial.print("Proc = ");
-      Serial.print(AudioProcessorUsage());
-      Serial.print(" (");    
-      Serial.print(AudioProcessorUsageMax());
-      Serial.print("),  Mem = ");
-      Serial.print(AudioMemoryUsage());
-      Serial.print(" (");    
-      Serial.print(AudioMemoryUsageMax());
-      Serial.println(")");
-    }
-
-
-
+   Proc = 20 (21),  Mem = 2 (8)
+   */
+  if (usageSec > 5000) {
+    Serial.print("Proc = ");
+    Serial.print(AudioProcessorUsage());
+    Serial.print(" (");    
+    Serial.print(AudioProcessorUsageMax());
+    Serial.print("),  Mem = ");
+    Serial.print(AudioMemoryUsage());
+    Serial.print(" (");    
+    Serial.print(AudioMemoryUsageMax());
+    Serial.println(")");
+    usageSec=0;
   }
+
 
 
   //___________________________________________________________________________________
@@ -331,11 +331,11 @@ void loop() {
       break;
     case 'V':
       handle_V(header); 
-     
+
       /////
       //Switch um Liste aufzubrechen
       //Switch für Sensor und Light Mapping
-      
+
       break;
     case 'N':
       handle_N(header);
@@ -351,16 +351,15 @@ void loop() {
   //////////////////////////////
   ////////////////////////////////
   //////////////////////////
-  if (WriteMetro.check() == 1)
-  {
+  if (writeSec > 500) {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
     Serial.print("wallDist: ");
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
     Serial.println(changed, DEC);
-    int lightChange = map(valueRF, 0, 1023, 5, 100); 
-    LightMetro = Metro(lightChange);
+    ligthDur = map(valueRF, 0, 1023, 5, 100); 
+    writeSec=0;
   }
 
   //////////////////////////////
@@ -370,8 +369,7 @@ void loop() {
 
   // Send a ping to the next node every 'interval' ms
   //unsigned long now = millis();
-  if (ComMetro.check() == 1)
-  {
+  if (comSec > 1000) {
     //last_time_sent = now;
 
     // Who should we send to?
@@ -446,12 +444,15 @@ void loop() {
         //last_time_sent -= 100;
       }
     }
-
+    comSec=0;
   }
 
   // Listen for a new node address
   nodeconfig_listen();
 }
+
+
+//____________________________________________________
 
 /**
  * Send a 'T' message, the current time
@@ -571,4 +572,7 @@ void add_node(uint16_t node)
 
 
 }
+
+
+
 
