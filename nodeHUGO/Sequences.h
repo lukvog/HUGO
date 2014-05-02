@@ -99,8 +99,8 @@ public:
 	float gain_dB_step;
 };
 
-int toneVolumeSeq1_raw[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
-int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000};
+int toneVolumeSeq1_raw[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000 };
+int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
 
 ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
 ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
