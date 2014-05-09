@@ -29,9 +29,6 @@ public:
 	void setInterpolation(float _nextGain_dB)
 	{
 		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
-		Serial.print("gain_dB_step: ");
-		Serial.print(gain_dB_step);
-		Serial.print("\n");
 	}
 	
 	void seqProceed()
@@ -40,13 +37,7 @@ public:
 		if (stepCounter == 0)
 		{
 			gain_dB = *pSeq++;
-			Serial.print("gain_dB: ");
-			Serial.print(gain_dB);
-			Serial.print("\n");
 			float gain = pow(10, (float)gain_dB/20.0);
-			Serial.print("gain: ");
-			Serial.print(gain);
-			Serial.print("\n");
 			mixSources.gain(1, gain);
 			mixSources.gain(2, gain);
 			mixSources.gain(3, gain);
@@ -60,9 +51,6 @@ public:
 				
 			float nextGain_dB= *pSeqNext;
 			setInterpolation(nextGain_dB);
-			Serial.print("nextGain_dB: ");
-			Serial.print(nextGain_dB);
-			Serial.print("\n");
 
 		}
 		else
@@ -105,15 +93,22 @@ int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
 ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
 ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
 
-std::vector<ToneVolumeSeq> masterToneVolSeq;
+std::vector<ToneVolumeSeq*> masterToneVolSeq;
+
+void setToneVolSeq()
+{
+	masterToneVolSeq.push_back(&toneVolumeSeq1);
+	masterToneVolSeq.push_back(&toneVolumeSeq2);
+}
 
 //------------------------------------------------
 //----------------- Delay State ------------------
 //------------------------------------------------
 
-extern Delay staticDelay;
+extern AudioEffectDelay staticDelay;
 extern AudioMixer4 mixSources;
 extern float delayVolume;
+
 class DelayStateSeq
 {
 public:	
@@ -146,7 +141,7 @@ public:
 				case 2: mixSources.gain(0, delayVolume);
 						staticDelay.hold(true);
 						staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // eqal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
-						staticDelay.setTargetDelay(AUDIO_BLOCK_SAMPLES * 32);
+						staticDelay.setTargetDelay(AUDIO_BLOCK_SAMPLES * 64);
 						break;
 				// talkThrough without delay
 				case 3: mixSources.gain(0, delayVolume);
@@ -158,16 +153,13 @@ public:
 				case 4:	break;
 				default: break;			
 			}			
-			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
-			Serial.print(speed);
-			Serial.print("\n");
-			Serial.print(stepCounter);
-			Serial.print("\n");
-			seqCounter++;
+			stepCounter = *pSeq++ * (1.0/speed);
 		}
 		else
 		{
 			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 		}
 	}
 
@@ -195,8 +187,13 @@ int delayStateSeq2_raw[8] = {1, 50, 2, 300, 1, 1000, 2, 300};
 DelayStateSeq delayStateSeq1(delayStateSeq1_raw, 2);
 DelayStateSeq delayStateSeq2(delayStateSeq2_raw, 4);
 
-std::vector<DelayStateSeq> masterDelayStateSeq;
+std::vector<DelayStateSeq*> masterDelayStateSeq;
 
+void setDelayStateSeq()
+{
+	masterDelayStateSeq.push_back(&delayStateSeq1);
+	masterDelayStateSeq.push_back(&delayStateSeq2);
+}
 
 //------------------------------------------------
 //----------------- Formant Filter ---------------
@@ -207,6 +204,8 @@ std::vector<DelayStateSeq> masterDelayStateSeq;
 #define i1 2
 #define o1 3
 #define u1 4
+
+extern AudioMixer4 mixFormants;
 
 class FormantFilterSequence
 {
@@ -219,12 +218,19 @@ public:
 	~FormantFilterSequence() {}
 	
 	void setFormants(float* _fc, float* _gain, float* _BW) {
+		float A_overall1 = pow(10, _gain[0]/20);
+		float A_overall2 = pow(10, _gain[1]/20);
+		float A_overall3 = pow(10, _gain[2]/20);
+		mixFormants.gain(1, A_overall1);
+		mixFormants.gain(2, A_overall2);
+		mixFormants.gain(3, A_overall3);
+		
 		// calcBiquad(FilterType,FrequencyC,dBgain,BW,QuantizationUnit,SampleRate,int*);
-		calcBiquad(FILTER_BANDPASS,_fc[0],_gain[0],0,_BW[0],2147483648,44100,updateFilter);
+		calcBiquad(FILTER_BANDPASS,_fc[0],0,_BW[0],2147483648,44100,updateFilter);
 		formantFilter1.updateCoefs(updateFilter);
-		calcBiquad(FILTER_BANDPASS,_fc[1],_gain[1],0,_BW[1],2147483648,44100,updateFilter);
+		calcBiquad(FILTER_BANDPASS,_fc[1],0,_BW[1],2147483648,44100,updateFilter);
 		formantFilter2.updateCoefs(updateFilter);
-		calcBiquad(FILTER_BANDPASS,_fc[2],_gain[2],0,_BW[2],2147483648,44100,updateFilter);
+		calcBiquad(FILTER_BANDPASS,_fc[2],0,_BW[2],2147483648,44100,updateFilter);
 		formantFilter3.updateCoefs(updateFilter);
 		fc[0] = _fc[0];
 		fc[1] = _fc[1];
@@ -369,9 +375,13 @@ int formantSeq2_raw[3] = { a1, 0, 1000};
 FormantFilterSequence formantSeq1(formantSeq1_raw, 8);
 FormantFilterSequence formantSeq2(formantSeq2_raw, 1);
 
-std::vector<FormantFilterSequence> masterFormantSeq;
+std::vector<FormantFilterSequence*> masterFormantSeq;
 
-
+void setFormantSeq()
+{
+	masterFormantSeq.push_back(&formantSeq1);
+	masterFormantSeq.push_back(&formantSeq2);
+}
 
 //------------------------------------------------
 //-------------------- Tone Osc ------------------
@@ -391,21 +401,27 @@ public:
 
 	void seqProceed()
 	{
-		if (stepCounter == 0)
+		if (stepCounter <= 0)
 		{
 			if(*pSeq != 0) // start note
-				osc->begin(0.4,tune_frequencies2_PGM[*pSeq++], waveform);
+			{
+				float velocity = 0.3 * ((float)*pSeq++/128.0);
+				osc->begin(velocity, tune_frequencies2_PGM[*pSeq++], waveform);
+			}
 			else	// stop note
 			{
 				osc->amplitude(0);
 				pSeq++;
+				pSeq++;
 			}
-			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
-			seqCounter++;
+			stepCounter = *pSeq++ * (1.0/speed);
+			stepCounter--;
 		}
 		else
 		{
 			stepCounter--;
+			if(stepCounter == 0)
+			 seqCounter++;
 		}
 	}
 
@@ -429,22 +445,32 @@ public:
 	AudioSynthWaveform* osc;
 };
 
-int toneSeq1_1_raw[4] = {35, 1000, 0, 300};
-int toneSeq1_2_raw[4] = {42, 1000, 0, 300};
-int toneSeq1_3_raw[4] = {49, 1000, 0, 300};
+int toneSeq1_1_raw[6] = {120, 35, 200, 0, 35, 400};
+int toneSeq1_2_raw[9] = {0, 42, 200, 120, 42, 200, 0, 42, 200};
+int toneSeq1_3_raw[6] = {0, 42, 400, 120, 49, 200};
 
-int toneSeq2_1_raw[8] = {35, 50, 0, 300, 35, 1000, 0, 300};
-int toneSeq2_2_raw[8] = {42, 50, 0, 300, 35, 1000, 0, 300};
-int toneSeq2_3_raw[8] = {49, 50, 0, 300, 35, 1000, 0, 300};
+int toneSeq2_1_raw[12] = { 120 , 38 , 145 , 0 , 38 , 152 , 120 , 43 , 152 , 0 , 43 , 152 } ;
+int toneSeq2_2_raw[12] = { 120 , 47 , 145 , 120 , 42 , 152 , 120 , 52 , 152 , 120 , 40 , 152 } ;
+int toneSeq2_3_raw[27] = { 0 , 59 , 69 , 120 , 59 , 76 , 0 , 59 , 76 , 120 , 59 , 76 , 0 , 59 , 114 , 120 , 59 , 38 , 0 , 59 , 76 , 120 , 59 , 38 , 0 , 59 , 38 } ;
 
 ToneSequence toneSeq1_1(toneSeq1_1_raw, 2, &osc1, TONE_TYPE_SQUARE);
-ToneSequence toneSeq1_2(toneSeq1_2_raw, 2, &osc2, TONE_TYPE_SQUARE);
+ToneSequence toneSeq1_2(toneSeq1_2_raw, 3, &osc2, TONE_TYPE_SQUARE);
 ToneSequence toneSeq1_3(toneSeq1_3_raw, 2, &osc3, TONE_TYPE_SQUARE);
 
 ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SQUARE);
-ToneSequence toneSeq2_3(toneSeq2_3_raw, 4, &osc3, TONE_TYPE_SQUARE);
+ToneSequence toneSeq2_3(toneSeq2_3_raw, 9, &osc3, TONE_TYPE_SQUARE);
 
-std::vector<ToneSequence> masterToneSeq;
+std::vector<ToneSequence*> masterToneSeq;
+
+void setToneSeq()
+{
+	masterToneSeq.push_back(&toneSeq1_1);
+	masterToneSeq.push_back(&toneSeq1_2);
+	masterToneSeq.push_back(&toneSeq1_3);
+	masterToneSeq.push_back(&toneSeq2_1);
+	masterToneSeq.push_back(&toneSeq2_2);
+	masterToneSeq.push_back(&toneSeq2_3);
+}
 
 #endif

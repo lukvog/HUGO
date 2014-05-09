@@ -29,9 +29,6 @@ public:
 	void setInterpolation(float _nextGain_dB)
 	{
 		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
-		Serial.print("gain_dB_step: ");
-		Serial.print(gain_dB_step);
-		Serial.print("\n");
 	}
 	
 	void seqProceed()
@@ -40,13 +37,7 @@ public:
 		if (stepCounter == 0)
 		{
 			gain_dB = *pSeq++;
-			Serial.print("gain_dB: ");
-			Serial.print(gain_dB);
-			Serial.print("\n");
 			float gain = pow(10, (float)gain_dB/20.0);
-			Serial.print("gain: ");
-			Serial.print(gain);
-			Serial.print("\n");
 			mixSources.gain(1, gain);
 			mixSources.gain(2, gain);
 			mixSources.gain(3, gain);
@@ -60,9 +51,6 @@ public:
 				
 			float nextGain_dB= *pSeqNext;
 			setInterpolation(nextGain_dB);
-			Serial.print("nextGain_dB: ");
-			Serial.print(nextGain_dB);
-			Serial.print("\n");
 
 		}
 		else
@@ -105,7 +93,7 @@ int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000};
 ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
 ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
 
-std::vector<ToneVolumeSeq> masterToneVolSeq;
+std::vector<ToneVolumeSeq*> masterToneVolSeq;
 
 //------------------------------------------------
 //----------------- Delay State ------------------
@@ -159,10 +147,6 @@ public:
 				default: break;			
 			}			
 			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
-			Serial.print(speed);
-			Serial.print("\n");
-			Serial.print(stepCounter);
-			Serial.print("\n");
 			seqCounter++;
 		}
 		else
@@ -195,7 +179,7 @@ int delayStateSeq2_raw[8] = {1, 50, 2, 300, 1, 1000, 2, 300};
 DelayStateSeq delayStateSeq1(delayStateSeq1_raw, 2);
 DelayStateSeq delayStateSeq2(delayStateSeq2_raw, 4);
 
-std::vector<DelayStateSeq> masterDelayStateSeq;
+std::vector<DelayStateSeq*> masterDelayStateSeq;
 
 
 //------------------------------------------------
@@ -369,7 +353,7 @@ int formantSeq2_raw[3] = { a1, 0, 1000};
 FormantFilterSequence formantSeq1(formantSeq1_raw, 8);
 FormantFilterSequence formantSeq2(formantSeq2_raw, 1);
 
-std::vector<FormantFilterSequence> masterFormantSeq;
+std::vector<FormantFilterSequence*> masterFormantSeq;
 
 
 
@@ -445,6 +429,6 @@ ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SQUARE);
 ToneSequence toneSeq2_3(toneSeq2_3_raw, 4, &osc3, TONE_TYPE_SQUARE);
 
-std::vector<ToneSequence> masterToneSeq;
+std::vector<ToneSequence*> masterToneSeq;
 
 #endif

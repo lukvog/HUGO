@@ -67,34 +67,47 @@ const int myInput = AUDIO_INPUT_MIC;
 
 float delayVolume;
 
-AudioInputI2S       audioInput;         // audio shield: mic or line-in
-Delay 	staticDelay;
+
+AudioInputI2S       audioInput;  // audio shield: mic or line-in 
+
+AudioEffectDelay 	staticDelay;
+
 AudioSynthWaveform 	osc1;
 AudioSynthWaveform 	osc2;
 AudioSynthWaveform	osc3;
+
+
 AudioMixer4			mixSources;
+
 AudioFilterBiquad    formantFilter1(ToneFilter1);
 AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
+
 AudioMixer4        mixFormants;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
 // Both channels of the audio input go to the FIR filter
-AudioConnection c1(audioInput, 0, staticDelay, 0);
-AudioConnection c2(staticDelay, 0, mixSources, 0);
 
-AudioConnection c3(osc1, 0, mixSources, 1);
-AudioConnection c12(osc2, 0, mixSources, 2);
-AudioConnection c13(osc3, 0, mixSources, 3);
-AudioConnection c4(mixSources, 0, formantFilter1, 0);
-AudioConnection c5(mixSources, 0, formantFilter2, 0);
-AudioConnection c6(mixSources, 0, formantFilter3, 0);
+AudioConnection c15(audioInput, 0, staticDelay, 0);
 
-AudioConnection c7(mixSources, 0, mixFormants, 0);
-AudioConnection c8(formantFilter1, 0, mixFormants, 1);
-AudioConnection c9(formantFilter2, 0, mixFormants, 2);
-AudioConnection c10(formantFilter3, 0, mixFormants, 3);
+AudioConnection c5(staticDelay, 0, mixSources, 3);
+
+AudioConnection c2(osc1, 0, mixSources, 0);
+AudioConnection c3(osc2, 0, mixSources, 1);
+AudioConnection c4(osc3, 0, mixSources, 2);
+
+
+
+
+AudioConnection c6(mixSources, 0, formantFilter1, 0);
+AudioConnection c7(mixSources, 0, formantFilter2, 0);
+AudioConnection c16(mixSources, 0, formantFilter3, 0);
+
+AudioConnection c8(mixSources, 0, mixFormants, 0);
+AudioConnection c9(formantFilter1, 0, mixFormants, 1);
+AudioConnection c10(formantFilter2, 0, mixFormants, 2);
+AudioConnection c17(formantFilter3, 0, mixFormants, 3);
 
 AudioConnection c11(mixFormants, 0, audioOutput, 0);
 
@@ -167,6 +180,58 @@ void setup()
 {
 
   Serial.begin(57600);
+  
+    //___________________________________________________________________________________
+  // Audio connections require memory to work.  For more
+  // detailed information, see the MemoryAndCpuUsage example
+  //delay(3000);
+
+	pinMode(Test1_PIN,INPUT_PULLUP);
+	pinMode(Test0_PIN,INPUT_PULLUP);
+
+	// It doesn't work properly with any less than 8
+	
+	AudioMemory(15);
+	
+	audioShield.enable();
+	
+	audioShield.inputSelect(myInput);
+	audioShield.volume(90);
+	
+	
+	
+	mixFormants.gain(0, 0.0001);
+	mixFormants.gain(1, 0.5);
+	mixFormants.gain(2, 0.5);
+	mixFormants.gain(3, 0.5);
+	
+	delayVolume = 3;
+	
+	mixSources.gain(0, delayVolume);
+	mixSources.gain(1, 0.1);
+	mixSources.gain(2, 0.1);
+	mixSources.gain(3, 0.1);
+	
+	setSopranO();
+	
+	osc1.set_ramp_length(88);
+	osc2.set_ramp_length(88);
+	osc3.set_ramp_length(88);
+	
+	osc1.amplitude(0);
+	osc2.amplitude(0);
+	osc3.amplitude(0);
+		
+	setToneVolSeq();
+	setDelayStateSeq();
+	setFormantSeq();
+	setToneSeq();
+	
+	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
+	
+	Serial.println("audio setup done");
 
   //___________________________________________________________________________________
   //Ultrasonic aka  RF
@@ -204,59 +269,6 @@ void setup()
     wallDist = 400;
   }
 
-
-  //___________________________________________________________________________________
-  // Audio connections require memory to work.  For more
-  // detailed information, see the MemoryAndCpuUsage example
-  delay(3000);
-
-	pinMode(Test1_PIN,INPUT_PULLUP);
-	pinMode(Test0_PIN,INPUT_PULLUP);
-
-	// It doesn't work properly with any less than 8
-	AudioMemory(12);
-
-	audioShield.enable();
-	audioShield.inputSelect(myInput);
-	audioShield.volume(90);
-	
-	mixFormants.gain(0, 0.0001);
-	mixFormants.gain(1, 0.4);
-	mixFormants.gain(2, 0.4);
-	mixFormants.gain(3, 0.4);
-	
-	delayVolume = 2;
-	
-	mixSources.gain(0, delayVolume);
-	mixSources.gain(1, 0.1);
-	mixSources.gain(2, 0.1);
-	mixSources.gain(3, 0.1);
-	
-	setSopranA();
-	
-	osc1.set_ramp_length(88);
-	osc2.set_ramp_length(88);
-	osc3.set_ramp_length(88);
-	
-	masterFormantSeq.push_back(formantSeq1);
-	masterFormantSeq.push_back(formantSeq2);
-	masterToneSeq.push_back(toneSeq1_1);
-	masterToneSeq.push_back(toneSeq1_2);
-	masterToneSeq.push_back(toneSeq1_3);
-	masterToneSeq.push_back(toneSeq2_1);
-	masterToneSeq.push_back(toneSeq2_2);
-	masterToneSeq.push_back(toneSeq2_3);
-	masterDelayStateSeq.push_back(delayStateSeq1);
-	masterDelayStateSeq.push_back(delayStateSeq2);
-	masterToneVolSeq.push_back(toneVolumeSeq1);
-	masterToneVolSeq.push_back(toneVolumeSeq2);
-	
-	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
-	
-	Serial.println("audio setup done");
-
   //___________________________________________________________________________________
   //RF24
 
@@ -290,7 +302,6 @@ void setup()
   //LIGHT
 
   pinMode(led, OUTPUT);
-
 }
 
 //___________________________________________________________
@@ -308,8 +319,9 @@ Metro TimingMetro = Metro(MOD_RATE);
 // audio volume
 int mainVolume = 0;
 int oldValue = 0;
+
 int actFromSeq = 0;
-int activeToneSeq = 0;
+int actToneSeq = 3;
 int actDelStateSeq = 0;
 int actOscVolSeq = 0;
 
@@ -371,89 +383,89 @@ void loop() {
 	}
 	
 	if (TimingMetro.check() == 1) {
-		
+	
 		// formant filter sequence
-		if (masterFormantSeq[actFromSeq].seqCounter < masterFormantSeq[actFromSeq].seqLength)
+		if (masterFormantSeq[actFromSeq]->seqCounter < masterFormantSeq[actFromSeq]->seqLength)
 		{		
-			masterFormantSeq[actFromSeq].seqProceed();
+			masterFormantSeq[actFromSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterFormantSeq[actFromSeq].loop == true)
+			if (masterFormantSeq[actFromSeq]->loop == true)
 			{
-				masterFormantSeq[actFromSeq].reset();
-				masterFormantSeq[actFromSeq].seqProceed();
+				masterFormantSeq[actFromSeq]->reset();
+				masterFormantSeq[actFromSeq]->seqProceed();
 			}			
 		}
 				
 		// osc1 sequence
-		if (masterToneSeq[activeToneSeq].seqCounter < masterToneSeq[activeToneSeq].seqLength)
+		if (masterToneSeq[actToneSeq]->seqCounter < masterToneSeq[actToneSeq]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq].seqProceed();
+			masterToneSeq[actToneSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq].loop == true)
+			if (masterToneSeq[actToneSeq]->loop == true)
 			{
-				masterToneSeq[activeToneSeq].reset();
-				masterToneSeq[activeToneSeq].seqProceed();
+				masterToneSeq[actToneSeq]->reset();
+				masterToneSeq[actToneSeq]->seqProceed();
 			}			
 		}
 		
 		// osc2 sequence
-		if (masterToneSeq[activeToneSeq+1].seqCounter < masterToneSeq[activeToneSeq+1].seqLength)
+		if (masterToneSeq[actToneSeq+1]->seqCounter < masterToneSeq[actToneSeq+1]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq+1].seqProceed();
+			masterToneSeq[actToneSeq+1]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq+1].loop == true)
+			if (masterToneSeq[actToneSeq+1]->loop == true)
 			{
-				masterToneSeq[activeToneSeq+1].reset();
-				masterToneSeq[activeToneSeq+1].seqProceed();
+				masterToneSeq[actToneSeq+1]->reset();
+				masterToneSeq[actToneSeq+1]->seqProceed();
 			}			
 		}
 		
 		// osc3 sequence
-		if (masterToneSeq[activeToneSeq+2].seqCounter < masterToneSeq[activeToneSeq+2].seqLength)
+		if (masterToneSeq[actToneSeq+2]->seqCounter < masterToneSeq[actToneSeq+2]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq+2].seqProceed();
+			masterToneSeq[actToneSeq+2]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq+2].loop == true)
+			if (masterToneSeq[actToneSeq+2]->loop == true)
 			{
-				masterToneSeq[activeToneSeq+2].reset();
-				masterToneSeq[activeToneSeq+2].seqProceed();
+				masterToneSeq[actToneSeq+2]->reset();
+				masterToneSeq[actToneSeq+2]->seqProceed();
 			}			
 		}
 		
 		// delay state sequence
-		if (masterDelayStateSeq[actDelStateSeq].seqCounter < masterDelayStateSeq[actDelStateSeq].seqLength)
+		if (masterDelayStateSeq[actDelStateSeq]->seqCounter < masterDelayStateSeq[actDelStateSeq]->seqLength)
 		{	
-			masterDelayStateSeq[actDelStateSeq].seqProceed();
+			masterDelayStateSeq[actDelStateSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterDelayStateSeq[actDelStateSeq].loop == true)
+			if (masterDelayStateSeq[actDelStateSeq]->loop == true)
 			{
-				masterDelayStateSeq[actDelStateSeq].reset();
-				masterDelayStateSeq[actDelStateSeq].seqProceed();
+				masterDelayStateSeq[actDelStateSeq]->reset();
+				masterDelayStateSeq[actDelStateSeq]->seqProceed();
 			}			
 		}
 		
 		
 		// tone volume sequence
-		if (masterToneVolSeq[actOscVolSeq].seqCounter < masterToneVolSeq[actOscVolSeq].seqLength)
+		if (masterToneVolSeq[actOscVolSeq]->seqCounter < masterToneVolSeq[actOscVolSeq]->seqLength)
 		{	
-			masterToneVolSeq[actOscVolSeq].seqProceed();
+			masterToneVolSeq[actOscVolSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterToneVolSeq[actOscVolSeq].loop == true)
+			if (masterToneVolSeq[actOscVolSeq]->loop == true)
 			{
-				masterToneVolSeq[actOscVolSeq].reset();
-				masterToneVolSeq[actOscVolSeq].seqProceed();
+				masterToneVolSeq[actOscVolSeq]->reset();
+				masterToneVolSeq[actOscVolSeq]->seqProceed();
 			}			
 		}
 
@@ -477,12 +489,12 @@ void loop() {
 
 	// if pin0 is grounded
 	if(b_test0.fallingEdge()) {
-		//staticDelay.hold(false);	
+		staticDelay.hold(true);	
 		//actFromSeq = 1;
 	}
 	// if pin 0 is open
 	if(b_test0.risingEdge()) {
-		//staticDelay.hold(true);	
+		staticDelay.hold(false);	
 		//actFromSeq = 0;
 	}
 

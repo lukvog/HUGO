@@ -95,18 +95,18 @@ void setup() {
 	osc2.set_ramp_length(88);
 	osc3.set_ramp_length(88);
 	
-	masterFormantSeq.push_back(formantSeq1);
-	masterFormantSeq.push_back(formantSeq2);
-	masterToneSeq.push_back(toneSeq1_1);
-	masterToneSeq.push_back(toneSeq1_2);
-	masterToneSeq.push_back(toneSeq1_3);
-	masterToneSeq.push_back(toneSeq2_1);
-	masterToneSeq.push_back(toneSeq2_2);
-	masterToneSeq.push_back(toneSeq2_3);
-	masterDelayStateSeq.push_back(delayStateSeq1);
-	masterDelayStateSeq.push_back(delayStateSeq2);
-	masterToneVolSeq.push_back(toneVolumeSeq1);
-	masterToneVolSeq.push_back(toneVolumeSeq2);
+	masterFormantSeq.push_back(&formantSeq1);
+	masterFormantSeq.push_back(&formantSeq2);
+	masterToneSeq.push_back(&toneSeq1_1);
+	masterToneSeq.push_back(&toneSeq1_2);
+	masterToneSeq.push_back(&toneSeq1_3);
+	masterToneSeq.push_back(&toneSeq2_1);
+	masterToneSeq.push_back(&toneSeq2_2);
+	masterToneSeq.push_back(&toneSeq2_3);
+	masterDelayStateSeq.push_back(&delayStateSeq1);
+	masterDelayStateSeq.push_back(&delayStateSeq2);
+	masterToneVolSeq.push_back(&toneVolumeSeq1);
+	masterToneVolSeq.push_back(&toneVolumeSeq2);
 	
 	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
 	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
@@ -158,87 +158,87 @@ void loop()
 	if (TimingMetro.check() == 1) {
 		
 		// formant filter sequence
-		if (masterFormantSeq[actFromSeq].seqCounter < masterFormantSeq[actFromSeq].seqLength)
+		if (masterFormantSeq[actFromSeq]->seqCounter < masterFormantSeq[actFromSeq]->seqLength)
 		{		
-			masterFormantSeq[actFromSeq].seqProceed();
+			masterFormantSeq[actFromSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterFormantSeq[actFromSeq].loop == true)
+			if (masterFormantSeq[actFromSeq]->loop == true)
 			{
-				masterFormantSeq[actFromSeq].reset();
-				masterFormantSeq[actFromSeq].seqProceed();
+				masterFormantSeq[actFromSeq]->reset();
+				masterFormantSeq[actFromSeq]->seqProceed();
 			}			
 		}
 				
 		// osc1 sequence
-		if (masterToneSeq[activeToneSeq].seqCounter < masterToneSeq[activeToneSeq].seqLength)
+		if (masterToneSeq[activeToneSeq]->seqCounter < masterToneSeq[activeToneSeq]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq].seqProceed();
+			masterToneSeq[activeToneSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq].loop == true)
+			if (masterToneSeq[activeToneSeq]->loop == true)
 			{
-				masterToneSeq[activeToneSeq].reset();
-				masterToneSeq[activeToneSeq].seqProceed();
+				masterToneSeq[activeToneSeq]->reset();
+				masterToneSeq[activeToneSeq]->seqProceed();
 			}			
 		}
 		
 		// osc2 sequence
-		if (masterToneSeq[activeToneSeq+1].seqCounter < masterToneSeq[activeToneSeq+1].seqLength)
+		if (masterToneSeq[activeToneSeq+1]->seqCounter < masterToneSeq[activeToneSeq+1]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq+1].seqProceed();
+			masterToneSeq[activeToneSeq+1]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq+1].loop == true)
+			if (masterToneSeq[activeToneSeq+1]->loop == true)
 			{
-				masterToneSeq[activeToneSeq+1].reset();
-				masterToneSeq[activeToneSeq+1].seqProceed();
+				masterToneSeq[activeToneSeq+1]->reset();
+				masterToneSeq[activeToneSeq+1]->seqProceed();
 			}			
 		}
 		
 		// osc3 sequence
-		if (masterToneSeq[activeToneSeq+2].seqCounter < masterToneSeq[activeToneSeq+2].seqLength)
+		if (masterToneSeq[activeToneSeq+2]->seqCounter < masterToneSeq[activeToneSeq+2]->seqLength)
 		{			
-			masterToneSeq[activeToneSeq+2].seqProceed();
+			masterToneSeq[activeToneSeq+2]->seqProceed();
 		}
 		else
 		{
-			if (masterToneSeq[activeToneSeq+2].loop == true)
+			if (masterToneSeq[activeToneSeq+2]->loop == true)
 			{
-				masterToneSeq[activeToneSeq+2].reset();
-				masterToneSeq[activeToneSeq+2].seqProceed();
+				masterToneSeq[activeToneSeq+2]->reset();
+				masterToneSeq[activeToneSeq+2]->seqProceed();
 			}			
 		}
 		
 		// delay state sequence
-		if (masterDelayStateSeq[actDelStateSeq].seqCounter < masterDelayStateSeq[actDelStateSeq].seqLength)
+		if (masterDelayStateSeq[actDelStateSeq]->seqCounter < masterDelayStateSeq[actDelStateSeq]->seqLength)
 		{	
-			masterDelayStateSeq[actDelStateSeq].seqProceed();
+			masterDelayStateSeq[actDelStateSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterDelayStateSeq[actDelStateSeq].loop == true)
+			if (masterDelayStateSeq[actDelStateSeq]->loop == true)
 			{
-				masterDelayStateSeq[actDelStateSeq].reset();
-				masterDelayStateSeq[actDelStateSeq].seqProceed();
+				masterDelayStateSeq[actDelStateSeq]->reset();
+				masterDelayStateSeq[actDelStateSeq]->seqProceed();
 			}			
 		}
 		
 		
 		// tone volume sequence
-		if (masterToneVolSeq[actOscVolSeq].seqCounter < masterToneVolSeq[actOscVolSeq].seqLength)
+		if (masterToneVolSeq[actOscVolSeq]->seqCounter < masterToneVolSeq[actOscVolSeq]->seqLength)
 		{	
-			masterToneVolSeq[actOscVolSeq].seqProceed();
+			masterToneVolSeq[actOscVolSeq]->seqProceed();
 		}
 		else
 		{
-			if (masterToneVolSeq[actOscVolSeq].loop == true)
+			if (masterToneVolSeq[actOscVolSeq]->loop == true)
 			{
-				masterToneVolSeq[actOscVolSeq].reset();
-				masterToneVolSeq[actOscVolSeq].seqProceed();
+				masterToneVolSeq[actOscVolSeq]->reset();
+				masterToneVolSeq[actOscVolSeq]->seqProceed();
 			}			
 		}
 
