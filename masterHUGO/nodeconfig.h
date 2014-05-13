@@ -12,4 +12,8 @@
 uint8_t nodeconfig_read(void);
 void nodeconfig_listen(void);
 
+// What are the actual node values that we want to use?
+// EEPROM locations are actually just indices into this array
+const uint16_t node_address_set[10] = { 00, 02, 05, 012, 015, 022, 025, 032, 035, 045 };
+
 #endif // __NODECONFIG_H__

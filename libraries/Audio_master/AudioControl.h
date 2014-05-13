@@ -40,8 +40,8 @@ class AudioControl
 public:
 	virtual bool enable(void) = 0;
 	virtual bool disable(void) = 0;
-	virtual bool volume(float volume) = 0;      // volume 0.0 to 100.0
-	virtual bool inputLevel(float volume) = 0;  // volume 0.0 to 100.0
+	virtual bool volume(float volume) = 0;      // volume 0.0 to 1.0
+	virtual bool inputLevel(float volume) = 0;  // volume 0.0 to 1.0
 	virtual bool inputSelect(int n) = 0;
 };
 

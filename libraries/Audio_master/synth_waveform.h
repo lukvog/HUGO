@@ -30,6 +30,10 @@
 #include "AudioStream.h"
 #include "arm_math.h"
 
+// waveforms.c
+extern "C" {
+extern const int16_t AudioWaveformSine[257];
+}
 
 #define AUDIO_SAMPLE_RATE_ROUNDED (44118)
 
@@ -51,9 +55,10 @@ public:
   { 
   }
   
-  void frequency(int t_hi)
+  void frequency(float t_hi)
   {
-    tone_incr = (0x80000000LL*t_hi)/AUDIO_SAMPLE_RATE_EXACT;
+    if (t_hi > AUDIO_SAMPLE_RATE_EXACT / 2 || t_hi < 0.0) return;
+    tone_incr = ((0x80000000LL*t_hi)/AUDIO_SAMPLE_RATE_EXACT) + 0.5;
   }
   
   // If ramp_length is non-zero this will set up
@@ -85,7 +90,7 @@ public:
     tone_amp = n * 32767.0;
   }
   
-  boolean begin(float t_amp,int t_hi,short t_type);
+  boolean begin(float t_amp,float t_hi,short t_type);
   virtual void update(void);
   void set_ramp_length(int16_t r_length);
   
@@ -102,4 +107,7 @@ private:
   uint32_t ramp_up;
   uint16_t ramp_length;
 };
+
+
+
 #endif

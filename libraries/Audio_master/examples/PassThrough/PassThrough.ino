@@ -32,7 +32,7 @@ void setup() {
   // Enable the audio shield and set the output volume.
   audioShield.enable();
   audioShield.inputSelect(myInput);
-  audioShield.volume(60);
+  audioShield.volume(0.6);
 }
 
 elapsedMillis volmsec=0;
@@ -41,7 +41,7 @@ void loop() {
   // every 50 ms, adjust the volume
   if (volmsec > 50) {
     float vol = analogRead(15);
-    vol = vol / 10.24;
+    vol = vol / 1023.0;
     audioShield.volume(vol);
     volmsec = 0;
   }

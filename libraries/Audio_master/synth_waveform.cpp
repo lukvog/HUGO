@@ -30,8 +30,13 @@
 
 
 /******************************************************************/
+// PAH 140415 - change sin to use Paul's interpolation which is much
+//				faster than arm's sin function
+// PAH 140316 - fix calculation of sample (amplitude error)
+// PAH 140314 - change t_hi from int to float
 // PAH - add ramp-up and ramp-down to the onset of the wave
 // the length is specified in samples
+
 void AudioSynthWaveform::set_ramp_length(int16_t r_length)
 {
   if(r_length < 0) {
@@ -47,17 +52,15 @@ void AudioSynthWaveform::set_ramp_length(int16_t r_length)
 }
 
 
-boolean AudioSynthWaveform::begin(float t_amp,int t_hi,short type)
+boolean AudioSynthWaveform::begin(float t_amp,float t_hi,short type)
 {
   tone_type = type;
-//  tone_amp = t_amp;
   amplitude(t_amp);
-  tone_freq = t_hi;
-  if(t_hi < 1)return false;
+  tone_freq = t_hi > 0.0;
+  if(t_hi <= 0.0)return false;
   if(t_hi >= AUDIO_SAMPLE_RATE_EXACT/2)return false;
   tone_phase = 0;
-//  tone_incr = (0x100000000LL*t_hi)/AUDIO_SAMPLE_RATE_EXACT;
-  tone_incr = (0x80000000LL*t_hi)/AUDIO_SAMPLE_RATE_EXACT;
+  frequency(t_hi);
   if(0) {
     Serial.print("AudioSynthWaveform.begin(tone_amp = ");
     Serial.print(t_amp);
@@ -72,8 +75,6 @@ boolean AudioSynthWaveform::begin(float t_amp,int t_hi,short type)
   return(true);
 }
 
-// PAH - 140313 fixed the calculation of the tone so that its spectrum
-//              is much improved
 // PAH - 140313 fixed a problem with ramping
 void AudioSynthWaveform::update(void)
 {
@@ -81,10 +82,12 @@ void AudioSynthWaveform::update(void)
   short *bp;
   // temporary for ramp in sine
   uint32_t ramp_mag;
+  int32_t val1, val2, val3;
+  uint32_t index, scale;
+  
   // temporaries for TRIANGLE
   uint32_t mag;
   short tmp_amp;
-
   
   if(tone_freq == 0)return;
   //          L E F T  C H A N N E L  O N L Y
@@ -94,6 +97,14 @@ void AudioSynthWaveform::update(void)
     switch(tone_type) {
     case TONE_TYPE_SINE:
       for(int i = 0;i < AUDIO_BLOCK_SAMPLES;i++) {
+      	// Calculate interpolated sin
+		index = tone_phase >> 23;
+		val1 = AudioWaveformSine[index];
+		val2 = AudioWaveformSine[index+1];
+		scale = (tone_phase >> 7) & 0xFFFF;
+		val2 *= scale;
+		val1 *= 0xFFFF - scale;
+		val3 = (val1 + val2) >> 16;
         // The value of ramp_up is always initialized to RAMP_LENGTH and then is
         // decremented each time through here until it reaches zero.
         // The value of ramp_up is used to generate a Q15 fraction which varies
@@ -106,8 +117,8 @@ void AudioSynthWaveform::update(void)
           ramp_up--;
           // adjust tone_phase to Q15 format and then adjust the result
           // of the multiplication
-      	// calculate the sample
-          tmp_amp = (short)((arm_sin_q15(tone_phase>>16) * tone_amp) >> 17);
+      	  // calculate the sample
+          tmp_amp = (short)((val3 * tone_amp) >> 15);
           *bp++ = (tmp_amp * ramp_mag)>>15;
         } 
         else if(ramp_down) {
@@ -120,15 +131,10 @@ void AudioSynthWaveform::update(void)
           // cannot represent +1
           ramp_mag = ((ramp_down - 1)<<15)/ramp_length;
           ramp_down--;
-          // adjust tone_phase to Q15 format and then adjust the result
-          // of the multiplication
-          tmp_amp = (short)((arm_sin_q15(tone_phase>>16) * last_tone_amp) >> 17);
+		  tmp_amp = (short)((val3 * last_tone_amp) >> 15);
           *bp++ = (tmp_amp * ramp_mag)>>15;
         } else {
-          // adjust tone_phase to Q15 format and then adjust the result
-          // of the multiplication
-          tmp_amp = (short)((arm_sin_q15(tone_phase>>16) * tone_amp) >> 17);
-          *bp++ = tmp_amp;
+		  *bp++ = (short)((val3 * tone_amp) >> 15);
         } 
         
         // phase and incr are both unsigned 32-bit fractions
@@ -140,7 +146,7 @@ void AudioSynthWaveform::update(void)
       
     case TONE_TYPE_SQUARE:
       for(int i = 0;i < AUDIO_BLOCK_SAMPLES;i++) {
-        if(tone_phase & 0x80000000)*bp++ = -tone_amp;
+        if(tone_phase & 0x40000000)*bp++ = -tone_amp;
         else *bp++ = tone_amp;
         // phase and incr are both unsigned 32-bit fractions
         tone_phase += tone_incr;
@@ -149,10 +155,9 @@ void AudioSynthWaveform::update(void)
       
     case TONE_TYPE_SAWTOOTH:
       for(int i = 0;i < AUDIO_BLOCK_SAMPLES;i++) {
-        *bp = ((short)(tone_phase>>16)*tone_amp) >> 15;
-        bp++;
+        *bp++ = ((short)(tone_phase>>15)*tone_amp) >> 15;
         // phase and incr are both unsigned 32-bit fractions
-        tone_phase += tone_incr;
+        tone_phase += tone_incr;    
       }
       break;
 
@@ -173,7 +178,7 @@ void AudioSynthWaveform::update(void)
           mag = ~mag + 1;
         }
         *bp++ = ((short)(mag>>17)*tmp_amp) >> 15;
-        tone_phase += tone_incr;
+        tone_phase += 2*tone_incr;
       }
       break;
     }
@@ -182,3 +187,7 @@ void AudioSynthWaveform::update(void)
     release(block);
   }
 }
+
+
+
+

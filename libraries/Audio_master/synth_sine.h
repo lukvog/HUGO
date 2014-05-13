@@ -24,41 +24,43 @@
  * THE SOFTWARE.
  */
 
-#ifndef _input_i2s_h_
-#define _input_i2s_h_
+#ifndef synth_sine_h_
+#define synth_sine_h_
 
-#include "AudioStream.h"
-#include "utility/dma_chan.h"
-
-#ifdef __MK20DX128__
-#define AUDIO_IN_I2S_DMA_CHANNEL 1
-#else
-#define AUDIO_IN_I2S_DMA_CHANNEL 5
-#endif
-
-class AudioInputI2S : public AudioStream
+class AudioSynthWaveformSine : public AudioStream
 {
 public:
-	AudioInputI2S(void) : AudioStream(0, NULL) { begin(); }
+	AudioSynthWaveformSine() : AudioStream(0, NULL), magnitude(16384) {}
+	void frequency(float freq);
+	void amplitude(float n) {
+		if (n < 0) n = 0;
+		else if (n > 1.0) n = 1.0;
+		magnitude = n * 65536.0;
+	}
 	virtual void update(void);
-	void begin(void);
-	friend void DMA_ISR(AUDIO_IN_I2S_DMA_CHANNEL)(void);
-protected:	
-	AudioInputI2S(int dummy): AudioStream(0, NULL) {} // to be used only inside AudioInputI2Sslave !!
-	static bool update_responsibility;
 private:
-	static audio_block_t *block_left;
-	static audio_block_t *block_right;
-	static uint16_t block_offset;
+	uint32_t phase;
+	uint32_t phase_increment;
+	int32_t magnitude;
 };
 
-
-class AudioInputI2Sslave : public AudioInputI2S
+class AudioSynthWaveformSineModulated : public AudioStream
 {
 public:
-	AudioInputI2Sslave(void) : AudioInputI2S(0) { begin(); }
-	void begin(void);
-	friend void dma_ch1_isr(void);
+	AudioSynthWaveformSineModulated() : AudioStream(1, inputQueueArray), magnitude(16384) {}
+	void frequency(float freq);
+	void amplitude(float n) {
+		if (n < 0) n = 0;
+		else if (n > 1.0) n = 1.0;
+		magnitude = n * 65536.0;
+	}
+	virtual void update(void);
+private:
+	uint32_t phase;
+	uint32_t phase_increment;
+	audio_block_t *inputQueueArray[1];
+	int32_t magnitude;
 };
+
 
 #endif
