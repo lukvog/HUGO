@@ -150,16 +150,19 @@ int fadeAmount = 1;    // how many points to fade the LED by
 
 //_________________________________________________________________________________
 //////////////////////
-//Ultrasonic aka IR
-
-
-//Ultrasonic ultrasonic(21);
-int irPin = 21;
+//IR
 
 int changed;
 int wallDist;
-int range;
+float irVal;
+int irPin = 21;
 
+//smoothing
+const int numReadings = 10;
+int readings[numReadings];      // the readings from the analog input
+int indx = 0;                  // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;                // the average
 
 
 //___________________________________________________________________________________
@@ -169,7 +172,7 @@ void setup()
   Serial.begin(57600);
 
   //___________________________________________________________________________________
-  //Ultrasonic aka  RF
+  //RF
 
   //calibration for Walls
 
@@ -177,17 +180,24 @@ void setup()
   int count = 0;
   int sum = 0;
 
+  for (int thisReading = 0; thisReading < numReadings; thisReading++)
+    readings[thisReading] = 0; 
+
   for(int i=0; i < 100; i++){
-    range = analogRead(21);
-    if (range != 0 && range <= 400)
+    irVal = analogRead(irPin);
+    // Linearize Sharp GP2YOA1YK
+    float irDist = 11.0e8 * pow(irVal, -2.438);
+
+    if (irDist >= 100 && irDist <= 550)  
     {
-      wall[count] = range;
-      //Serial.print(count);
-      //Serial.print("range: ");
-      //Serial.println(range, DEC);
+
+      wall[count] = irDist;
+      Serial.print(count);
+      Serial.print("range: ");
+      Serial.println(irDist, DEC);
       count++;
     }
-    delay(60);
+    delay(50);
   };
 
   //Serial.println(count);
@@ -198,10 +208,11 @@ void setup()
 
   //Serial.println(sum);
 
-  wallDist = (sum/count) - 15;
-  if (wallDist < 5)
+  wallDist = (sum/count) - 30;
+
+  if (wallDist < 50)
   {
-    wallDist = 400;
+    wallDist = 550;
   }
 
 
@@ -210,52 +221,52 @@ void setup()
   // detailed information, see the MemoryAndCpuUsage example
   delay(3000);
 
-	pinMode(Test1_PIN,INPUT_PULLUP);
-	pinMode(Test0_PIN,INPUT_PULLUP);
+  pinMode(Test1_PIN,INPUT_PULLUP);
+  pinMode(Test0_PIN,INPUT_PULLUP);
 
-	// It doesn't work properly with any less than 8
-	AudioMemory(12);
+  // It doesn't work properly with any less than 8
+  AudioMemory(12);
 
-	audioShield.enable();
-	audioShield.inputSelect(myInput);
-	audioShield.volume(90);
-	
-	mixFormants.gain(0, 0.0001);
-	mixFormants.gain(1, 0.4);
-	mixFormants.gain(2, 0.4);
-	mixFormants.gain(3, 0.4);
-	
-	delayVolume = 2;
-	
-	mixSources.gain(0, delayVolume);
-	mixSources.gain(1, 0.1);
-	mixSources.gain(2, 0.1);
-	mixSources.gain(3, 0.1);
-	
-	setSopranA();
-	
-	osc1.set_ramp_length(88);
-	osc2.set_ramp_length(88);
-	osc3.set_ramp_length(88);
-	
-	masterFormantSeq.push_back(formantSeq1);
-	masterFormantSeq.push_back(formantSeq2);
-	masterToneSeq.push_back(toneSeq1_1);
-	masterToneSeq.push_back(toneSeq1_2);
-	masterToneSeq.push_back(toneSeq1_3);
-	masterToneSeq.push_back(toneSeq2_1);
-	masterToneSeq.push_back(toneSeq2_2);
-	masterToneSeq.push_back(toneSeq2_3);
-	masterDelayStateSeq.push_back(delayStateSeq1);
-	masterDelayStateSeq.push_back(delayStateSeq2);
-	masterToneVolSeq.push_back(toneVolumeSeq1);
-	masterToneVolSeq.push_back(toneVolumeSeq2);
-	
-	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
-	
-	Serial.println("audio setup done");
+  audioShield.enable();
+  audioShield.inputSelect(myInput);
+  audioShield.volume(90);
+
+  mixFormants.gain(0, 0.0001);
+  mixFormants.gain(1, 0.4);
+  mixFormants.gain(2, 0.4);
+  mixFormants.gain(3, 0.4);
+
+  delayVolume = 2;
+
+  mixSources.gain(0, delayVolume);
+  mixSources.gain(1, 0.1);
+  mixSources.gain(2, 0.1);
+  mixSources.gain(3, 0.1);
+
+  setSopranA();
+
+  osc1.set_ramp_length(88);
+  osc2.set_ramp_length(88);
+  osc3.set_ramp_length(88);
+
+  masterFormantSeq.push_back(formantSeq1);
+  masterFormantSeq.push_back(formantSeq2);
+  masterToneSeq.push_back(toneSeq1_1);
+  masterToneSeq.push_back(toneSeq1_2);
+  masterToneSeq.push_back(toneSeq1_3);
+  masterToneSeq.push_back(toneSeq2_1);
+  masterToneSeq.push_back(toneSeq2_2);
+  masterToneSeq.push_back(toneSeq2_3);
+  masterDelayStateSeq.push_back(delayStateSeq1);
+  masterDelayStateSeq.push_back(delayStateSeq2);
+  masterToneVolSeq.push_back(toneVolumeSeq1);
+  masterToneVolSeq.push_back(toneVolumeSeq2);
+
+  // osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+  // osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+  // osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
+
+  Serial.println("audio setup done");
 
   //___________________________________________________________________________________
   //RF24
@@ -321,12 +332,35 @@ void loop() {
   //Ultrasonic
 
   if (SensMetro.check() == 1) {
-    range = analogRead(21);
 
-    if (range != 0 && range < wallDist)
+    irVal = analogRead(irPin);
+    // Linearize Sharp GP2YOA1YK
+    float irDist = 11.0e8 * pow(irVal, -2.438);
+
+    // subtract the last reading:
+    total= total - readings[indx];        
+    // read from the sensor:  
+    readings[indx] = irDist;
+    // add the reading to the total:
+    total= total + readings[indx];      
+    // advance to the next position in the array:  
+    indx = indx + 1;                    
+
+    // if we're at the end of the array...
+    if (indx >= numReadings)              
+      // ...wrap around to the beginning:
+      indx = 0;                          
+
+    // calculate the average:
+    average = total / numReadings; 
+
+    Serial.println(irDist, DEC);
+
+    if (average >= 50 && average <= wallDist)
     {
-      changed = range;
+      changed = average;
     }
+
   }
 
 
@@ -360,131 +394,131 @@ void loop() {
   // volume control
   // every 10 ms, check for adjustment
   // volume control
-  
-	// every 10 ms, check for adjustment
-	if (VolMetro.check() == 1) {
-		int n = analogRead(15);
-		if (n != mainVolume) {
-			mainVolume = n;
-			audioShield.volume((float)n / 10.23);
-		}
-	}
-	
-	if (TimingMetro.check() == 1) {
-		
-		// formant filter sequence
-		if (masterFormantSeq[actFromSeq].seqCounter < masterFormantSeq[actFromSeq].seqLength)
-		{		
-			masterFormantSeq[actFromSeq].seqProceed();
-		}
-		else
-		{
-			if (masterFormantSeq[actFromSeq].loop == true)
-			{
-				masterFormantSeq[actFromSeq].reset();
-				masterFormantSeq[actFromSeq].seqProceed();
-			}			
-		}
-				
-		// osc1 sequence
-		if (masterToneSeq[activeToneSeq].seqCounter < masterToneSeq[activeToneSeq].seqLength)
-		{			
-			masterToneSeq[activeToneSeq].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq].loop == true)
-			{
-				masterToneSeq[activeToneSeq].reset();
-				masterToneSeq[activeToneSeq].seqProceed();
-			}			
-		}
-		
-		// osc2 sequence
-		if (masterToneSeq[activeToneSeq+1].seqCounter < masterToneSeq[activeToneSeq+1].seqLength)
-		{			
-			masterToneSeq[activeToneSeq+1].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq+1].loop == true)
-			{
-				masterToneSeq[activeToneSeq+1].reset();
-				masterToneSeq[activeToneSeq+1].seqProceed();
-			}			
-		}
-		
-		// osc3 sequence
-		if (masterToneSeq[activeToneSeq+2].seqCounter < masterToneSeq[activeToneSeq+2].seqLength)
-		{			
-			masterToneSeq[activeToneSeq+2].seqProceed();
-		}
-		else
-		{
-			if (masterToneSeq[activeToneSeq+2].loop == true)
-			{
-				masterToneSeq[activeToneSeq+2].reset();
-				masterToneSeq[activeToneSeq+2].seqProceed();
-			}			
-		}
-		
-		// delay state sequence
-		if (masterDelayStateSeq[actDelStateSeq].seqCounter < masterDelayStateSeq[actDelStateSeq].seqLength)
-		{	
-			masterDelayStateSeq[actDelStateSeq].seqProceed();
-		}
-		else
-		{
-			if (masterDelayStateSeq[actDelStateSeq].loop == true)
-			{
-				masterDelayStateSeq[actDelStateSeq].reset();
-				masterDelayStateSeq[actDelStateSeq].seqProceed();
-			}			
-		}
-		
-		
-		// tone volume sequence
-		if (masterToneVolSeq[actOscVolSeq].seqCounter < masterToneVolSeq[actOscVolSeq].seqLength)
-		{	
-			masterToneVolSeq[actOscVolSeq].seqProceed();
-		}
-		else
-		{
-			if (masterToneVolSeq[actOscVolSeq].loop == true)
-			{
-				masterToneVolSeq[actOscVolSeq].reset();
-				masterToneVolSeq[actOscVolSeq].seqProceed();
-			}			
-		}
 
-		
-	}
-	
-	// update the two buttons
-	b_test0.update();
-	b_test1.update();
+  // every 10 ms, check for adjustment
+  if (VolMetro.check() == 1) {
+    int n = analogRead(15);
+    if (n != mainVolume) {
+      mainVolume = n;
+      audioShield.volume((float)n / 10.23);
+    }
+  }
+
+  if (TimingMetro.check() == 1) {
+
+    // formant filter sequence
+    if (masterFormantSeq[actFromSeq].seqCounter < masterFormantSeq[actFromSeq].seqLength)
+    {		
+      masterFormantSeq[actFromSeq].seqProceed();
+    }
+    else
+    {
+      if (masterFormantSeq[actFromSeq].loop == true)
+      {
+        masterFormantSeq[actFromSeq].reset();
+        masterFormantSeq[actFromSeq].seqProceed();
+      }			
+    }
+
+    // osc1 sequence
+    if (masterToneSeq[activeToneSeq].seqCounter < masterToneSeq[activeToneSeq].seqLength)
+    {			
+      masterToneSeq[activeToneSeq].seqProceed();
+    }
+    else
+    {
+      if (masterToneSeq[activeToneSeq].loop == true)
+      {
+        masterToneSeq[activeToneSeq].reset();
+        masterToneSeq[activeToneSeq].seqProceed();
+      }			
+    }
+
+    // osc2 sequence
+    if (masterToneSeq[activeToneSeq+1].seqCounter < masterToneSeq[activeToneSeq+1].seqLength)
+    {			
+      masterToneSeq[activeToneSeq+1].seqProceed();
+    }
+    else
+    {
+      if (masterToneSeq[activeToneSeq+1].loop == true)
+      {
+        masterToneSeq[activeToneSeq+1].reset();
+        masterToneSeq[activeToneSeq+1].seqProceed();
+      }			
+    }
+
+    // osc3 sequence
+    if (masterToneSeq[activeToneSeq+2].seqCounter < masterToneSeq[activeToneSeq+2].seqLength)
+    {			
+      masterToneSeq[activeToneSeq+2].seqProceed();
+    }
+    else
+    {
+      if (masterToneSeq[activeToneSeq+2].loop == true)
+      {
+        masterToneSeq[activeToneSeq+2].reset();
+        masterToneSeq[activeToneSeq+2].seqProceed();
+      }			
+    }
+
+    // delay state sequence
+    if (masterDelayStateSeq[actDelStateSeq].seqCounter < masterDelayStateSeq[actDelStateSeq].seqLength)
+    {	
+      masterDelayStateSeq[actDelStateSeq].seqProceed();
+    }
+    else
+    {
+      if (masterDelayStateSeq[actDelStateSeq].loop == true)
+      {
+        masterDelayStateSeq[actDelStateSeq].reset();
+        masterDelayStateSeq[actDelStateSeq].seqProceed();
+      }			
+    }
 
 
-	// if pin1 is grounded
-	if(b_test1.fallingEdge()) {
-		//staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 32);
-	}
+    // tone volume sequence
+    if (masterToneVolSeq[actOscVolSeq].seqCounter < masterToneVolSeq[actOscVolSeq].seqLength)
+    {	
+      masterToneVolSeq[actOscVolSeq].seqProceed();
+    }
+    else
+    {
+      if (masterToneVolSeq[actOscVolSeq].loop == true)
+      {
+        masterToneVolSeq[actOscVolSeq].reset();
+        masterToneVolSeq[actOscVolSeq].seqProceed();
+      }			
+    }
 
-	// If pin1 is open
-	if(b_test1.risingEdge()) {
-		//staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 64);
-	}
 
-	// if pin0 is grounded
-	if(b_test0.fallingEdge()) {
-		//staticDelay.hold(false);	
-		//actFromSeq = 1;
-	}
-	// if pin 0 is open
-	if(b_test0.risingEdge()) {
-		//staticDelay.hold(true);	
-		//actFromSeq = 0;
-	}
+  }
+
+  // update the two buttons
+  b_test0.update();
+  b_test1.update();
+
+
+  // if pin1 is grounded
+  if(b_test1.fallingEdge()) {
+    //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 32);
+  }
+
+  // If pin1 is open
+  if(b_test1.risingEdge()) {
+    //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 64);
+  }
+
+  // if pin0 is grounded
+  if(b_test0.fallingEdge()) {
+    //staticDelay.hold(false);	
+    //actFromSeq = 1;
+  }
+  // if pin 0 is open
+  if(b_test0.risingEdge()) {
+    //staticDelay.hold(true);	
+    //actFromSeq = 0;
+  }
 
   //////////////////
   //Mem and CPU Usage
@@ -678,7 +712,7 @@ bool send_V(uint16_t to)
   RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
 
   // The 'V' message is a value message
-  unsigned int message = analogRead(15);
+  unsigned int message = changed;
   Serial.printf_P(PSTR("---------------------------------\n\r"));
   Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
   return network.write(header,&message,sizeof(unsigned int));
@@ -770,6 +804,7 @@ void add_node(uint16_t node)
 
 
 }
+
 
 
 
