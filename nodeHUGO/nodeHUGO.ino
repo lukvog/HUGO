@@ -737,7 +737,6 @@ void loop() {
  */
 void handle_S(RF24NetworkHeader& header)
 {
-  // The 'V' contains values
   int message;
   network.read(header,&message,sizeof(int));
   Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);

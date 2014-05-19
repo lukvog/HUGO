@@ -243,7 +243,7 @@ void loop() {
   
 	if (SeqMetro.check() == 1)
 	{
-		// LP filter sequence
+		// Seq Nr. sequence
 		if (masterNode1.SeqNr.seqCounter >= masterNode1.SeqNr.seqLength)
 		{
 			masterNode1.SeqNr.reset();
