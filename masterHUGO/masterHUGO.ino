@@ -241,7 +241,6 @@ void loop() {
   ////////////////////////////////
   //////////////////////////
   
-<<<<<<< HEAD
 	// if (SeqMetro.check() == 1)
 	// {
 		int time = millis();
@@ -383,22 +382,6 @@ void loop() {
 		Serial.print(timeDif);
 		Serial.print("\n");
 	//}
-=======
-	if (SeqMetro.check() == 1)
-	{
-		// Seq Nr. sequence
-		if (masterNode1.SeqNr.seqCounter >= masterNode1.SeqNr.seqLength)
-		{
-			masterNode1.SeqNr.reset();
-			masterNode1.SeqNr.seqProceed();	
-		}
-		else
-		{		
-			masterNode1.SeqNr.seqProceed();
-		}
-	
-	}
->>>>>>> adaeaebf9b3196a62391de178c98a4faa974971b
 
 
   // // Send a ping to the next node every 'interval' ms
