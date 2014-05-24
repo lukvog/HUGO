@@ -11,21 +11,21 @@
 #include <vector>
 
 //------------------------------------------------
-//------------------ Tone Volume -----------------
+//---------------------- Volume ------------------
 //------------------------------------------------
 
-int toneVolumeSeq1_raw[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000 };
-int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
+int volumeSeq1_raw[8] = { 0, 2000, -40, 1000, 0, 2000, -40, 1000 };
+int volumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
 
-ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
-ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
+VolumeSeq volumeSeq1(volumeSeq1_raw, 4);
+VolumeSeq volumeSeq2(volumeSeq2_raw, 2);
 
-std::vector<ToneVolumeSeq*> masterToneVolSeq;
+std::vector<VolumeSeq*> masterVolSeq;
 
 void setToneVolSeq()
 {
-	masterToneVolSeq.push_back(&toneVolumeSeq1);
-	masterToneVolSeq.push_back(&toneVolumeSeq2);
+	masterVolSeq.push_back(&volumeSeq1);
+	masterVolSeq.push_back(&volumeSeq2);
 }
 
 //------------------------------------------------
@@ -88,11 +88,13 @@ void setFormantSeq()
 //----------------- LowPass Filter ---------------
 //------------------------------------------------
 
-int LPSeq1_raw[12] = { 400, 1, 1000, 1000, 1, 1000, 200, 1, 1000, 6000, 1, 1000};
-int LPSeq2_raw[3] = { 700, 0, 1000};
+int LPSeq1_raw[8+1] = { 0, 400, 1000, 1000, 1000, 200, 1000, 6000, 1000};
+int LPSeq2_raw[2+1] = { 1, 700, 1000};
+int LPSeq3_raw[12+1] = {1,1000 , 750 , 1000 , 0 , 500 , 1050 , 500 , 2226 , 2000 , 0 , 100 , 1335 };
 
 LPFilterSequence LPSeq1(LPSeq1_raw, 4);
 LPFilterSequence LPSeq2(LPSeq2_raw, 1);
+LPFilterSequence LPSeq3(LPSeq3_raw, 6);
 
 std::vector<LPFilterSequence*> masterLPSeq;
 
@@ -100,6 +102,7 @@ void setLPSeq()
 {
 	masterLPSeq.push_back(&LPSeq1);
 	masterLPSeq.push_back(&LPSeq2);
+	masterLPSeq.push_back(&LPSeq3);
 }
 
 //------------------------------------------------

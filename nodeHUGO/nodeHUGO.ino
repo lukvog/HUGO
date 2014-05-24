@@ -81,6 +81,7 @@ AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
 AudioMixer4        mixFormants;
 AudioFilterBiquad	LowPass(LowPassFilter);
+AudioMixer4        outMix;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
@@ -88,11 +89,10 @@ AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 AudioConnection c15(audioInput, 0, staticDelay, 0);
 
-AudioConnection c5(staticDelay, 0, mixSources, 3);
-
 AudioConnection c2(osc1, 0, mixSources, 0);
 AudioConnection c3(osc2, 0, mixSources, 1);
 AudioConnection c4(osc3, 0, mixSources, 2);
+AudioConnection c5(staticDelay, 0, mixSources, 3);
 
 AudioConnection c6(mixSources, 0, formantFilter1, 0);
 AudioConnection c7(mixSources, 0, formantFilter2, 0);
@@ -103,7 +103,8 @@ AudioConnection c9(formantFilter1, 0, mixFormants, 1);
 AudioConnection c10(formantFilter2, 0, mixFormants, 2);
 AudioConnection c17(formantFilter3, 0, mixFormants, 3);
 AudioConnection c18(mixFormants, 0, LowPass, 0);
-AudioConnection c11(LowPass, 0, audioOutput, 0);
+AudioConnection c19(LowPass, 0, outMix, 0);
+AudioConnection c11(outMix, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
@@ -192,17 +193,19 @@ void setup()
 	audioShield.inputSelect(myInput);
 	audioShield.volume(0.7);	
 	
+	delayVolume = 2;
+	
+	mixSources.gain(0, 0.2);
+	mixSources.gain(1, 0.2);
+	mixSources.gain(2, 0.2);
+	mixSources.gain(3, delayVolume);
+	
 	mixFormants.gain(0, 0.5);
 	mixFormants.gain(1, 0.5);
 	mixFormants.gain(2, 0.5);
-	mixFormants.gain(3, 0.5);	
+	mixFormants.gain(3, 0.5);
 	
-	delayVolume = 2;
-	
-	mixSources.gain(0, 0.1);
-	mixSources.gain(1, 0.1);
-	mixSources.gain(2, 0.1);
-	mixSources.gain(3, delayVolume);
+	outMix.gain(0, 0.5);
 	
 	setSopranO();
 	
@@ -226,9 +229,9 @@ void setup()
 	setFormantSeq();
 	setToneSeq();
 	
-	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
+	osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+	osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+	osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
 	
 	Serial.println("audio setup done");
 
@@ -319,14 +322,14 @@ Metro TimingMetro = Metro(MOD_RATE);
 float mainVolume = 0;
 int oldValue = 0;
 
-int actLPSeq = 0;
+int actLPSeq = 2;
 int actFromSeq = 0;
 int actToneSeq = 3;
 int actDelStateSeq = 0;
 int actDelLoLeSeq = 0;
-int actOscVolSeq = 0;
+int actVolSeq = 0;
 
-bool seqReset = false;
+bool seqReset = true;
 
 
 
@@ -485,18 +488,18 @@ void loop() {
 			masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
 		}
 		
-		// tone volume sequence
-		if ((masterToneVolSeq[actOscVolSeq]->seqCounter >= masterToneVolSeq[actOscVolSeq]->seqLength) || seqReset)
+		// volume sequence
+		if ((masterVolSeq[actVolSeq]->seqCounter >= masterVolSeq[actVolSeq]->seqLength) || seqReset)
 		{
-			if ((masterToneVolSeq[actOscVolSeq]->loop == true) || seqReset)
+			if ((masterVolSeq[actVolSeq]->loop == true) || seqReset)
 			{
-				masterToneVolSeq[actOscVolSeq]->reset();
-				masterToneVolSeq[actOscVolSeq]->seqProceed();
+				masterVolSeq[actVolSeq]->reset();
+				masterVolSeq[actVolSeq]->seqProceed();
 			}			
 		}
 		else
 		{	
-			masterToneVolSeq[actOscVolSeq]->seqProceed();
+			masterVolSeq[actVolSeq]->seqProceed();
 		}
 	seqReset = false;
 	}
@@ -699,7 +702,6 @@ void loop() {
  */
 void handle_S(RF24NetworkHeader& header)
 {
-  // The 'V' contains values
   int message;
   network.read(header,&message,sizeof(int));
   Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);

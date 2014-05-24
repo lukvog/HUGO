@@ -19,24 +19,9 @@ public:
 		: nodeNr(_nodeNr),
 		seq(_seq),
 		pSeq(_seq),
-		seqLength(_seqLength)
-	{
-		switch(_paramNr)
-		{
-		case 0: type = 'S';
-				break;
-		case 1: type = 'F';
-				break;
-		case 2: type = 'G';
-				break;
-		case 3: type = 'H';
-				break;
-		case 4: type = 'I';
-				break;
-		default: Serial.print("paramNr not valid");
-				break;
-		}
-	}
+		seqLength(_seqLength),
+		header(/*to node*/ node_address_set[nodeNr], /*type*/ type[_paramNr] /*Time*/)
+	{}
 	~MasterSeq() {}
 	
 	void seqProceed()
@@ -44,10 +29,12 @@ public:
 		if (stepCounter == 0)
 		{	
 			int message = *pSeq++;
-			RF24NetworkHeader header(/*to node*/ node_address_set[nodeNr], /*type*/ type /*Time*/);
 			network.write(header,&message,sizeof(int));
-			Serial.printf_P(PSTR("%lu: APP Send Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
-			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			//Serial.printf_P(PSTR("%lu: APP Send Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
+			stepCounter = *pSeq++ * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 		}
 		else
 		{		
@@ -63,8 +50,21 @@ public:
 		seqCounter = 0;
 		stepCounter = 0;	
 	}
+	
+	void Process()
+	{
+		if (seqCounter >= seqLength)
+		{
+			reset();
+			seqProceed();	
+		}
+		else
+		{		
+			seqProceed();
+		}
+	}
+		
 	int nodeNr;
-	char type;
 	float speed = 1.0;
 	int stepCounter = 0;
 	int seqCounter = 0;
@@ -73,6 +73,9 @@ public:
 	int* pSeqNext;
 	int seqLength = 0;
 	bool loop = true;
+	char type[5] = {'S', 'F', 'G', 'H', 'I'};
+	
+	RF24NetworkHeader header;
 };
 
 struct MasterNode
@@ -96,14 +99,101 @@ struct MasterNode
 	MasterSeq Mod4;
 };
 
-int node1_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
-int node1_Mod1[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
-int node1_Mod2[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
-int node1_Mod3[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
-int node1_Mod4[8] = { 1, 1000, -10, 1000, 1, 1000, -40, 1000};
+int node1_seqNr[8] = { 1, 1, 2, 1, 3, 1, 4, 1};
+int node1_Mod1[2] = { 1, 10};
+int node1_Mod2[2] = { 1, 10};
+int node1_Mod3[2] = { 1, 10};
+int node1_Mod4[2] = { 1, 10};
 
-MasterNode masterNode1(1, node1_seqNr, 4, node1_Mod1, 4, node1_Mod2, 4, node1_Mod3, 4, node1_Mod4, 4);
+MasterNode MasterNode1(1, node1_seqNr, 4, node1_Mod1, 1, node1_Mod2, 1, node1_Mod3, 1, node1_Mod4, 1);
 
+int node2_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node2_Mod1[2] = { 1, 1000};
+int node2_Mod2[2] = { 1, 1000};
+int node2_Mod3[2] = { 1, 1000};
+int node2_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode2(2, node2_seqNr, 4, node2_Mod1, 1, node2_Mod2, 1, node2_Mod3, 1, node2_Mod4, 1);
+
+int node3_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node3_Mod1[2] = { 1, 1000};
+int node3_Mod2[2] = { 1, 1000};
+int node3_Mod3[2] = { 1, 1000};
+int node3_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode3(3, node3_seqNr, 4, node3_Mod1, 1, node3_Mod2, 1, node3_Mod3, 1, node3_Mod4, 1);
+
+int node4_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node4_Mod1[2] = { 1, 1000};
+int node4_Mod2[2] = { 1, 1000};
+int node4_Mod3[2] = { 1, 1000};
+int node4_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode4(4, node4_seqNr, 4, node4_Mod1, 1, node4_Mod2, 1, node4_Mod3, 1, node4_Mod4, 1);
+
+int node5_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node5_Mod1[2] = { 1, 1000};
+int node5_Mod2[2] = { 1, 1000};
+int node5_Mod3[2] = { 1, 1000};
+int node5_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode5(5, node5_seqNr, 4, node5_Mod1, 1, node5_Mod2, 1, node5_Mod3, 1, node5_Mod4, 1);
+
+int node6_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node6_Mod1[2] = { 1, 1000};
+int node6_Mod2[2] = { 1, 1000};
+int node6_Mod3[2] = { 1, 1000};
+int node6_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode6(6, node6_seqNr, 4, node6_Mod1, 1, node6_Mod2, 1, node6_Mod3, 1, node6_Mod4, 1);
+
+int node7_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node7_Mod1[2] = { 1, 1000};
+int node7_Mod2[2] = { 1, 1000};
+int node7_Mod3[2] = { 1, 1000};
+int node7_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode7(7, node7_seqNr, 4, node7_Mod1, 1, node7_Mod2, 1, node7_Mod3, 1, node7_Mod4, 1);
+
+int node8_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node8_Mod1[2] = { 1, 1000};
+int node8_Mod2[2] = { 1, 1000};
+int node8_Mod3[2] = { 1, 1000};
+int node8_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode8(8, node8_seqNr, 4, node8_Mod1, 1, node8_Mod2, 1, node8_Mod3, 1, node8_Mod4, 1);
+
+int node9_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node9_Mod1[2] = { 1, 1000};
+int node9_Mod2[2] = { 1, 1000};
+int node9_Mod3[2] = { 1, 1000};
+int node9_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode9(9, node9_seqNr, 4, node9_Mod1, 1, node9_Mod2, 1, node9_Mod3, 1, node9_Mod4, 1);
+
+int node10_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node10_Mod1[2] = { 1, 1000};
+int node10_Mod2[2] = { 1, 1000};
+int node10_Mod3[2] = { 1, 1000};
+int node10_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode10(10, node10_seqNr, 4, node10_Mod1, 1, node10_Mod2, 1, node10_Mod3, 1, node10_Mod4, 1);
+
+int node11_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node11_Mod1[2] = { 1, 1000};
+int node11_Mod2[2] = { 1, 1000};
+int node11_Mod3[2] = { 1, 1000};
+int node11_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode11(11, node11_seqNr, 4, node11_Mod1, 1, node11_Mod2, 1, node11_Mod3, 1, node11_Mod4, 1);
+
+int node12_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
+int node12_Mod1[2] = { 1, 1000};
+int node12_Mod2[2] = { 1, 1000};
+int node12_Mod3[2] = { 1, 1000};
+int node12_Mod4[2] = { 1, 1000};
+
+MasterNode MasterNode12(12, node12_seqNr, 4, node12_Mod1, 1, node12_Mod2, 1, node12_Mod3, 1, node12_Mod4, 1);
 
 
 #endif

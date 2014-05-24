@@ -11,61 +11,21 @@
 #include <vector>
 
 //------------------------------------------------
-//------------------ Tone Volume -----------------
+//----------------- Sequence Base ----------------
 //------------------------------------------------
 
-extern AudioMixer4 mixSources;
-
-class ToneVolumeSeq
+class Sequence
 {
 public:
-	ToneVolumeSeq(int* _seq, int _seqLength)
+	Sequence(int* _seq, int _seqLength)
 		:seq(_seq),
 		pSeq(_seq),
 		seqLength(_seqLength)
 	{}
-	~ToneVolumeSeq() {}
-	
-	void setInterpolation(float _nextGain_dB)
-	{
-		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
-	}
+	~Sequence() {}
 	
 	void seqProceed()
-	{
-		
-		if (stepCounter == 0)
-		{
-			gain_dB = *pSeq++ - 12;
-			float gain = pow(10.0, (float)gain_dB/20.0);
-			mixSources.gain(0, gain);
-			mixSources.gain(1, gain);
-			mixSources.gain(2, gain);
-			
-			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
-			
-			if(seqCounter+1 < seqLength)
-				pSeqNext = pSeq;
-			else
-				pSeqNext = seq;
-				
-			float nextGain_dB= *pSeqNext;
-			setInterpolation(nextGain_dB);
-
-		}
-		else
-		{
-			gain_dB = gain_dB + gain_dB_step;
-			float gain = pow(10, (float)gain_dB/20.0);
-			mixSources.gain(0, gain);
-			mixSources.gain(1, gain);
-			mixSources.gain(2, gain);
-			
-			stepCounter--;
-			if(stepCounter == 0)
-				seqCounter++;
-		}
-	}
+	{}
 	
 	void reset()
 	{
@@ -82,6 +42,79 @@ public:
 	int* pSeqNext;
 	int seqLength = 0;
 	bool loop = true;
+};
+
+
+
+
+//------------------------------------------------
+//------------------ Tone Volume -----------------
+//------------------------------------------------
+
+extern AudioMixer4 outMix;
+
+class VolumeSeq : public Sequence
+{
+public:
+	VolumeSeq(int* _seq, int _seqLength)
+		: Sequence(_seq, _seqLength)
+	{}
+	~VolumeSeq() {}
+	
+	void setInterpolation(float _nextGain_dB)
+	{
+		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
+	}
+	
+	void seqProceed()
+	{
+		
+		if (stepCounter == 0)
+		{
+			while(*(pSeq+1) == 0) // to handle delay length 0
+			{			
+				seqCounter++;			
+				if(seqCounter+1 < seqLength)
+					pSeq = pSeq + 2;
+				else
+					pSeq = seq;
+			}
+			
+			gain_dB = *pSeq++;			
+			float gain = pow(10.0, (float)gain_dB/20.0);
+			outMix.gain(0, gain);
+			// mixFormants.gain(1, gain);
+			// mixFormants.gain(2, gain);
+			// mixFormants.gain(3, gain);
+			
+			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
+				
+			if(seqCounter+1 < seqLength)
+				pSeqNext = pSeq;
+			else
+				pSeqNext = seq;
+				
+			float nextGain_dB= *pSeqNext;
+			setInterpolation(nextGain_dB);
+
+		}
+		else
+		{
+			gain_dB = gain_dB + gain_dB_step;
+			float gain = pow(10, (float)gain_dB/20.0);
+			outMix.gain(0, gain);
+			// mixFormants.gain(1, gain);
+			// mixFormants.gain(2, gain);
+			// mixFormants.gain(3, gain);
+			
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
+		}
+	}
 	
 	float gain_dB;
 	float gain_dB_step;
@@ -95,13 +128,11 @@ extern AudioEffectDelay staticDelay;
 extern AudioMixer4 mixSources;
 extern float delayVolume;
 
-class DelayStateSeq
+class DelayStateSeq : public Sequence
 {
 public:	
 	DelayStateSeq(int* _seq, int _seqLength)
-		:seq(_seq),
-		pSeq(_seq),
-		seqLength(_seqLength)
+		: Sequence(_seq, _seqLength)
 	{}
 	~DelayStateSeq() {}
 
@@ -136,6 +167,9 @@ public:
 				default: break;			
 			}			
 			stepCounter = *pSeq++ * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 		}
 		else
 		{
@@ -144,22 +178,6 @@ public:
 				seqCounter++;
 		}
 	}
-
-	void reset()
-	{
-		pSeq = seq;
-		seqCounter = 0;
-		stepCounter = 0;	
-	}
-
-	float speed = 1.0;
-	int stepCounter = 0;
-	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int* pSeqNext;
-	int seqLength = 0;
-	bool loop = true;
 };
 
 //------------------------------------------------
@@ -168,13 +186,11 @@ public:
 
 // loop length value can vary between 1 and 65 (this represents value of 1*128 and 65*128 samples)
 
-class DelayLoopLengthSeq
+class DelayLoopLengthSeq : public Sequence
 {
 public:	
 	DelayLoopLengthSeq(int* _seq, int _seqLength)
-		:seq(_seq),
-		pSeq(_seq),
-		seqLength(_seqLength)
+		: Sequence(_seq, _seqLength)
 	{}
 	~DelayLoopLengthSeq() {}
 
@@ -184,6 +200,9 @@ public:
 		{
 			staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * (*pSeq++)); // equal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES			
 			stepCounter = *pSeq++ * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 		}
 		else
 		{
@@ -192,21 +211,6 @@ public:
 				seqCounter++;
 		}
 	}
-
-	void reset()
-	{
-		pSeq = seq;
-		seqCounter = 0;
-		stepCounter = 0;	
-	}
-
-	float speed = 1.0;
-	int stepCounter = 0;
-	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int seqLength = 0;
-	bool loop = true;
 };
 
 //------------------------------------------------
@@ -221,13 +225,11 @@ public:
 
 extern AudioMixer4 mixFormants;
 
-class FormantFilterSequence
+class FormantFilterSequence : public Sequence
 {
 public:
 	FormantFilterSequence(int* _seq, int _seqLength)
-		:seq(_seq),
-		pSeq(_seq),
-		seqLength(_seqLength)
+		: Sequence(_seq, _seqLength)
 	{}
 	~FormantFilterSequence() {}
 	
@@ -290,6 +292,9 @@ public:
 			}
 			formantInterpolation = *pSeq++;
 			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 			
 			if(formantInterpolation)
 			{
@@ -337,22 +342,7 @@ public:
 				seqCounter++;
 		}
 	}
-	
-	void reset()
-	{
-		pSeq = seq;
-		seqCounter = 0;
-		stepCounter = 0;	
-	}
-	
-	float speed = 1.0;
-	int stepCounter = 0;
-	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int* pSeqNext;
-	int seqLength = 0;
-	bool loop = true;
+
 	bool formantInterpolation = true;
 	bool formantIsInterpolating = false;
 	
@@ -389,13 +379,11 @@ public:
 
 extern AudioFilterBiquad LowPass;
 
-class LPFilterSequence
+class LPFilterSequence : public Sequence
 {
 public:
 	LPFilterSequence(int* _seq, int _seqLength)
-		:seq(_seq),
-		pSeq(_seq),
-		seqLength(_seqLength)
+		: Sequence(_seq, _seqLength)
 	{}
 	~LPFilterSequence() {}
 	
@@ -403,32 +391,43 @@ public:
 	{
 		if (stepCounter == 0)
 		{
-			
-			// calcBiquad(FilterType,FrequencyC,dBgain,BW,QuantizationUnit,SampleRate,int*);
+			while(*(pSeq+1) == 0) // to handle delay length 0
+			{
+				seqCounter++;			
+				if(seqCounter+1 < seqLength)
+					pSeq = pSeq + 2;
+				else
+					pSeq = seq+1;
+			}	
 			freq = *pSeq++;
+			//freq = pow(2.0f,((freq+53.0f)/12.0f));
 			calcBiquad(FILTER_LOPASS,freq,0,0.5,2147483648,44100,updateFilter);
 			LowPass.updateCoefs(updateFilter);
-			freqInterpolation = *pSeq++;
 			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
 			
 			if(freqInterpolation)
 			{
 				if(seqCounter+1 < seqLength)
 					pSeqNext = pSeq;
 				else
-					pSeqNext = seq;
+					pSeqNext = seq + 1;
 				
 				freq_delta = ((float)*pSeqNext - freq) / (float)stepCounter;
 				freqIsInterpolating = true;
 			}
 			else
 				freqIsInterpolating = false;
+			
 		}
 		else
 		{
 			if(freqIsInterpolating)
 			{
 				freq += freq_delta;
+				//freq = pow(2.0f,((freq+53.0f)/12.0f));
 				// calcBiquad(FilterType,FrequencyC,dBgain,BW,QuantizationUnit,SampleRate,int*);
 				calcBiquad(FILTER_LOPASS,freq,0,0.5,2147483648,44100,updateFilter);
 				LowPass.updateCoefs(updateFilter);
@@ -441,19 +440,12 @@ public:
 	
 	void reset()
 	{
-		pSeq = seq;
+		freqInterpolation = *seq;
+		pSeq = seq + 1;
 		seqCounter = 0;
 		stepCounter = 0;	
 	}
-	
-	float speed = 1.0;
-	int stepCounter = 0;
-	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int* pSeqNext;
-	int seqLength = 0;
-	bool loop = true;
+
 	bool freqInterpolation = true;
 	bool freqIsInterpolating = false;
 	
@@ -465,13 +457,11 @@ public:
 //-------------------- Tone Osc ------------------
 //------------------------------------------------
 
-class ToneSequence
+class ToneSequence : public Sequence
 {
 public:	
 	ToneSequence(int* _seq, int _seqLength, AudioSynthWaveform* _osc, short _waveform)
-		:seq(_seq),
-		pSeq(_seq),
-		seqLength(_seqLength),
+		: Sequence(_seq, _seqLength),
 		osc(_osc),
 		waveform(_waveform)
 	{}
@@ -494,6 +484,8 @@ public:
 			}
 			stepCounter = *pSeq++ * (1.0/speed);
 			stepCounter--;
+			if(stepCounter == 0)
+			 seqCounter++;
 		}
 		else
 		{
@@ -502,22 +494,6 @@ public:
 			 seqCounter++;
 		}
 	}
-
-	void reset()
-	{
-		pSeq = seq;
-		seqCounter = 0;
-		stepCounter = 0;	
-	}
-
-	float speed = 1.0;
-	int stepCounter = 0;
-	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int* pSeqNext;
-	int seqLength = 0;
-	bool loop = true;
 
 	short waveform;
 	AudioSynthWaveform* osc;
