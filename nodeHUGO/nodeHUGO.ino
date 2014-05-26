@@ -81,7 +81,6 @@ AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
 AudioMixer4        mixFormants;
 AudioFilterBiquad	LowPass(LowPassFilter);
-AudioMixer4        outMix;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
@@ -89,10 +88,11 @@ AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 AudioConnection c15(audioInput, 0, staticDelay, 0);
 
+AudioConnection c5(staticDelay, 0, mixSources, 3);
+
 AudioConnection c2(osc1, 0, mixSources, 0);
 AudioConnection c3(osc2, 0, mixSources, 1);
 AudioConnection c4(osc3, 0, mixSources, 2);
-AudioConnection c5(staticDelay, 0, mixSources, 3);
 
 AudioConnection c6(mixSources, 0, formantFilter1, 0);
 AudioConnection c7(mixSources, 0, formantFilter2, 0);
@@ -103,8 +103,7 @@ AudioConnection c9(formantFilter1, 0, mixFormants, 1);
 AudioConnection c10(formantFilter2, 0, mixFormants, 2);
 AudioConnection c17(formantFilter3, 0, mixFormants, 3);
 AudioConnection c18(mixFormants, 0, LowPass, 0);
-AudioConnection c19(LowPass, 0, outMix, 0);
-AudioConnection c11(outMix, 0, audioOutput, 0);
+AudioConnection c11(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
@@ -197,19 +196,17 @@ void setup()
 	audioShield.inputSelect(myInput);
 	audioShield.volume(0.7);	
 	
-	delayVolume = 2;
-	
-	mixSources.gain(0, 0.2);
-	mixSources.gain(1, 0.2);
-	mixSources.gain(2, 0.2);
-	mixSources.gain(3, delayVolume);
-	
 	mixFormants.gain(0, 0.5);
 	mixFormants.gain(1, 0.5);
 	mixFormants.gain(2, 0.5);
-	mixFormants.gain(3, 0.5);
+	mixFormants.gain(3, 0.5);	
 	
-	outMix.gain(0, 0.5);
+	delayVolume = 2;
+	
+	mixSources.gain(0, 0.1);
+	mixSources.gain(1, 0.1);
+	mixSources.gain(2, 0.1);
+	mixSources.gain(3, delayVolume);
 	
 	setSopranO();
 	
@@ -233,9 +230,9 @@ void setup()
 	setFormantSeq();
 	setToneSeq();
 	
-	osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
+	// osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+	// osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+	// osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
 	
 	Serial.println("audio setup done");
 
@@ -243,6 +240,7 @@ void setup()
   //IR Sensor
 
   //calibration for Walls
+
   int wall[100];
   int count = 0;
   int sum = 0;
@@ -250,13 +248,10 @@ void setup()
   for (int thisReading = 0; thisReading < numReadings; thisReading++)
     readings[thisReading] = 0; 
 
-  //calibration for Walls
-
   for(int i=0; i < 100; i++){
     irVal = analogRead(irPin);
     // Linearize Sharp GP2YOA1YK
     float irDist = 11.0e8 * pow(irVal, -2.438);
-    //float irDist = 1000/irVal;
 
     if (irDist >= 100 && irDist <= 550)  
     {
@@ -279,6 +274,7 @@ void setup()
   //Serial.println(sum);
 
   wallDist = (sum/count) - 30;
+
   if (wallDist < 50)
   {
     wallDist = 550;
@@ -336,14 +332,14 @@ Metro TimingMetro = Metro(MOD_RATE);
 float mainVolume = 0;
 int oldValue = 0;
 
-int actLPSeq = 2;
+int actLPSeq = 0;
 int actFromSeq = 0;
 int actToneSeq = 3;
 int actDelStateSeq = 0;
 int actDelLoLeSeq = 0;
-int actVolSeq = 0;
+int actOscVolSeq = 0;
 
-bool seqReset = true;
+bool seqReset = false;
 
 
 
@@ -526,18 +522,18 @@ void loop() {
 			masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
 		}
 		
-		// volume sequence
-		if ((masterVolSeq[actVolSeq]->seqCounter >= masterVolSeq[actVolSeq]->seqLength) || seqReset)
+		// tone volume sequence
+		if ((masterToneVolSeq[actOscVolSeq]->seqCounter >= masterToneVolSeq[actOscVolSeq]->seqLength) || seqReset)
 		{
-			if ((masterVolSeq[actVolSeq]->loop == true) || seqReset)
+			if ((masterToneVolSeq[actOscVolSeq]->loop == true) || seqReset)
 			{
-				masterVolSeq[actVolSeq]->reset();
-				masterVolSeq[actVolSeq]->seqProceed();
+				masterToneVolSeq[actOscVolSeq]->reset();
+				masterToneVolSeq[actOscVolSeq]->seqProceed();
 			}			
 		}
 		else
 		{	
-			masterVolSeq[actVolSeq]->seqProceed();
+			masterToneVolSeq[actOscVolSeq]->seqProceed();
 		}
 	seqReset = false;
 	}
