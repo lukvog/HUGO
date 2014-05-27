@@ -369,6 +369,17 @@ void loop() {
 
   if (LightMetro.check() == 1) {
 
+    analogWrite(bulb, pwmActual[brightness]);
+ 
+   // change the brightness for next time through the loop:
+   brightness = brightness + fadeAmount;
+   // reverse the direction of the fading at the ends of the fade:
+   if (brightness == 0 || brightness == 31) {
+      fadeAmount = -fadeAmount ;
+   }
+ 
+    
+    /*
     // set the brightness of pin 9:
     brightness = constrain(brightness, 0, 255);
     analogWrite(led, brightness);
@@ -387,6 +398,8 @@ void loop() {
     if (brightness <= 0 || brightness >= 255) {
       fadeAmount = -fadeAmount ;
     }
+    
+    */
   }
 
   //___________________________________________________________________________________

@@ -72,6 +72,7 @@ int LowPassFilter[]={0,0,0,0,0,0,0,0};
 
 AudioInputI2S       audioInput;  // audio shield: mic or line-in 
 AudioEffectDelay 	staticDelay;
+AudioPeak            peak;
 AudioSynthWaveform 	osc1;
 AudioSynthWaveform 	osc2;
 AudioSynthWaveform	osc3;
@@ -150,11 +151,29 @@ int valueRF = 1;
 /////////////////////////
 //Light
 
-int led = 5;           // the pin that the LED is attached to
+int bulb = 5;           // the pin that the LED is attached to
 int brightness = 0;    // how bright the LED is
 int fadeAmount = 1;    // how many points to fade the LED by
 
 
+int pwmActual[] = {
+  0, 1, 2, 3, 4, 5, 7, 9,
+  12, 15, 18, 22, 27, 32, 37, 44,
+  50, 58, 66, 75, 85, 96, 107, 120,
+  133, 147, 163, 179, 196, 215, 234, 255
+};
+
+/*
+int pwmActual[] = {
+  1,1,1,1,2,2,2,2,2,2,
+  3,3,3,3,4,4,4,5,5,6,
+  6,7,7,8,9,10,10,11,12,13,
+  15,16,17,19,21,23,25,27,29,32,35,
+  38,42,45,49,54,59,64,70,76,83,91,
+  99,108,117,128,140,152,166,181,
+  197,215,235,256
+  };
+*/
 
 //_________________________________________________________________________________
 //////////////////////
@@ -179,11 +198,91 @@ void setup()
 {
 
   Serial.begin(57600);
+
+  //___________________________________________________________________________________
+  //IR Sensor
+
+  //calibration for Walls
+  int wall[100];
+  int count = 0;
+  int sum = 0;
+
+  for (int thisReading = 0; thisReading < numReadings; thisReading++)
+    readings[thisReading] = 0; 
+
+  //calibration for Walls
+
+  for(int i=0; i < 100; i++){
+    irVal = analogRead(irPin);
+    // Linearize Sharp GP2YOA1YK
+    float irDist = 11.0e8 * pow(irVal, -2.438);
+    //float irDist = 1000/irVal;
+
+    if (irDist >= 100 && irDist <= 550)  
+    {
+
+      wall[count] = irDist;
+      Serial.print(count);
+      Serial.print("range: ");
+      Serial.println(irDist, DEC);
+      count++;
+    }
+    delay(50);
+  };
+
+  //Serial.println(count);
+
+  for(int i=0; i < count; i++){
+    sum += wall[i];
+  };
+
+  //Serial.println(sum);
+
+  wallDist = (sum/count) - 30;
+  if (wallDist < 50)
+  {
+    wallDist = 550;
+  }
+
+
+  //___________________________________________________________________________________
+  //RF24
+
+  ///SPI Setup
+  SPI.setMOSI(7);
+  SPI.setSCK(14);
+  //radio.setDataRate(RF24_2MBPS);
+  //radio.setDataRate(RF24_1MBPS);
+  //radio.setDataRate(RF24_250KBPS);
+
+  //
+  // Print preamble
+
+  delay(2000);
+  Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
+  Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
+
+  //
+  // Pull node address out of eeprom 
+  //
+  // Which node are we?
+  this_node = nodeconfig_read();
+
+  //
+  // Bring up the RF network
+  //
+  SPI.begin();
+  radio.begin();
+  network.begin(/*channel*/ 100, /*node address*/ this_node );
+
+  //___________________________________________________________________________________
+  //LIGHT
+
+  pinMode(bulb, OUTPUT);
   
-    //___________________________________________________________________________________
+  //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
-  //delay(3000);
 
 	pinMode(Test1_PIN,INPUT_PULLUP);
 	pinMode(Test0_PIN,INPUT_PULLUP);
@@ -239,91 +338,12 @@ void setup()
 	
 	Serial.println("audio setup done");
 
-  //___________________________________________________________________________________
-  //IR Sensor
-
-  //calibration for Walls
-  int wall[100];
-  int count = 0;
-  int sum = 0;
-
-  for (int thisReading = 0; thisReading < numReadings; thisReading++)
-    readings[thisReading] = 0; 
-
-  //calibration for Walls
-
-  for(int i=0; i < 100; i++){
-    irVal = analogRead(irPin);
-    // Linearize Sharp GP2YOA1YK
-    float irDist = 11.0e8 * pow(irVal, -2.438);
-    //float irDist = 1000/irVal;
-
-    if (irDist >= 100 && irDist <= 550)  
-    {
-
-      wall[count] = irDist;
-      Serial.print(count);
-      Serial.print("range: ");
-      Serial.println(irDist, DEC);
-      count++;
-    }
-    delay(50);
-  };
-
-  //Serial.println(count);
-
-  for(int i=0; i < count; i++){
-    sum += wall[i];
-  };
-
-  //Serial.println(sum);
-
-  wallDist = (sum/count) - 30;
-  if (wallDist < 50)
-  {
-    wallDist = 550;
-  }
-
-
-  //___________________________________________________________________________________
-  //RF24
-
-  ///SPI Setup
-  SPI.setMOSI(7);
-  SPI.setSCK(14);
-  //radio.setDataRate(RF24_1MBPS);
-  //radio.setDataRate(RF24_250KBPS);
-
-  //
-  // Print preamble
-
-  delay(2000);
-  Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
-  Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
-
-  //
-  // Pull node address out of eeprom 
-  //
-  // Which node are we?
-  this_node = nodeconfig_read();
-
-  //
-  // Bring up the RF network
-  //
-  SPI.begin();
-  radio.begin();
-  network.begin(/*channel*/ 100, /*node address*/ this_node );
-
-  //___________________________________________________________________________________
-  //LIGHT
-
-  pinMode(led, OUTPUT);
 }
 
 //___________________________________________________________
 
 //Metros
-Metro LightMetro = Metro(400);
+Metro LightMetro = Metro(50);
 Metro ComMetro = Metro(1000);
 Metro SensMetro = Metro(100);
 Metro WriteMetro = Metro(500);
@@ -391,24 +411,16 @@ void loop() {
 
   if (LightMetro.check() == 1) {
 
-    // set the brightness of pin 9:
-    brightness = constrain(brightness, 0, 255);
-    analogWrite(led, brightness);
-
-    // change the brightness for next time through the loop:
-    int fadeAmountPWR = 1;
-    if (fadeAmount > 0) { 
-      fadeAmountPWR = fadeAmount + (brightness * 0.1); 
-    }
-    else { 
-      fadeAmountPWR = fadeAmount - (brightness * 0.1); 
-    }
-    brightness = brightness + fadeAmountPWR;
-    // reverse the direction of the fading at the ends of the fade:
-
-    if (brightness <= 0 || brightness >= 255) {
+    analogWrite(bulb, pwmActual[brightness]);
+ 
+   // change the brightness for next time through the loop:
+   brightness = brightness + fadeAmount;
+   // reverse the direction of the fading at the ends of the fade:
+   if (brightness == 0 || brightness == 31) {
       fadeAmount = -fadeAmount ;
-    }
+   }
+  
+ 
   }
 
   //___________________________________________________________________________________
@@ -640,9 +652,8 @@ void loop() {
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
     Serial.println(changed, DEC);
-    //int ligthDur = 
-    LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
-    LightMetro.reset();
+    //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
+    //LightMetro.reset();
   }
 
   //////////////////////////////

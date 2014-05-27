@@ -134,6 +134,7 @@ void setup()
   ///SPI Setup
   SPI.setMOSI(7);
   SPI.setSCK(14);
+  //radio.setDataRate(RF24_2MBPS);
   //radio.setDataRate(RF24_1MBPS);
   //radio.setDataRate(RF24_250KBPS);
 
@@ -241,9 +242,10 @@ void loop() {
   ////////////////////////////////
   //////////////////////////
   
-	// if (SeqMetro.check() == 1)
-	// {
+	 if (SeqMetro.check() == 1)
+	{
 		int time = millis();
+                bool ok;
 		// Node 1 - Seq Nr.
 		MasterNode1.SeqNr.Process();
 		// Node 1 - Modulation 1
@@ -254,6 +256,16 @@ void loop() {
 		MasterNode1.Mod3.Process();
 		// Node 1 - Modulation 4
 		MasterNode1.Mod4.Process();
+
+      // // Notify us of the result
+       //if (ok)
+       //{
+       //  Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+       //}
+       //else
+       //{
+       //  Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+       //}
 		
 		// // Node 2 - Seq Nr.
 		// MasterNode2.SeqNr.Process();
@@ -381,7 +393,7 @@ void loop() {
 		Serial.print("timeDif: ");
 		Serial.print(timeDif);
 		Serial.print("\n");
-	//}
+	}
 
 
   // // Send a ping to the next node every 'interval' ms

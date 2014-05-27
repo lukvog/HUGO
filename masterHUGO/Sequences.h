@@ -31,10 +31,12 @@ public:
 			int message = *pSeq++;
 			network.write(header,&message,sizeof(int));
 			//Serial.printf_P(PSTR("%lu: APP Send Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
+
 			stepCounter = *pSeq++ * (1.0/speed);
 			stepCounter--;
 			if(stepCounter == 0)
 				seqCounter++;
+//return network.write(header,&message,sizeof(unsigned long));
 		}
 		else
 		{		
