@@ -36,7 +36,6 @@ public:
 			stepCounter--;
 			if(stepCounter == 0)
 				seqCounter++;
-//return network.write(header,&message,sizeof(unsigned long));
 		}
 		else
 		{		

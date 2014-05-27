@@ -68,7 +68,8 @@ const int myInput = AUDIO_INPUT_MIC;
 
 float delayVolume;
 
-int LowPassFilter[]={0,0,0,0,0,0,0,0};
+int LowPassFilter[]={
+  0,0,0,0,0,0,0,0};
 
 AudioInputI2S       audioInput;  // audio shield: mic or line-in 
 AudioEffectDelay 	staticDelay;
@@ -106,6 +107,8 @@ AudioConnection c17(formantFilter3, 0, mixFormants, 3);
 AudioConnection c18(mixFormants, 0, LowPass, 0);
 AudioConnection c19(LowPass, 0, outMix, 0);
 AudioConnection c11(outMix, 0, audioOutput, 0);
+
+AudioConnection c20(outMix, 0, peak, 0);
 
 AudioControlSGTL5000 audioShield;
 
@@ -165,15 +168,15 @@ int pwmActual[] = {
 
 /*
 int pwmActual[] = {
-  1,1,1,1,2,2,2,2,2,2,
-  3,3,3,3,4,4,4,5,5,6,
-  6,7,7,8,9,10,10,11,12,13,
-  15,16,17,19,21,23,25,27,29,32,35,
-  38,42,45,49,54,59,64,70,76,83,91,
-  99,108,117,128,140,152,166,181,
-  197,215,235,256
-  };
-*/
+ 1,1,1,1,2,2,2,2,2,2,
+ 3,3,3,3,4,4,4,5,5,6,
+ 6,7,7,8,9,10,10,11,12,13,
+ 15,16,17,19,21,23,25,27,29,32,35,
+ 38,42,45,49,54,59,64,70,76,83,91,
+ 99,108,117,128,140,152,166,181,
+ 197,215,235,256
+ };
+ */
 
 //_________________________________________________________________________________
 //////////////////////
@@ -279,68 +282,72 @@ void setup()
   //LIGHT
 
   pinMode(bulb, OUTPUT);
-  
+
   //___________________________________________________________________________________
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
 
-	pinMode(Test1_PIN,INPUT_PULLUP);
-	pinMode(Test0_PIN,INPUT_PULLUP);
+  pinMode(Test1_PIN,INPUT_PULLUP);
+  pinMode(Test0_PIN,INPUT_PULLUP);
 
-	// It doesn't work properly with any less than 8
-	
-	AudioMemory(15);
-	
-	audioShield.enable();
-	
-	audioShield.inputSelect(myInput);
-	audioShield.volume(0.7);	
-	
-	delayVolume = 2;
-	
-	mixSources.gain(0, 0.2);
-	mixSources.gain(1, 0.2);
-	mixSources.gain(2, 0.2);
-	mixSources.gain(3, delayVolume);
-	
-	mixFormants.gain(0, 0.5);
-	mixFormants.gain(1, 0.5);
-	mixFormants.gain(2, 0.5);
-	mixFormants.gain(3, 0.5);
-	
-	outMix.gain(0, 0.5);
-	
-	setSopranO();
-	
-	osc1.set_ramp_length(88);
-	osc2.set_ramp_length(88);
-	osc3.set_ramp_length(88);
-	
-	osc1.amplitude(0);
-	osc2.amplitude(0);
-	osc3.amplitude(0);
-	
-	staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // equal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
-	
-	calcBiquad(FILTER_LOPASS,1000,0,0.5,2147483648,44100,updateFilter);
-	LowPass.updateCoefs(updateFilter);
-	
-	setLPSeq();
-	setToneVolSeq();
-	setDelayStateSeq();
-	setDelayLoopLengthSeq();
-	setFormantSeq();
-	setToneSeq();
-	
-	osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-	osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-	osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
-	
-	Serial.println("audio setup done");
+  // It doesn't work properly with any less than 8
+
+  AudioMemory(15);
+
+  audioShield.enable();
+
+  audioShield.inputSelect(myInput);
+  audioShield.volume(0.7);	
+
+  delayVolume = 2;
+
+  mixSources.gain(0, 0.2);
+  mixSources.gain(1, 0.2);
+  mixSources.gain(2, 0.2);
+  mixSources.gain(3, delayVolume);
+
+  mixFormants.gain(0, 0.5);
+  mixFormants.gain(1, 0.5);
+  mixFormants.gain(2, 0.5);
+  mixFormants.gain(3, 0.5);
+
+  outMix.gain(0, 0.5);
+
+  setSopranO();
+
+  osc1.set_ramp_length(88);
+  osc2.set_ramp_length(88);
+  osc3.set_ramp_length(88);
+
+  osc1.amplitude(0);
+  osc2.amplitude(0);
+  osc3.amplitude(0);
+
+  staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // equal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+
+  calcBiquad(FILTER_LOPASS,1000,0,0.5,2147483648,44100,updateFilter);
+  LowPass.updateCoefs(updateFilter);
+
+  setLPSeq();
+  setToneVolSeq();
+  setDelayStateSeq();
+  setDelayLoopLengthSeq();
+  setFormantSeq();
+  setToneSeq();
+
+  osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+  osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+  osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
+
+  Serial.println("audio setup done");
 
 }
 
-//___________________________________________________________
+
+
+//________________________________________________________________________________________
+////////////////////////////////////////
+
 
 //Metros
 Metro LightMetro = Metro(50);
@@ -349,6 +356,7 @@ Metro SensMetro = Metro(100);
 Metro WriteMetro = Metro(500);
 Metro MonitorMetro = Metro(1000);
 Metro VolMetro = Metro(10);
+Metro PeakMetro = Metro(100);
 
 Metro TimingMetro = Metro(MOD_RATE);
 
@@ -365,44 +373,68 @@ int actVolSeq = 0;
 
 bool seqReset = true;
 
+//////////////////////
+//Peak
+uint8_t cnt=0;
+
+
+//_________________________________________________________________________________________
+/////////////////////////////////////////////
 
 
 void loop() {
+
+  //_____________________________________
+  //Read Peak
+
+  if (PeakMetro.check() == 1) {
+    uint8_t peakRead=peak.Dpp()/2184.5321; // 65536 / 2184.5321 ~ 30.
+    for(cnt=0;cnt<peakRead;cnt++) Serial.print(">");
+    while(cnt++<30) Serial.print(" ");
+    Serial.println();
+    peak.begin(); // no need to call .stop if all you want
+  };
+
 
   //___________________________________________________________________________________
   //IR Sensor
 
   if (SensMetro.check() == 1) {
-  irVal = analogRead(irPin);
-  // Linearize Sharp GP2YOA1YK
-  float irDist = 11.0e8 * pow(irVal, -2.438);
-  //Serial.println(irVal, DEC);
+    irVal = analogRead(irPin);
+    // Linearize Sharp GP2YOA1YK
+    float irDist = 11.0e8 * pow(irVal, -2.438);
+    //Serial.println(irVal, DEC);
 
-  //float irDist = 1000/irVal;
+    //float irDist = 1000/irVal;
 
-  // subtract the last reading:
-  total= total - readings[indx];        
-  // read from the sensor:  
-  readings[indx] = irDist;
-  // add the reading to the total:
-  total= total + readings[indx];      
-  // advance to the next position in the array:  
-  indx = indx + 1;                    
+    // subtract the last reading:
+    total= total - readings[indx];        
+    // read from the sensor:  
+    readings[indx] = irDist;
+    // add the reading to the total:
+    total= total + readings[indx];      
+    // advance to the next position in the array:  
+    indx = indx + 1;                    
 
-  // if we're at the end of the array...
-  if (indx >= numReadings)              
-    // ...wrap around to the beginning:
-    indx = 0;                          
+    // if we're at the end of the array...
+    if (indx >= numReadings)              
+      // ...wrap around to the beginning:
+      indx = 0;                          
 
-  // calculate the average:
-  average = total / numReadings; 
+    // calculate the average:
+    average = total / numReadings; 
 
-  //Serial.println(irDist, DEC);
+    //Serial.println(irDist, DEC);
 
     if (average >= 50 && average <= wallDist)
     {
       changed = average;
     }
+
+    Serial.print("wallDist: ");
+    Serial.println(wallDist, DEC);
+    Serial.print("changed: ");
+    Serial.println(changed, DEC);
   }
 
 
@@ -412,15 +444,15 @@ void loop() {
   if (LightMetro.check() == 1) {
 
     analogWrite(bulb, pwmActual[brightness]);
- 
-   // change the brightness for next time through the loop:
-   brightness = brightness + fadeAmount;
-   // reverse the direction of the fading at the ends of the fade:
-   if (brightness == 0 || brightness == 31) {
+
+    // change the brightness for next time through the loop:
+    brightness = brightness + fadeAmount;
+    // reverse the direction of the fading at the ends of the fade:
+    if (brightness == 0 || brightness == 31) {
       fadeAmount = -fadeAmount ;
-   }
-  
- 
+    }
+
+
   }
 
   //___________________________________________________________________________________
@@ -428,157 +460,157 @@ void loop() {
   // volume control
   // every 10 ms, check for adjustment
   // volume control
-  
-	// every 10 ms, check for adjustment
-	if (VolMetro.check() == 1) {
-		int vol = analogRead(15);
-		if (vol != mainVolume) {
-			mainVolume = vol / 1023.0;
-			audioShield.volume(mainVolume);
-		}
-	}
-	
-	if (TimingMetro.check() == 1) {
-	
-		// LP filter sequence
-		if ((masterLPSeq[actLPSeq]->seqCounter >= masterLPSeq[actLPSeq]->seqLength) || seqReset)
-		{
-			if ((masterLPSeq[actLPSeq]->loop == true) || seqReset)
-			{
-				masterLPSeq[actLPSeq]->reset();
-				masterLPSeq[actLPSeq]->seqProceed();
-			}	
-		}
-		else
-		{		
-			masterLPSeq[actLPSeq]->seqProceed();
-		}
-		
-		// formant filter sequence
-		if ((masterFormantSeq[actFromSeq]->seqCounter >= masterFormantSeq[actFromSeq]->seqLength) || seqReset)
-		{
-			if ((masterFormantSeq[actFromSeq]->loop == true) || seqReset)
-			{
-				masterFormantSeq[actFromSeq]->reset();
-				masterFormantSeq[actFromSeq]->seqProceed();
-			}			
-		}
-		else		
-		{		
-			masterFormantSeq[actFromSeq]->seqProceed();
-		}
-		
-		// osc1 sequence
-		if ((masterToneSeq[actToneSeq]->seqCounter >= masterToneSeq[actToneSeq]->seqLength) || seqReset)
-		{
-			if ((masterToneSeq[actToneSeq]->loop == true) || seqReset)
-			{
-				masterToneSeq[actToneSeq]->reset();
-				masterToneSeq[actToneSeq]->seqProceed();
-			}			
-		}
-		else
-		{			
-			masterToneSeq[actToneSeq]->seqProceed();
-		}
-		
-		// osc2 sequence
-		if ((masterToneSeq[actToneSeq+1]->seqCounter >= masterToneSeq[actToneSeq+1]->seqLength) || seqReset)
-		{
-			if ((masterToneSeq[actToneSeq+1]->loop == true) || seqReset)
-			{
-				masterToneSeq[actToneSeq+1]->reset();
-				masterToneSeq[actToneSeq+1]->seqProceed();
-			}			
-		}
-		else
-		{			
-			masterToneSeq[actToneSeq+1]->seqProceed();
-		}
-		
-		// osc3 sequence
-		if ((masterToneSeq[actToneSeq+2]->seqCounter >= masterToneSeq[actToneSeq+2]->seqLength) || seqReset)
-		{
-			if ((masterToneSeq[actToneSeq+2]->loop == true) || seqReset)
-			{
-				masterToneSeq[actToneSeq+2]->reset();
-				masterToneSeq[actToneSeq+2]->seqProceed();
-			}			
-		}
-		else
-		{			
-			masterToneSeq[actToneSeq+2]->seqProceed();
-		}
-		
-		// delay state sequence
-		if ((masterDelayStateSeq[actDelStateSeq]->seqCounter >= masterDelayStateSeq[actDelStateSeq]->seqLength) || seqReset)
-		{
-			if ((masterDelayStateSeq[actDelStateSeq]->loop == true) || seqReset)
-			{
-				masterDelayStateSeq[actDelStateSeq]->reset();
-				masterDelayStateSeq[actDelStateSeq]->seqProceed();
-			}			
-		}
-		else
-		{	
-			masterDelayStateSeq[actDelStateSeq]->seqProceed();
-		}
-		
-		// delay loop length sequence
-		if ((masterDelayLoopLengthSeq[actDelLoLeSeq]->seqCounter >= masterDelayLoopLengthSeq[actDelLoLeSeq]->seqLength) || seqReset)
-		{
-			if ((masterDelayLoopLengthSeq[actDelLoLeSeq]->loop == true) || seqReset)
-			{
-				masterDelayLoopLengthSeq[actDelLoLeSeq]->reset();
-				masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
-			}			
-		}		
-		else
-		{	
-			masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
-		}
-		
-		// volume sequence
-		if ((masterVolSeq[actVolSeq]->seqCounter >= masterVolSeq[actVolSeq]->seqLength) || seqReset)
-		{
-			if ((masterVolSeq[actVolSeq]->loop == true) || seqReset)
-			{
-				masterVolSeq[actVolSeq]->reset();
-				masterVolSeq[actVolSeq]->seqProceed();
-			}			
-		}
-		else
-		{	
-			masterVolSeq[actVolSeq]->seqProceed();
-		}
-	seqReset = false;
-	}
-	
-	// // update the two buttons
-	// b_test0.update();
-	// b_test1.update();
+
+  // every 10 ms, check for adjustment
+  if (VolMetro.check() == 1) {
+    int vol = analogRead(15);
+    if (vol != mainVolume) {
+      mainVolume = vol / 1023.0;
+      audioShield.volume(mainVolume);
+    }
+  }
+
+  if (TimingMetro.check() == 1) {
+
+    // LP filter sequence
+    if ((masterLPSeq[actLPSeq]->seqCounter >= masterLPSeq[actLPSeq]->seqLength) || seqReset)
+    {
+      if ((masterLPSeq[actLPSeq]->loop == true) || seqReset)
+      {
+        masterLPSeq[actLPSeq]->reset();
+        masterLPSeq[actLPSeq]->seqProceed();
+      }	
+    }
+    else
+    {		
+      masterLPSeq[actLPSeq]->seqProceed();
+    }
+
+    // formant filter sequence
+    if ((masterFormantSeq[actFromSeq]->seqCounter >= masterFormantSeq[actFromSeq]->seqLength) || seqReset)
+    {
+      if ((masterFormantSeq[actFromSeq]->loop == true) || seqReset)
+      {
+        masterFormantSeq[actFromSeq]->reset();
+        masterFormantSeq[actFromSeq]->seqProceed();
+      }			
+    }
+    else		
+    {		
+      masterFormantSeq[actFromSeq]->seqProceed();
+    }
+
+    // osc1 sequence
+    if ((masterToneSeq[actToneSeq]->seqCounter >= masterToneSeq[actToneSeq]->seqLength) || seqReset)
+    {
+      if ((masterToneSeq[actToneSeq]->loop == true) || seqReset)
+      {
+        masterToneSeq[actToneSeq]->reset();
+        masterToneSeq[actToneSeq]->seqProceed();
+      }			
+    }
+    else
+    {			
+      masterToneSeq[actToneSeq]->seqProceed();
+    }
+
+    // osc2 sequence
+    if ((masterToneSeq[actToneSeq+1]->seqCounter >= masterToneSeq[actToneSeq+1]->seqLength) || seqReset)
+    {
+      if ((masterToneSeq[actToneSeq+1]->loop == true) || seqReset)
+      {
+        masterToneSeq[actToneSeq+1]->reset();
+        masterToneSeq[actToneSeq+1]->seqProceed();
+      }			
+    }
+    else
+    {			
+      masterToneSeq[actToneSeq+1]->seqProceed();
+    }
+
+    // osc3 sequence
+    if ((masterToneSeq[actToneSeq+2]->seqCounter >= masterToneSeq[actToneSeq+2]->seqLength) || seqReset)
+    {
+      if ((masterToneSeq[actToneSeq+2]->loop == true) || seqReset)
+      {
+        masterToneSeq[actToneSeq+2]->reset();
+        masterToneSeq[actToneSeq+2]->seqProceed();
+      }			
+    }
+    else
+    {			
+      masterToneSeq[actToneSeq+2]->seqProceed();
+    }
+
+    // delay state sequence
+    if ((masterDelayStateSeq[actDelStateSeq]->seqCounter >= masterDelayStateSeq[actDelStateSeq]->seqLength) || seqReset)
+    {
+      if ((masterDelayStateSeq[actDelStateSeq]->loop == true) || seqReset)
+      {
+        masterDelayStateSeq[actDelStateSeq]->reset();
+        masterDelayStateSeq[actDelStateSeq]->seqProceed();
+      }			
+    }
+    else
+    {	
+      masterDelayStateSeq[actDelStateSeq]->seqProceed();
+    }
+
+    // delay loop length sequence
+    if ((masterDelayLoopLengthSeq[actDelLoLeSeq]->seqCounter >= masterDelayLoopLengthSeq[actDelLoLeSeq]->seqLength) || seqReset)
+    {
+      if ((masterDelayLoopLengthSeq[actDelLoLeSeq]->loop == true) || seqReset)
+      {
+        masterDelayLoopLengthSeq[actDelLoLeSeq]->reset();
+        masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
+      }			
+    }		
+    else
+    {	
+      masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
+    }
+
+    // volume sequence
+    if ((masterVolSeq[actVolSeq]->seqCounter >= masterVolSeq[actVolSeq]->seqLength) || seqReset)
+    {
+      if ((masterVolSeq[actVolSeq]->loop == true) || seqReset)
+      {
+        masterVolSeq[actVolSeq]->reset();
+        masterVolSeq[actVolSeq]->seqProceed();
+      }			
+    }
+    else
+    {	
+      masterVolSeq[actVolSeq]->seqProceed();
+    }
+    seqReset = false;
+  }
+
+  // // update the two buttons
+  // b_test0.update();
+  // b_test1.update();
 
 
-	// // if pin1 is grounded
-	// if(b_test1.fallingEdge()) {
-		// //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 32);
-	// }
+  // // if pin1 is grounded
+  // if(b_test1.fallingEdge()) {
+  // //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 32);
+  // }
 
-	// // If pin1 is open
-	// if(b_test1.risingEdge()) {
-		// //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 64);
-	// }
+  // // If pin1 is open
+  // if(b_test1.risingEdge()) {
+  // //staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 64);
+  // }
 
-	// // if pin0 is grounded
-	// if(b_test0.fallingEdge()) {
-		// staticDelay.hold(true);	
-		// //actFromSeq = 1;
-	// }
-	// // if pin 0 is open
-	// if(b_test0.risingEdge()) {
-		// staticDelay.hold(false);	
-		// //actFromSeq = 0;
-	// }
+  // // if pin0 is grounded
+  // if(b_test0.fallingEdge()) {
+  // staticDelay.hold(true);	
+  // //actFromSeq = 1;
+  // }
+  // // if pin 0 is open
+  // if(b_test0.risingEdge()) {
+  // staticDelay.hold(false);	
+  // //actFromSeq = 0;
+  // }
 
   //////////////////
   //Mem and CPU Usage
@@ -617,13 +649,13 @@ void loop() {
     // Dispatch the message to the correct handler.
     switch (header.type)
     {
-	case 'S':
+    case 'S':
       handle_S(header);
       break;
-    // case 'T':
+      // case 'T':
       // handle_T(header);
       // break;
-    // case 'V':
+      // case 'V':
       // handle_V(header); 
 
       // /////
@@ -631,7 +663,7 @@ void loop() {
       // //Switch für Sensor und Light Mapping
 
       // break;
-    // case 'N':
+      // case 'N':
       // handle_N(header);
       // break;
     default:
@@ -648,10 +680,7 @@ void loop() {
   if (WriteMetro.check() == 1) {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
-    Serial.print("wallDist: ");
-    Serial.println(wallDist, DEC);
-    Serial.print("changed: ");
-    Serial.println(changed, DEC);
+
     //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
     //LightMetro.reset();
   }
@@ -664,80 +693,80 @@ void loop() {
   // // Send a ping to the next node every 'interval' ms
   // //unsigned long now = millis();
   // if (ComMetro.check() == 1) {
-    // //last_time_sent = now;
+  // //last_time_sent = now;
 
-    // // Who should we send to?
-    // // By default, send to base
-    // uint16_t to = 00;
+  // // Who should we send to?
+  // // By default, send to base
+  // uint16_t to = 00;
 
-    // // Or if we have active nodes,
-    // if ( num_active_nodes )
-    // {
-      // // Send to the next active node
-      // to = active_nodes[next_ping_node_index++];
-      // if (to == this_node)
-      // {
-        // to = active_nodes[next_ping_node_index++];
-      // }
-      // // Have we rolled over?
-      // if ( next_ping_node_index > num_active_nodes )
-      // {
-        // // Next time start at the beginning
-        // next_ping_node_index = 0;
+  // // Or if we have active nodes,
+  // if ( num_active_nodes )
+  // {
+  // // Send to the next active node
+  // to = active_nodes[next_ping_node_index++];
+  // if (to == this_node)
+  // {
+  // to = active_nodes[next_ping_node_index++];
+  // }
+  // // Have we rolled over?
+  // if ( next_ping_node_index > num_active_nodes )
+  // {
+  // // Next time start at the beginning
+  // next_ping_node_index = 0;
 
-        // // This time, send to node 00.
-        // to = 00;
-      // }
-    // }
+  // // This time, send to node 00.
+  // to = 00;
+  // }
+  // }
 
-    // bool ok;
+  // bool ok;
 
-    // // Normal nodes send a 'T' ping
-    // if ( this_node > 00 ) {
-      // //if ( this_node > 00 || to == 00 )
-      // ok = send_T(to);
+  // // Normal nodes send a 'T' ping
+  // if ( this_node > 00 ) {
+  // //if ( this_node > 00 || to == 00 )
+  // ok = send_T(to);
 
-      // // Notify us of the result
-      // if (ok)
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-      // }
-      // else
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
-      // }
-    // }
-    // // Base node sends the current active nodes out
-    // else {
-      // ok = send_N(to);
+  // // Notify us of the result
+  // if (ok)
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+  // }
+  // else
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+  // }
+  // }
+  // // Base node sends the current active nodes out
+  // else {
+  // ok = send_N(to);
 
-      // // Notify us of the result
-      // if (ok)
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-      // }
-      // else
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+  // // Notify us of the result
+  // if (ok)
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+  // }
+  // else
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
 
-        // // Try sending at a different time next time
-        // //last_time_sent -= 100;
-      // }
+  // // Try sending at a different time next time
+  // //last_time_sent -= 100;
+  // }
 
-      // ok = send_V(to);
-      // // Notify us of the result
-      // if (ok)
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
-      // }
-      // else
-      // {
-        // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
+  // ok = send_V(to);
+  // // Notify us of the result
+  // if (ok)
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send ok\n\r"),millis());
+  // }
+  // else
+  // {
+  // Serial.printf_P(PSTR("%lu: APP Send failed\n\r"),millis());
 
-        // // Try sending at a different time next time
-        // //last_time_sent -= 100;
-      // }
-    // }
+  // // Try sending at a different time next time
+  // //last_time_sent -= 100;
+  // }
+  // }
   // }
 
 
@@ -760,121 +789,123 @@ void handle_S(RF24NetworkHeader& header)
 // //____________________________________________________
 
 // /**
- // * Send a 'T' message, the current time
- // */
+// * Send a 'T' message, the current time
+// */
 // bool send_T(uint16_t to)
 // {
-  // RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
+// RF24NetworkHeader header(/*to node*/ to, /*type*/ 'T' /*Time*/);
 
-  // // The 'T' message that we send is just a ulong, containing the time
-  // unsigned long message = millis();
-  // Serial.printf_P(PSTR("---------------------------------\n\r"));
-  // Serial.printf_P(PSTR("%lu: APP Sending %lu to 0%o...\n\r"),millis(),message,to);
-  // return network.write(header,&message,sizeof(unsigned long));
+// // The 'T' message that we send is just a ulong, containing the time
+// unsigned long message = millis();
+// Serial.printf_P(PSTR("---------------------------------\n\r"));
+// Serial.printf_P(PSTR("%lu: APP Sending %lu to 0%o...\n\r"),millis(),message,to);
+// return network.write(header,&message,sizeof(unsigned long));
 // }
 
 
 
 // /**
- // * Send a 'V' message, a value
- // */
+// * Send a 'V' message, a value
+// */
 
 
 // bool send_V(uint16_t to)
 // {
-  // RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
+// RF24NetworkHeader header(/*to node*/ to, /*type*/ 'V' /*Time*/);
 
-  // // The 'V' message is a value message
-  // unsigned int message = analogRead(15);
-  // Serial.printf_P(PSTR("---------------------------------\n\r"));
-  // Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
-  // return network.write(header,&message,sizeof(unsigned int));
+// // The 'V' message is a value message
+// unsigned int message = analogRead(15);
+// Serial.printf_P(PSTR("---------------------------------\n\r"));
+// Serial.printf_P(PSTR("%lu: APP Sending Value %lu to 0%o...\n\r"),millis(),message,to);
+// return network.write(header,&message,sizeof(unsigned int));
 // }
 
 
 
 // /**
- // * Send an 'N' message, the active node list
- // */
+// * Send an 'N' message, the active node list
+// */
 // bool send_N(uint16_t to)
 // {
-  // RF24NetworkHeader header(/*to node*/ to, /*type*/ 'N' /*Time*/);
+// RF24NetworkHeader header(/*to node*/ to, /*type*/ 'N' /*Time*/);
 
-  // Serial.printf_P(PSTR("---------------------------------\n\r"));
-  // Serial.printf_P(PSTR("%lu: APP Sending active nodes to 0%o...\n\r"),millis(),to);
-  // return network.write(header,active_nodes,sizeof(active_nodes));
+// Serial.printf_P(PSTR("---------------------------------\n\r"));
+// Serial.printf_P(PSTR("%lu: APP Sending active nodes to 0%o...\n\r"),millis(),to);
+// return network.write(header,active_nodes,sizeof(active_nodes));
 // }
 
 // /**
- // * Handle a 'T' message
- // *
- // * Add the node to the list of active nodes
- // */
+// * Handle a 'T' message
+// *
+// * Add the node to the list of active nodes
+// */
 // void handle_T(RF24NetworkHeader& header)
 // {
-  // // The 'T' message is just a ulong, containing the time
-  // unsigned long message;
-  // network.read(header,&message,sizeof(unsigned long));
-  // Serial.printf_P(PSTR("%lu: APP Received Time %lu from 0%o\n\r"),millis(),message,header.from_node);
+// // The 'T' message is just a ulong, containing the time
+// unsigned long message;
+// network.read(header,&message,sizeof(unsigned long));
+// Serial.printf_P(PSTR("%lu: APP Received Time %lu from 0%o\n\r"),millis(),message,header.from_node);
 
-  // // If this message is from ourselves or the base, don't bother adding it to the active nodes.
-  // if ( header.from_node != this_node || header.from_node > 00 )
-    // add_node(header.from_node);
+// // If this message is from ourselves or the base, don't bother adding it to the active nodes.
+// if ( header.from_node != this_node || header.from_node > 00 )
+// add_node(header.from_node);
 // }
 
 // /**
- // * Handle a 'V' message
- // *
- // * Add the node to the list of active nodes
- // */
+// * Handle a 'V' message
+// *
+// * Add the node to the list of active nodes
+// */
 // void handle_V(RF24NetworkHeader& header)
 // {
-  // // The 'V' contains values
-  // unsigned int message;
-  // network.read(header,&message,sizeof(unsigned int));
-  // Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
-  // valueRF = message;
+// // The 'V' contains values
+// unsigned int message;
+// network.read(header,&message,sizeof(unsigned int));
+// Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
+// valueRF = message;
 
-  // // If this message is from ourselves or the base, don't bother adding it to the active nodes.
-  // if ( header.from_node != this_node || header.from_node > 00 )
-    // add_node(header.from_node);
+// // If this message is from ourselves or the base, don't bother adding it to the active nodes.
+// if ( header.from_node != this_node || header.from_node > 00 )
+// add_node(header.from_node);
 // }
 
 
 // /**
- // * Handle an 'N' message, the active node list
- // */
+// * Handle an 'N' message, the active node list
+// */
 // void handle_N(RF24NetworkHeader& header)
 // {
-  // static uint16_t incoming_nodes[max_active_nodes];
+// static uint16_t incoming_nodes[max_active_nodes];
 
-  // network.read(header,&incoming_nodes,sizeof(incoming_nodes));
-  // Serial.printf_P(PSTR("%lu: APP Received nodes from 0%o\n\r"),millis(),header.from_node);
+// network.read(header,&incoming_nodes,sizeof(incoming_nodes));
+// Serial.printf_P(PSTR("%lu: APP Received nodes from 0%o\n\r"),millis(),header.from_node);
 
-  // int i = 0;
-  // while ( i < max_active_nodes && incoming_nodes[i] > 00 )
-    // add_node(incoming_nodes[i++]);
+// int i = 0;
+// while ( i < max_active_nodes && incoming_nodes[i] > 00 )
+// add_node(incoming_nodes[i++]);
 // }
 
 // /**
- // * Add a particular node to the current list of active nodes
- // */
+// * Add a particular node to the current list of active nodes
+// */
 // void add_node(uint16_t node)
 // {
-  // // Do we already know about this node?
-  // short i = num_active_nodes;
-  // while (i--)
-  // {
-    // if ( active_nodes[i] == node )
-      // break;
-  // }
-  // // If not, add it to the table
-  // if ( i == -1 && num_active_nodes < max_active_nodes )
-  // {
-    // active_nodes[num_active_nodes++] = node; 
-    // Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
-  // }
+// // Do we already know about this node?
+// short i = num_active_nodes;
+// while (i--)
+// {
+// if ( active_nodes[i] == node )
+// break;
 // }
+// // If not, add it to the table
+// if ( i == -1 && num_active_nodes < max_active_nodes )
+// {
+// active_nodes[num_active_nodes++] = node; 
+// Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
+// }
+// }
+
+
 
 
 
