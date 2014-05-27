@@ -454,8 +454,8 @@ void loop() {
 
   if (LightMetro.check() == 1) {
 
-    uint8_t brightness=peakMix.Dpp()/2028;
-    brightness = map(brightness, 0, lookUpIndexes, 30, lookUpIndexes);
+    uint8_t brightness=peakMix.Dpp()/1024;
+    brightness = map(brightness, 0, lookUpIndexes, 20, lookUpIndexes);
 
     // subtract the last reading:
     totalL= totalL - readingsL[indxL];        
