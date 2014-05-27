@@ -29,8 +29,16 @@ public:
 		if (stepCounter == 0)
 		{	
 			int message = *pSeq++;
-			network.write(header,&message,sizeof(int));
-			//Serial.printf_P(PSTR("%lu: APP Send Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
+			int ok = network.write(header,&message,sizeof(int));
+			// // Notify us of the result
+		   if (ok)
+		   {
+		    Serial.printf_P(PSTR("%lu: Master Send ok: Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
+		   }
+		   else
+		   {
+		    Serial.printf_P(PSTR("%lu: Master Send faild: Value %lu to 0%o\n\r"),millis(),message,node_address_set[nodeNr]);
+		   }
 
 			stepCounter = *pSeq++ * (1.0/speed);
 			stepCounter--;
@@ -108,11 +116,11 @@ int node1_Mod4[2] = { 1, 10};
 
 MasterNode MasterNode1(1, node1_seqNr, 4, node1_Mod1, 1, node1_Mod2, 1, node1_Mod3, 1, node1_Mod4, 1);
 
-int node2_seqNr[8] = { 1, 100, 2, 100, 3, 100, 4, 100};
-int node2_Mod1[2] = { 1, 1000};
-int node2_Mod2[2] = { 1, 1000};
-int node2_Mod3[2] = { 1, 1000};
-int node2_Mod4[2] = { 1, 1000};
+int node2_seqNr[8] = { 1, 10, 2, 10, 3, 10, 4, 10};
+int node2_Mod1[2] = { 1, 10};
+int node2_Mod2[2] = { 1, 10};
+int node2_Mod3[2] = { 1, 10};
+int node2_Mod4[2] = { 1, 10};
 
 MasterNode MasterNode2(2, node2_seqNr, 4, node2_Mod1, 1, node2_Mod2, 1, node2_Mod3, 1, node2_Mod4, 1);
 
