@@ -51,41 +51,9 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	
 	if (mReadPtr < 0)
 		mReadPtr += loopLength;
-
-	// Length and stepsize of interpolated read
-	// number of read samples is altered by difference between old and new delay
-	// if target delay hase not changed, step == 1.0
-
-	// float length = readEndPtr - mReadPtr;
-	// // make sure it is within buffer bounds
-
-	// if (length < 0)
-		// length += delayBuffer.mDelayLength;
-	// float step = length / (float)bufferSize;
 	
 	for (size_t i = 0; i < bufferSize; i++)
 	{
-		// size_t readInt = (size_t)mReadPtr;
-		// float readFrac = mReadPtr - readInt;
-
-		// float x1, x2;
-		// if (readInt != delayBuffer.mDelayLength - 1)
-		// {
-		  // x1 = (float)delayBuffer.mContent[readInt];
-		  // x2 = (float)delayBuffer.mContent[readInt + 1];
-		// }
-		// else
-		// {
-		  // x1 = (float)delayBuffer.mContent[readInt];
-		  // x2 = (float)delayBuffer.mContent[0];
-		// }
-
-		// //outBuffer[i] = LinearInterpolation(x1, x2, readFrac);
-
-		// //allpass interpolation
-		// mOldValue = (readFrac*x2 + x1 - readFrac*mOldValue);
-		// outBuffer[i] = (uint32_t) mOldValue;
-		
 		outBuffer[i] = delayBuffer.mContent[mReadPtr++];
 		
 		if (mReadPtr >= loopLength)
@@ -93,7 +61,7 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	}
  }
  
-  void Delay::update(void)
+  void AudioEffectDelay::update(void)
  {
 
 	audio_block_t* block;
@@ -107,5 +75,4 @@ void DelayBuffer::Write(uint32_t* inBuffer, uint32_t bufferSize, bool hold)
 	
 	transmit(block);
 	release(block);
-	
  }

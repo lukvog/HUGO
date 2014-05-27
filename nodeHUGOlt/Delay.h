@@ -31,7 +31,7 @@ class DelayBuffer
 {
 
 friend class DelayTap;
-friend class Delay;
+friend class AudioEffectDelay;
 
 public:
 	DelayBuffer(size_t maxDelay)
@@ -58,17 +58,16 @@ protected:
 	size_t mWritePtr;
 };
 
-class Delay : public AudioStream
+class AudioEffectDelay : public AudioStream
 {
 public:
-	Delay() :
+	AudioEffectDelay(void) :
 	AudioStream(1,inputQueueArray),
 	mDelay(8192+AUDIO_BLOCK_SAMPLES),
 	targetDelay(0),
 	mHold(false),
 	loopLength(mDelay.mDelayLength)
 	{}
-	~Delay() {}
 
 	virtual void update(void);
 	void hold(bool hold) {
@@ -97,6 +96,19 @@ private:
 	int targetDelay;
 	int loopLength;
 };
+
+
+// class AudioEffectDelay : public AudioStream
+// {
+// public:
+	// AudioEffectDelay(void) :
+	// AudioStream(1,inputQueueArray)
+	// {}
+	// virtual void update(void);
+	
+// private:
+	// audio_block_t *inputQueueArray[1];
+// };
 
 
 #endif

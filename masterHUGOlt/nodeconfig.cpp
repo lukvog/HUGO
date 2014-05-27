@@ -17,9 +17,7 @@ uint8_t* address_at_eeprom_location = (uint8_t*)10;
 // What flag value is stored there so we know the value is valid?
 const uint8_t valid_eeprom_flag = 0xdf;
 
-// What are the actual node values that we want to use?
-// EEPROM locations are actually just indices into this array
-const uint16_t node_address_set[10] = { 00, 02, 05, 012, 015, 022, 025, 032, 035, 045 };
+
 
 uint8_t nodeconfig_read(void)
 {
