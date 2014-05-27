@@ -71,44 +71,44 @@ float delayVolume;
 int LowPassFilter[]={
   0,0,0,0,0,0,0,0};
 
-AudioInputI2S       audioInput;  // audio shield: mic or line-in 
+AudioInputI2S       audioInput;  // audio shield: mic or line-in
+AudioMixer4        inMix;
 AudioEffectDelay 	staticDelay;
-AudioPeak            peak;
 AudioSynthWaveform 	osc1;
 AudioSynthWaveform 	osc2;
 AudioSynthWaveform	osc3;
+AudioMixer4			mixOsc;
 AudioMixer4			mixSources;
 AudioFilterBiquad    formantFilter1(ToneFilter1);
 AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
 AudioMixer4        mixFormants;
 AudioFilterBiquad	LowPass(LowPassFilter);
-AudioMixer4        outMix;
+AudioPeak            peak;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
 // Both channels of the audio input go to the FIR filter
 
-AudioConnection c15(audioInput, 0, staticDelay, 0);
+AudioConnection c1(audioInput, 0, staticDelay, 0);
+AudioConnection c2(staticDelay, 0, inMix, 0);
+AudioConnection c3(osc1, 0, mixOsc, 0);
+AudioConnection c4(osc2, 0, mixOsc, 1);
+AudioConnection c5(osc3, 0, mixOsc, 2);
+AudioConnection c6(mixOsc, 0, mixSources, 0);
+AudioConnection c7(inMix, 0, mixSources, 1);
 
-AudioConnection c2(osc1, 0, mixSources, 0);
-AudioConnection c3(osc2, 0, mixSources, 1);
-AudioConnection c4(osc3, 0, mixSources, 2);
-AudioConnection c5(staticDelay, 0, mixSources, 3);
+AudioConnection c8(mixSources, 0, formantFilter1, 0);
+AudioConnection c9(mixSources, 0, formantFilter2, 0);
+AudioConnection c10(mixSources, 0, formantFilter3, 0);
 
-AudioConnection c6(mixSources, 0, formantFilter1, 0);
-AudioConnection c7(mixSources, 0, formantFilter2, 0);
-AudioConnection c16(mixSources, 0, formantFilter3, 0);
-
-AudioConnection c8(staticDelay, 0, mixFormants, 0);
-AudioConnection c9(formantFilter1, 0, mixFormants, 1);
-AudioConnection c10(formantFilter2, 0, mixFormants, 2);
-AudioConnection c17(formantFilter3, 0, mixFormants, 3);
-AudioConnection c18(mixFormants, 0, LowPass, 0);
-AudioConnection c19(LowPass, 0, outMix, 0);
-AudioConnection c11(outMix, 0, audioOutput, 0);
-
-AudioConnection c20(outMix, 0, peak, 0);
+AudioConnection c11(inMix, 0, mixFormants, 0);
+AudioConnection c12(formantFilter1, 0, mixFormants, 1);
+AudioConnection c13(formantFilter2, 0, mixFormants, 2);
+AudioConnection c14(formantFilter3, 0, mixFormants, 3);
+AudioConnection c15(mixFormants, 0, LowPass, 0);
+AudioConnection c16(LowPass, 0, peak, 0);
+AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
@@ -200,147 +200,145 @@ int average = 0;                // the average
 void setup() 
 {
 
-  Serial.begin(57600);
+	Serial.begin(57600);
 
-  //___________________________________________________________________________________
-  //IR Sensor
+	//___________________________________________________________________________________
+	//IR Sensor
 
-  //calibration for Walls
-  int wall[100];
-  int count = 0;
-  int sum = 0;
+	//calibration for Walls
+	int wall[100];
+	int count = 0;
+	int sum = 0;
 
-  for (int thisReading = 0; thisReading < numReadings; thisReading++)
-    readings[thisReading] = 0; 
+	for (int thisReading = 0; thisReading < numReadings; thisReading++)
+	readings[thisReading] = 0; 
 
-  //calibration for Walls
+	//calibration for Walls
 
-  for(int i=0; i < 100; i++){
-    irVal = analogRead(irPin);
-    // Linearize Sharp GP2YOA1YK
-    float irDist = 11.0e8 * pow(irVal, -2.438);
-    //float irDist = 1000/irVal;
+	for(int i=0; i < 100; i++){
+	irVal = analogRead(irPin);
+	// Linearize Sharp GP2YOA1YK
+	float irDist = 11.0e8 * pow(irVal, -2.438);
+	//float irDist = 1000/irVal;
 
-    if (irDist >= 100 && irDist <= 550)  
-    {
+	if (irDist >= 100 && irDist <= 550)  
+	{
 
-      wall[count] = irDist;
-      Serial.print(count);
-      Serial.print("range: ");
-      Serial.println(irDist, DEC);
-      count++;
-    }
-    delay(50);
-  };
+	  wall[count] = irDist;
+	  Serial.print(count);
+	  Serial.print("range: ");
+	  Serial.println(irDist, DEC);
+	  count++;
+	}
+	delay(50);
+	};
 
-  //Serial.println(count);
+	//Serial.println(count);
 
-  for(int i=0; i < count; i++){
-    sum += wall[i];
-  };
+	for(int i=0; i < count; i++){
+	sum += wall[i];
+	};
 
-  //Serial.println(sum);
+	//Serial.println(sum);
 
-  wallDist = (sum/count) - 30;
-  if (wallDist < 50)
-  {
-    wallDist = 550;
-  }
+	wallDist = (sum/count) - 30;
+	if (wallDist < 50)
+	{
+	wallDist = 550;
+	}
 
 
-  //___________________________________________________________________________________
-  //RF24
+	//___________________________________________________________________________________
+	//RF24
 
-  ///SPI Setup
-  SPI.setMOSI(7);
-  SPI.setSCK(14);
-  //radio.setDataRate(RF24_2MBPS);
-  //radio.setDataRate(RF24_1MBPS);
-  //radio.setDataRate(RF24_250KBPS);
+	///SPI Setup
+	SPI.setMOSI(7);
+	SPI.setSCK(14);
+	//radio.setDataRate(RF24_2MBPS);
+	//radio.setDataRate(RF24_1MBPS);
+	//radio.setDataRate(RF24_250KBPS);
 
-  //
-  // Print preamble
+	//
+	// Print preamble
 
-  delay(2000);
-  Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
-  Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
+	delay(2000);
+	Serial.printf_P(PSTR("\n\rRF24Network/examples/meshping/\n\r"));
+	Serial.printf_P(PSTR("VERSION: " __TAG__ "\n\r"));
 
-  //
-  // Pull node address out of eeprom 
-  //
-  // Which node are we?
-  this_node = nodeconfig_read();
+	//
+	// Pull node address out of eeprom 
+	//
+	// Which node are we?
+	this_node = nodeconfig_read();
 
-  //
-  // Bring up the RF network
-  //
-  SPI.begin();
-  radio.begin();
-  network.begin(/*channel*/ 100, /*node address*/ this_node );
+	//
+	// Bring up the RF network
+	//
+	SPI.begin();
+	radio.begin();
+	network.begin(/*channel*/ 100, /*node address*/ this_node );
 
-  //___________________________________________________________________________________
-  //LIGHT
+	//___________________________________________________________________________________
+	//LIGHT
 
-  pinMode(bulb, OUTPUT);
+	pinMode(bulb, OUTPUT);
 
-  //___________________________________________________________________________________
-  // Audio connections require memory to work.  For more
-  // detailed information, see the MemoryAndCpuUsage example
+	//___________________________________________________________________________________
 
-  pinMode(Test1_PIN,INPUT_PULLUP);
-  pinMode(Test0_PIN,INPUT_PULLUP);
+	pinMode(Test1_PIN,INPUT_PULLUP);
+	pinMode(Test0_PIN,INPUT_PULLUP);
 
-  // It doesn't work properly with any less than 8
+	AudioMemory(15);
 
-  AudioMemory(15);
+	audioShield.enable();
 
-  audioShield.enable();
+	audioShield.inputSelect(myInput);
+	audioShield.volume(0.7);	
 
-  audioShield.inputSelect(myInput);
-  audioShield.volume(0.7);	
+	// volumes 
+	inMix.gain(0, 0.5);				// controlled by input volume sequence (base level can be set in SeqDef.h as "InVolumeSeq.mainGainLevel")
+	mixOsc.gain(0, 0.3);			// osc1
+	mixOsc.gain(1, 0.3);			// osc2
+	mixOsc.gain(2, 0.3);			// osc3
+	mixSources.gain(0, 0.5);		// osc's
+	mixSources.gain(1, 0.5);		// delay
+	mixOsc.gain(0, 1);				// controlled by tone volume sequence (base level can be set in SeqDef.h as "ToneVolumeSeq.mainGainLevel")
+	mixFormants.gain(0, 0.3);		// delay
+	mixFormants.gain(1, 0.3);		// formant1
+	mixFormants.gain(2, 0.3);		// formant2
+	mixFormants.gain(3, 0.3);		// formant3
+	
+	// osc's init values
+	osc1.set_ramp_length(88);
+	osc2.set_ramp_length(88);
+	osc3.set_ramp_length(88);
+	osc1.amplitude(0);
+	osc2.amplitude(0);
+	osc3.amplitude(0);
 
-  delayVolume = 2;
+	// load Sequence arrays
+	setLPSeq();
+	setToneVolSeq();
+	setInVolSeq();
+	setDelayStateSeq();
+	setDelayLoopLengthSeq();
+	setFormantSeq();
+	setToneSeq();
 
-  mixSources.gain(0, 0.2);
-  mixSources.gain(1, 0.2);
-  mixSources.gain(2, 0.2);
-  mixSources.gain(3, delayVolume);
+	// set standard values for test cases when disable sequences
+	// formant fiter
+	setSopranO();
+	// delay loopLength
+	staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // equal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
+	// lowPass
+	calcBiquad(FILTER_LOPASS,10000,0,0.5,2147483648,44100,updateFilter);
+	LowPass.updateCoefs(updateFilter);
+	// osc's
+	osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
+	osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
+	osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
 
-  mixFormants.gain(0, 0.5);
-  mixFormants.gain(1, 0.5);
-  mixFormants.gain(2, 0.5);
-  mixFormants.gain(3, 0.5);
-
-  outMix.gain(0, 0.5);
-
-  setSopranO();
-
-  osc1.set_ramp_length(88);
-  osc2.set_ramp_length(88);
-  osc3.set_ramp_length(88);
-
-  osc1.amplitude(0);
-  osc2.amplitude(0);
-  osc3.amplitude(0);
-
-  staticDelay.setLoopLength(AUDIO_BLOCK_SAMPLES * 65); // equal the delayBufferLength of 8192 + AUDIO_BLOCK_SAMPLES
-
-  calcBiquad(FILTER_LOPASS,1000,0,0.5,2147483648,44100,updateFilter);
-  LowPass.updateCoefs(updateFilter);
-
-  setLPSeq();
-  setToneVolSeq();
-  setDelayStateSeq();
-  setDelayLoopLengthSeq();
-  setFormantSeq();
-  setToneSeq();
-
-  osc1.begin(0.1,tune_frequencies2_PGM[30], TONE_TYPE_SQUARE);
-  osc2.begin(0.1,tune_frequencies2_PGM[37], TONE_TYPE_SQUARE);
-  osc3.begin(0.1,tune_frequencies2_PGM[44], TONE_TYPE_SQUARE);
-
-  Serial.println("audio setup done");
-
+	Serial.println("audio setup done");
 }
 
 
@@ -364,12 +362,14 @@ Metro TimingMetro = Metro(MOD_RATE);
 float mainVolume = 0;
 int oldValue = 0;
 
+// sequence indices
 int actLPSeq = 2;
 int actFromSeq = 0;
 int actToneSeq = 3;
 int actDelStateSeq = 0;
 int actDelLoLeSeq = 0;
-int actVolSeq = 0;
+int actToneVolSeq = 0;
+int actInVolSeq = 0;
 
 bool seqReset = true;
 
@@ -471,7 +471,35 @@ void loop() {
   }
 
   if (TimingMetro.check() == 1) {
-
+	
+	// In volume sequence
+    if ((masterInVolSeq[actInVolSeq]->seqCounter >= masterInVolSeq[actInVolSeq]->seqLength) || seqReset)
+    {
+      if ((masterInVolSeq[actInVolSeq]->loop == true) || seqReset)
+      {
+        masterInVolSeq[actInVolSeq]->reset();
+        masterInVolSeq[actInVolSeq]->seqProceed();
+      }			
+    }
+    else
+    {	
+      masterInVolSeq[actInVolSeq]->seqProceed();
+    }
+	
+	// tone volume sequence
+    if ((masterToneVolSeq[actToneVolSeq]->seqCounter >= masterToneVolSeq[actToneVolSeq]->seqLength) || seqReset)
+    {
+      if ((masterToneVolSeq[actToneVolSeq]->loop == true) || seqReset)
+      {
+        masterToneVolSeq[actToneVolSeq]->reset();
+        masterToneVolSeq[actToneVolSeq]->seqProceed();
+      }			
+    }
+    else
+    {	
+      masterToneVolSeq[actToneVolSeq]->seqProceed();
+    }
+	
     // LP filter sequence
     if ((masterLPSeq[actLPSeq]->seqCounter >= masterLPSeq[actLPSeq]->seqLength) || seqReset)
     {
@@ -569,20 +597,7 @@ void loop() {
     {	
       masterDelayLoopLengthSeq[actDelLoLeSeq]->seqProceed();
     }
-
-    // volume sequence
-    if ((masterVolSeq[actVolSeq]->seqCounter >= masterVolSeq[actVolSeq]->seqLength) || seqReset)
-    {
-      if ((masterVolSeq[actVolSeq]->loop == true) || seqReset)
-      {
-        masterVolSeq[actVolSeq]->reset();
-        masterVolSeq[actVolSeq]->seqProceed();
-      }			
-    }
-    else
-    {	
-      masterVolSeq[actVolSeq]->seqProceed();
-    }
+	
     seqReset = false;
   }
 
@@ -780,9 +795,18 @@ void loop() {
  */
 void handle_S(RF24NetworkHeader& header)
 {
-  int message;
-  network.read(header,&message,sizeof(int));
-  Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
+	int message;
+	network.read(header,&message,sizeof(int));
+	Serial.printf_P(PSTR("%lu: APP Received Value %lu from 0%o\n\r"),millis(),message,header.from_node);
+	// set sequence indices
+	actLPSeq = message;
+	actFromSeq = message;
+	actToneSeq = message*3;
+	actDelStateSeq = message;
+	actDelLoLeSeq = message;
+	actToneVolSeq = message;
+	actInVolSeq = message;
+	seqReset = true;
 }
 
 

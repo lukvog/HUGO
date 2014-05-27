@@ -11,21 +11,39 @@
 #include <vector>
 
 //------------------------------------------------
-//---------------------- Volume ------------------
+//----------------- Tone Volume ------------------
 //------------------------------------------------
 
-int volumeSeq1_raw[8] = { 0, 2000, -40, 1000, 0, 2000, -40, 1000 };
-int volumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
+int toneVolumeSeq1_raw[8] = { 0, 2000, -30, 1000, 0, 2000, -30, 1000 };
+int toneVolumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
 
-VolumeSeq volumeSeq1(volumeSeq1_raw, 4);
-VolumeSeq volumeSeq2(volumeSeq2_raw, 2);
+ToneVolumeSeq toneVolumeSeq1(toneVolumeSeq1_raw, 4);
+ToneVolumeSeq toneVolumeSeq2(toneVolumeSeq2_raw, 2);
 
-std::vector<VolumeSeq*> masterVolSeq;
+std::vector<ToneVolumeSeq*> masterToneVolSeq;
 
 void setToneVolSeq()
 {
-	masterVolSeq.push_back(&volumeSeq1);
-	masterVolSeq.push_back(&volumeSeq2);
+	masterToneVolSeq.push_back(&toneVolumeSeq1);
+	masterToneVolSeq.push_back(&toneVolumeSeq2);
+}
+
+//------------------------------------------------
+//---------------- Input Volume ------------------
+//------------------------------------------------
+
+int inVolumeSeq1_raw[8] = { -10, 1000, 0, 2000, -10, 1000,  0, 2000};
+int inVolumeSeq2_raw[4] = { -10, 1000, -50, 1000 };
+
+InVolumeSeq inVolumeSeq1(inVolumeSeq1_raw, 4);
+InVolumeSeq inVolumeSeq2(inVolumeSeq2_raw, 2);
+
+std::vector<InVolumeSeq*> masterInVolSeq;
+
+void setInVolSeq()
+{
+	masterInVolSeq.push_back(&inVolumeSeq1);
+	masterInVolSeq.push_back(&inVolumeSeq2);
 }
 
 //------------------------------------------------
