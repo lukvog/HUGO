@@ -246,27 +246,27 @@ void loop() {
 	{
 		int time = millis();
 
-		// // Node 1 - Seq Nr.
-		// MasterNode1.SeqNr.Process();
-		// // Node 1 - Modulation 1
-		// MasterNode1.Mod1.Process();
-		// // Node 1 - Modulation 2
-		// MasterNode1.Mod2.Process();
-		// // Node 1 - Modulation 3
-		// MasterNode1.Mod3.Process();
-		// // Node 1 - Modulation 4
-		// MasterNode1.Mod4.Process();
+		// Node 1 - Seq Nr.
+		MasterNode1.SeqNr.Process();
+		// Node 1 - Modulation 1
+		MasterNode1.Mod1.Process();
+		// Node 1 - Modulation 2
+		MasterNode1.Mod2.Process();
+		// Node 1 - Modulation 3
+		MasterNode1.Mod3.Process();
+		// Node 1 - Modulation 4
+		MasterNode1.Mod4.Process();
 		
-		// Node 2 - Seq Nr.
-		MasterNode2.SeqNr.Process();
-		// Node 2 - Modulation 1
-		MasterNode2.Mod1.Process();
-		// Node 2 - Modulation 2
-		MasterNode2.Mod2.Process();
-		// Node 2 - Modulation 3
-		MasterNode2.Mod3.Process();
-		// Node 2 - Modulation 4
-		MasterNode2.Mod4.Process();
+		// // Node 2 - Seq Nr.
+		// MasterNode2.SeqNr.Process();
+		// // Node 2 - Modulation 1
+		// MasterNode2.Mod1.Process();
+		// // Node 2 - Modulation 2
+		// MasterNode2.Mod2.Process();
+		// // Node 2 - Modulation 3
+		// MasterNode2.Mod3.Process();
+		// // Node 2 - Modulation 4
+		// MasterNode2.Mod4.Process();
 		
 		// // Node 3 - Seq Nr.
 		// MasterNode3.SeqNr.Process();
