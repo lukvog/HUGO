@@ -19,7 +19,7 @@
 #include <RF24.h>
 #include "nodeconfig.h"
 
-#define MOD_RATE 100
+#define MOD_RATE 500
 
 #include "sequences.h"
 
@@ -251,7 +251,7 @@ void loop() {
 		// // Node 1 - Modulation 1
 		 MasterNode1.Mod1.Process();
 		// // Node 1 - Modulation 2
-		 MasterNode1.Mod2.Process();
+		 //MasterNode1.Mod2.Process();
 		// // Node 1 - Modulation 3
 		// MasterNode1.Mod3.Process();
 		// // Node 1 - Modulation 4
@@ -262,7 +262,7 @@ void loop() {
 		// Node 2 - Modulation 1
 		MasterNode2.Mod1.Process();
 		// Node 2 - Modulation 2
-		MasterNode2.Mod2.Process();
+		//MasterNode2.Mod2.Process();
 		// Node 2 - Modulation 3
 		//MasterNode2.Mod3.Process();
 		// Node 2 - Modulation 4
@@ -273,7 +273,7 @@ void loop() {
 		// // Node 3 - Modulation 1
 		 MasterNode3.Mod1.Process();
 		// // Node 3 - Modulation 2
-		 MasterNode3.Mod2.Process();
+		// MasterNode3.Mod2.Process();
 		// // Node 3 - Modulation 3
 		// MasterNode3.Mod3.Process();
 		// // Node 3 - Modulation 4
@@ -284,7 +284,7 @@ void loop() {
 		// // Node 4 - Modulation 1
 		 MasterNode4.Mod1.Process();
 		// // Node 4 - Modulation 2
-		 MasterNode4.Mod2.Process();
+		// MasterNode4.Mod2.Process();
 		// // Node 4 - Modulation 3
 		// MasterNode4.Mod3.Process();
 		// // Node 4 - Modulation 4
@@ -295,7 +295,7 @@ void loop() {
 		// // Node 5 - Modulation 1
 		 MasterNode5.Mod1.Process();
 		// // Node 5 - Modulation 2
-		 MasterNode5.Mod2.Process();
+		// MasterNode5.Mod2.Process();
 		// // Node 5 - Modulation 3
 		// MasterNode5.Mod3.Process();
 		// // Node 5 - Modulation 4
@@ -306,7 +306,7 @@ void loop() {
 		// // Node 6 - Modulation 1
 		 MasterNode6.Mod1.Process();
 		// // Node 6 - Modulation 2
-		 MasterNode6.Mod2.Process();
+		// MasterNode6.Mod2.Process();
 		// // Node 6 - Modulation 3
 		// MasterNode6.Mod3.Process();
 		// // Node 6 - Modulation 4
@@ -317,7 +317,7 @@ void loop() {
 		// // Node 7 - Modulation 1
 		 MasterNode7.Mod1.Process();
 		// // Node 7 - Modulation 2
-		 MasterNode7.Mod2.Process();
+		// MasterNode7.Mod2.Process();
 		// // Node 7 - Modulation 3
 		// MasterNode7.Mod3.Process();
 		// // Node 7 - Modulation 4
@@ -328,7 +328,7 @@ void loop() {
 		// // Node 8 - Modulation 1
 		 MasterNode8.Mod1.Process();
 		// // Node 8 - Modulation 2
-		 MasterNode8.Mod2.Process();
+		// MasterNode8.Mod2.Process();
 		// // Node 8 - Modulation 3
 		// MasterNode8.Mod3.Process();
 		// // Node 8 - Modulation 4
@@ -339,7 +339,7 @@ void loop() {
 		// // Node 9 - Modulation 1
 		 MasterNode9.Mod1.Process();
 		// // Node 9 - Modulation 2
-		 MasterNode9.Mod2.Process();
+		// MasterNode9.Mod2.Process();
 		// // Node 9 - Modulation 3
 		// MasterNode9.Mod3.Process();
 		// // Node 9 - Modulation 4
@@ -350,7 +350,7 @@ void loop() {
 		// // Node 10 - Modulation 1
 		 MasterNode10.Mod1.Process();
 		// // Node 10 - Modulation 2
-		 MasterNode10.Mod2.Process();
+		// MasterNode10.Mod2.Process();
 		// // Node 10 - Modulation 3
 		// MasterNode10.Mod3.Process();
 		// // Node 10 - Modulation 4
@@ -361,7 +361,7 @@ void loop() {
 		// // Node 11 - Modulation 1
 		 MasterNode11.Mod1.Process();
 		// // Node 11 - Modulation 2
-		 MasterNode11.Mod2.Process();
+		// MasterNode11.Mod2.Process();
 		// // Node 11 - Modulation 3
 		// MasterNode11.Mod3.Process();
 		// // Node 11 - Modulation 4
@@ -372,7 +372,7 @@ void loop() {
 		// // Node 12 - Modulation 1
 		 MasterNode12.Mod1.Process();
 		// // Node 12 - Modulation 2
-		 MasterNode12.Mod2.Process();
+		// MasterNode12.Mod2.Process();
 		// // Node 12 - Modulation 3
 		// MasterNode12.Mod3.Process();
 		// // Node 12 - Modulation 4

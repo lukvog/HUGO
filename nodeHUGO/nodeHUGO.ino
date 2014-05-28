@@ -396,6 +396,7 @@ void loop() {
   //_____________________________________
   //Read Peak
 
+/*
   if (PeakMetro.check() == 1) {
     uint8_t peakRead=peakMix.Dpp()/2184.5321; // 65536 / 2184.5321 ~ 30.
     for(cnt=0;cnt<peakRead;cnt++) Serial.print(">");
@@ -403,6 +404,8 @@ void loop() {
     Serial.println();
     peakMix.begin(); // no need to call .stop if all you want
   };
+  
+  */
 
 
   //___________________________________________________________________________________
@@ -474,6 +477,7 @@ void loop() {
      averageL = totalL / numReadingsL; 
      
      analogWrite(bulb, pwmActual[averageL]);
+     peakMix.begin(); 
      */
 
     // change the brightness for next time through the loop:

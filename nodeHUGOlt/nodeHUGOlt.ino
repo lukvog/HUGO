@@ -180,7 +180,7 @@ int pwmActual[] = {
 
 
 //smoothing
-const int numReadingsL = 10;
+const int numReadingsL = 5;
 int readingsL[numReadingsL];      // the readings from the analog input
 int indxL = 0;                  // the index of the current reading
 int totalL = 0;                  // the running total
@@ -371,6 +371,7 @@ Metro TimingMetro = Metro(MOD_RATE);
 // audio volume
 float mainVolume = 0;
 int oldValue = 0;
+float prox = 0.0;
 
 int actLPSeq = 2;
 int actFromSeq = 0;
@@ -397,6 +398,7 @@ void loop() {
   //_____________________________________
   //Read Peak
 
+/*
   if (PeakMetro.check() == 1) {
     uint8_t peakRead=peakMix.Dpp()/2028;
     for(cnt=0;cnt<peakRead;cnt++) Serial.print(">");
@@ -404,6 +406,8 @@ void loop() {
     Serial.println();
     peakMix.begin(); // no need to call .stop if all you want
   };
+  
+  */
 
 
   //___________________________________________________________________________________
@@ -452,7 +456,7 @@ void loop() {
   if (LightMetro.check() == 1) {
 
     uint8_t brightness=peakMix.Dpp()/1024;
-    brightness = map(brightness, 0, lookUpIndexes, 35, lookUpIndexes);
+    brightness = pwmActual[brightness];
 
     // subtract the last reading:
     totalL= totalL - readingsL[indxL];        
@@ -470,8 +474,11 @@ void loop() {
 
     // calculate the average:
     averageL = totalL / numReadingsL; 
-
-    analogWrite(bulb, pwmActual[averageL]);
+    
+    int mapped = map(averageL, 0, 255, 7, 500);
+   
+    analogWrite(bulb, mapped);
+    peakMix.begin();
     /*
     // change the brightness for next time through the loop:
      brightness = brightness + fadeAmount;
@@ -495,8 +502,14 @@ void loop() {
   // every 10 ms, check for adjustment
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
+    //prox = (float) changed;
+    //prox = (changed - 50) / 900;
+    //prox = map(changed, 50, 500, 0.5, 0.0);
+    //Serial.println(prox);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
+      mainVolume = mainVolume + prox;
+ 
       audioShield.volume(mainVolume);
     }
   }
@@ -709,6 +722,8 @@ void loop() {
   ////////////////////////////////
   //////////////////////////
   if (WriteMetro.check() == 1) {
+    Serial.println(mainVolume);
+    Serial.println(prox);
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
   }
