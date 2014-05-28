@@ -1,6 +1,6 @@
 /*
  Copyright (C) 2011 James Coliz, Jr. <maniacbug@ymail.com>
-
+ 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -19,7 +19,8 @@ const uint8_t valid_eeprom_flag = 0xdf;
 
 // What are the actual node values that we want to use?
 // EEPROM locations are actually just indices into this array
-const uint16_t node_address_set[13] = { 00, 01, 02, 03, 04, 05, 011, 012, 013, 014, 015, 021, 022 };
+const uint16_t node_address_set[13] = { 
+  00, 01, 02, 03, 04, 05, 011, 012, 013, 014, 015, 021, 022 };
 
 uint8_t nodeconfig_read(void)
 {
@@ -35,26 +36,28 @@ uint8_t nodeconfig_read(void)
   }
   else
   {
-    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 via serial to set node address\n\r"));
+    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 or ';',':','<' via serial to set node address\n\r"));
     while(1)
     {
       nodeconfig_listen();
     }
   }
-  
+
   return result;
 }
+
 
 void nodeconfig_listen(void)
 {
   //
   // Listen for serial input, which is how we set the address
   //
+ 
   if (Serial.available())
   {
     // If the character on serial input is in a valid range...
     char c = Serial.read();
-    if ( c >= '0' && c <= '9' )
+    if ( c >= '0' && c <= '<' )
     {
       // It is our address
       eeprom_write_byte(address_at_eeprom_location,valid_eeprom_flag);
@@ -65,5 +68,8 @@ void nodeconfig_listen(void)
       while(1);
     }
   }
+
+
 }
 // vim:ai:cin:sts=2 sw=2 ft=cpp
+
