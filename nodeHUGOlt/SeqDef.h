@@ -13,6 +13,7 @@
 //------------------------------------------------
 //----------------- Sequence Base ----------------
 //------------------------------------------------
+extern bool seqReset;
 
 class Sequence
 {
@@ -26,7 +27,7 @@ public:
 	
 	void seqProceed()
 	{}
-	
+
 	void reset()
 	{
 		pSeq = seq;
@@ -45,21 +46,19 @@ public:
 };
 
 
-
-
 //------------------------------------------------
 //------------------ Tone Volume -----------------
 //------------------------------------------------
 
-extern AudioMixer4 outMix;
+extern AudioMixer4 mixSources;
 
-class VolumeSeq : public Sequence
+class ToneVolumeSeq : public Sequence
 {
 public:
-	VolumeSeq(int* _seq, int _seqLength)
+	ToneVolumeSeq(int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
-	~VolumeSeq() {}
+	~ToneVolumeSeq() {}
 	
 	void setInterpolation(float _nextGain_dB)
 	{
@@ -80,12 +79,9 @@ public:
 					pSeq = seq;
 			}
 			
-			gain_dB = *pSeq++;			
+			gain_dB = *pSeq++ + mainGainLevel;			
 			float gain = pow(10.0, (float)gain_dB/20.0);
-			outMix.gain(0, gain);
-			// mixFormants.gain(1, gain);
-			// mixFormants.gain(2, gain);
-			// mixFormants.gain(3, gain);
+			mixSources.gain(0, gain);
 			
 			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
 			stepCounter--;
@@ -97,7 +93,7 @@ public:
 			else
 				pSeqNext = seq;
 				
-			float nextGain_dB= *pSeqNext;
+			float nextGain_dB= *pSeqNext + mainGainLevel;
 			setInterpolation(nextGain_dB);
 
 		}
@@ -105,10 +101,7 @@ public:
 		{
 			gain_dB = gain_dB + gain_dB_step;
 			float gain = pow(10, (float)gain_dB/20.0);
-			outMix.gain(0, gain);
-			// mixFormants.gain(1, gain);
-			// mixFormants.gain(2, gain);
-			// mixFormants.gain(3, gain);
+			mixSources.gain(0, gain);
 			
 			stepCounter--;
 			if(stepCounter == 0)
@@ -116,6 +109,75 @@ public:
 		}
 	}
 	
+	float mainGainLevel = 6.0;
+	float gain_dB;
+	float gain_dB_step;
+};
+
+//------------------------------------------------
+//----------------- Input Volume -----------------
+//------------------------------------------------
+
+extern AudioMixer4 inMix;
+
+class InVolumeSeq : public Sequence
+{
+public:
+	InVolumeSeq(int* _seq, int _seqLength)
+		: Sequence(_seq, _seqLength)
+	{}
+	~InVolumeSeq() {}
+	
+	void setInterpolation(float _nextGain_dB)
+	{
+		gain_dB_step = (_nextGain_dB - gain_dB) / (float)stepCounter;
+	}
+	
+	void seqProceed()
+	{
+		
+		if (stepCounter == 0)
+		{
+			while(*(pSeq+1) == 0) // to handle delay length 0
+			{			
+				seqCounter++;			
+				if(seqCounter+1 < seqLength)
+					pSeq = pSeq + 2;
+				else
+					pSeq = seq;
+			}
+			
+			gain_dB = *pSeq++ + mainGainLevel;			
+			float gain = pow(10.0, (float)gain_dB/20.0);
+			inMix.gain(0, gain);
+			
+			stepCounter = ((*pSeq++) / (MOD_RATE)) * (1.0/speed);
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
+				
+			if(seqCounter+1 < seqLength)
+				pSeqNext = pSeq;
+			else
+				pSeqNext = seq;
+				
+			float nextGain_dB= *pSeqNext + mainGainLevel;
+			setInterpolation(nextGain_dB);
+
+		}
+		else
+		{
+			gain_dB = gain_dB + gain_dB_step;
+			float gain = pow(10, (float)gain_dB/20.0);
+			inMix.gain(0, gain);
+			
+			stepCounter--;
+			if(stepCounter == 0)
+				seqCounter++;
+		}
+	}
+	
+	float mainGainLevel = -10.0;
 	float gain_dB;
 	float gain_dB_step;
 };

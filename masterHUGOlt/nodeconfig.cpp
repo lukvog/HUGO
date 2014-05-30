@@ -33,7 +33,7 @@ uint8_t nodeconfig_read(void)
   }
   else
   {
-    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 via serial to set node address\n\r"));
+    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 or ';',':','<' via serial to set node address\n\r"));
     while(1)
     {
       nodeconfig_listen();
@@ -52,7 +52,7 @@ void nodeconfig_listen(void)
   {
     // If the character on serial input is in a valid range...
     char c = Serial.read();
-    if ( c >= '0' && c <= '9' )
+    if ( c >= '0' && c <= '<' )
     {
       // It is our address
       eeprom_write_byte(address_at_eeprom_location,valid_eeprom_flag);

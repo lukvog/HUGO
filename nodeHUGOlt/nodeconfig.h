@@ -6,7 +6,6 @@
  version 2 as published by the Free Software Foundation.
  */
 
-
 #ifndef __NODECONFIG_H__
 #define __NODECONFIG_H__
 
