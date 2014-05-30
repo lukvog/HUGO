@@ -119,6 +119,7 @@ public:
 //------------------------------------------------
 
 extern AudioMixer4 inMix;
+extern uint8_t inputVolume;
 
 class InVolumeSeq : public Sequence
 {
@@ -147,7 +148,7 @@ public:
 					pSeq = seq;
 			}
 			
-			gain_dB = *pSeq++ + mainGainLevel;			
+			gain_dB = *pSeq++ + mainGainLevel - (1 * inputVolume);			
 			float gain = pow(10.0, (float)gain_dB/20.0);
 			inMix.gain(0, gain);
 			
@@ -161,13 +162,13 @@ public:
 			else
 				pSeqNext = seq;
 				
-			float nextGain_dB= *pSeqNext + mainGainLevel;
+			float nextGain_dB= *pSeqNext + mainGainLevel - (1 * inputVolume);
 			setInterpolation(nextGain_dB);
 
 		}
 		else
 		{
-			gain_dB = gain_dB + gain_dB_step;
+			gain_dB = gain_dB + gain_dB_step - (1 * inputVolume);
 			float gain = pow(10, (float)gain_dB/20.0);
 			inMix.gain(0, gain);
 			

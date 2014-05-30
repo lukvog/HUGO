@@ -72,6 +72,7 @@ int LowPassFilter[]={
   0,0,0,0,0,0,0,0};
 
 AudioInputI2S       audioInput;  // audio shield: mic or line-in
+AudioPeak            peakMix;
 AudioMixer4        inMix;
 AudioEffectDelay 	staticDelay;
 AudioSynthWaveform 	osc1;
@@ -84,13 +85,13 @@ AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
 AudioMixer4        mixFormants;
 AudioFilterBiquad	LowPass(LowPassFilter);
-AudioPeak            peakMix;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
 // Both channels of the audio input go to the FIR filter
 
 AudioConnection c1(audioInput, 0, staticDelay, 0);
+AudioConnection c16(audioInput, 0, peakMix, 0);
 AudioConnection c2(staticDelay, 0, inMix, 0);
 AudioConnection c3(osc1, 0, mixOsc, 0);
 AudioConnection c4(osc2, 0, mixOsc, 1);
@@ -107,7 +108,6 @@ AudioConnection c12(formantFilter1, 0, mixFormants, 1);
 AudioConnection c13(formantFilter2, 0, mixFormants, 2);
 AudioConnection c14(formantFilter3, 0, mixFormants, 3);
 AudioConnection c15(mixFormants, 0, LowPass, 0);
-AudioConnection c16(LowPass, 0, peakMix, 0);
 AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
@@ -305,13 +305,12 @@ void setup()
   audioShield.volume(0.7);	
 
   // volumes 
-  inMix.gain(0, 0.5);				// controlled by input volume sequence (base level can be set in SeqDef.h as "InVolumeSeq.mainGainLevel")
+  inMix.gain(0, 0.5);			// delay input :: controlled by input volume sequence (base level can be set in SeqDef.h as "InVolumeSeq.mainGainLevel")
   mixOsc.gain(0, 0.3);			// osc1
   mixOsc.gain(1, 0.3);			// osc2
   mixOsc.gain(2, 0.3);			// osc3
-  mixSources.gain(0, 0.5);		// osc's
-  mixSources.gain(1, 0.5);		// delay
-  mixOsc.gain(0, 1);				// controlled by tone volume sequence (base level can be set in SeqDef.h as "ToneVolumeSeq.mainGainLevel")
+  mixSources.gain(0, 0.5);		// all osc's :: controlled by tone volume sequence (base level can be set in SeqDef.h as "ToneVolumeSeq.mainGainLevel")
+  mixSources.gain(1, 0.5);		// delay			
   mixFormants.gain(0, 0.3);		// delay
   mixFormants.gain(1, 0.3);		// formant1
   mixFormants.gain(2, 0.3);		// formant2
@@ -386,6 +385,7 @@ bool seqReset = true;
 //////////////////////
 //Peak
 uint8_t cnt=0;
+uint8_t inputVolume = 0.0;
 
 
 //_________________________________________________________________________________________
@@ -519,6 +519,12 @@ void loop() {
   }
 
   if (TimingMetro.check() == 1) {
+  
+	// detect input volume (maximum value ca. 21)
+	inputVolume = peakMix.Dpp()/2184.5321;
+	Serial.print(inputVolume);
+	Serial.print("\n");
+    peakMix.begin();
 
     // In volume sequence
     if ((masterInVolSeq[actInVolSeq]->seqCounter >= masterInVolSeq[actInVolSeq]->seqLength) || seqReset)
