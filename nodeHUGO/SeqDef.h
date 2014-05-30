@@ -148,7 +148,7 @@ public:
 					pSeq = seq;
 			}
 			
-			gain_dB = *pSeq++ + mainGainLevel - (1 * inputVolume);			
+			gain_dB = *pSeq++ + mainGainLevel - (inputVolume);			
 			float gain = pow(10.0, (float)gain_dB/20.0);
 			inMix.gain(0, gain);
 			
@@ -162,13 +162,13 @@ public:
 			else
 				pSeqNext = seq;
 				
-			float nextGain_dB= *pSeqNext + mainGainLevel - (1 * inputVolume);
+			float nextGain_dB= *pSeqNext + mainGainLevel - (inputVolume);
 			setInterpolation(nextGain_dB);
 
 		}
 		else
 		{
-			gain_dB = gain_dB + gain_dB_step - (1 * inputVolume);
+			gain_dB = gain_dB + gain_dB_step - (inputVolume);
 			float gain = pow(10, (float)gain_dB/20.0);
 			inMix.gain(0, gain);
 			

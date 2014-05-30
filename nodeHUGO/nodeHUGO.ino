@@ -520,8 +520,10 @@ void loop() {
 
   if (TimingMetro.check() == 1) {
   
-	// detect input volume (maximum value ca. 21)
-	inputVolume = peakMix.Dpp()/2184.5321;
+	// detect input volume
+	int factor = 2;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
+	float tempInputVol = peakMix.Dpp()/1024.0;
+	inputVolume = factor * log10(tempInputVol);
 	Serial.print(inputVolume);
 	Serial.print("\n");
     peakMix.begin();
