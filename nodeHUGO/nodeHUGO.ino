@@ -370,6 +370,7 @@ Metro TimingMetro = Metro(MOD_RATE);
 // audio volume
 float mainVolume = 0;
 int oldValue = 0;
+float prox = 0.0;
 
 // sequence indices
 int actLPSeq = 2;
@@ -455,30 +456,32 @@ void loop() {
 
   if (LightMetro.check() == 1) {
 
-    /*
     uint8_t brightness=peakMix.Dpp()/1024;
-     brightness = map(brightness, 0, lookUpIndexes, 35, lookUpIndexes);
+    brightness = pwmActual[brightness];
+
+    // subtract the last reading:
+    totalL= totalL - readingsL[indxL];        
+    // read from the sensor:  
+    readingsL[indxL] = brightness;
+    // add the reading to the total:
+    totalL= totalL + readingsL[indxL];      
+    // advance to the next position in the array:  
+    indxL = indxL + 1;                    
+
+    // if we're at the end of the array...
+    if (indxL >= numReadingsL)              
+      // ...wrap around to the beginning:
+      indxL = 0;                          
+
+    // calculate the average:
+    averageL = totalL / numReadingsL; 
+    
+    int mapped = map(averageL, 0, 255, 7, 500);
+   
+    analogWrite(bulb, mapped);
+    peakMix.begin();
      
-     // subtract the last reading:
-     totalL= totalL - readingsL[indxL];        
-     // read from the sensor:  
-     readingsL[indxL] = brightness;
-     // add the reading to the total:
-     totalL= totalL + readingsL[indxL];      
-     // advance to the next position in the array:  
-     indxL = indxL + 1;                    
-     
-     // if we're at the end of the array...
-     if (indxL >= numReadingsL)              
-     // ...wrap around to the beginning:
-     indxL = 0;                          
-     
-     // calculate the average:
-     averageL = totalL / numReadingsL; 
-     
-     analogWrite(bulb, pwmActual[averageL]);
-     peakMix.begin(); 
-     */
+     /*
 
     // change the brightness for next time through the loop:
     brightness = brightness + fadeAmount;
@@ -489,7 +492,7 @@ void loop() {
     analogWrite(bulb, brightness);
 
 
-
+*/
     //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
     //LightMetro.reset();
 
@@ -502,12 +505,16 @@ void loop() {
   // every 10 ms, check for adjustment
   // volume control
 
-  // every 10 ms, check for adjustment
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
+    prox = (float) changed;
+    prox = (changed - 50.0) / 900.0;
+    //Serial.println(prox);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
-      audioShield.volume(mainVolume);
+      float mainVolumeChange = mainVolume + prox;
+      audioShield.volume(mainVolumeChange);
+      mainVolume = vol;
     }
   }
 
@@ -736,6 +743,7 @@ void loop() {
   if (WriteMetro.check() == 1) {
     Serial.print("valueRF = "); 
     Serial.println(valueRF);
+Serial.println(prox);
 
     //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
     //LightMetro.reset();

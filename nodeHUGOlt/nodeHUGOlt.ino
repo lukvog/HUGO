@@ -499,18 +499,16 @@ void loop() {
   // every 10 ms, check for adjustment
   // volume control
 
-  // every 10 ms, check for adjustment
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
-    //prox = (float) changed;
-    //prox = (changed - 50.0) / 900.0;
-    //prox = map(changed, 50, 500, 0.5, 0.0);
+    prox = (float) changed;
+    prox = (changed - 50.0) / 900.0;
     //Serial.println(prox);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
-      mainVolume = mainVolume + prox;
- 
-      audioShield.volume(mainVolume);
+      float mainVolumeChange = mainVolume + prox;
+      audioShield.volume(mainVolumeChange);
+      mainVolume = vol;
     }
   }
 
