@@ -241,37 +241,36 @@ void loop() {
   //////////////////////////////
   ////////////////////////////////
   //////////////////////////
-  
-	 if (SeqMetro.check() == 1)
+  if (SeqMetro.check() == 1)
 	{
 		int time = millis();
 
-		// Node 1 - Seq Nr.
-		MasterNode1.SeqNr.Process();
-		// Node 1 - Modulation 1
-		MasterNode1.Mod1.Process();
-		// Node 1 - Modulation 2
-		MasterNode1.Mod2.Process();
-		// Node 1 - Modulation 3
-		MasterNode1.Mod3.Process();
-		// Node 1 - Modulation 4
-		MasterNode1.Mod4.Process();
+		// // Node 1 - Seq Nr.
+		 MasterNode1.SeqNr.Process();
+		// // Node 1 - Modulation 1
+		 MasterNode1.Mod1.Process();
+		// // Node 1 - Modulation 2
+		 //MasterNode1.Mod2.Process();
+		// // Node 1 - Modulation 3
+		// MasterNode1.Mod3.Process();
+		// // Node 1 - Modulation 4
+		// MasterNode1.Mod4.Process();
 		
-		// // Node 2 - Seq Nr.
-		// MasterNode2.SeqNr.Process();
-		// // Node 2 - Modulation 1
-		// MasterNode2.Mod1.Process();
-		// // Node 2 - Modulation 2
-		// MasterNode2.Mod2.Process();
-		// // Node 2 - Modulation 3
-		// MasterNode2.Mod3.Process();
-		// // Node 2 - Modulation 4
-		// MasterNode2.Mod4.Process();
+		// Node 2 - Seq Nr.
+		MasterNode2.SeqNr.Process();
+		// Node 2 - Modulation 1
+		MasterNode2.Mod1.Process();
+		// Node 2 - Modulation 2
+		//MasterNode2.Mod2.Process();
+		// Node 2 - Modulation 3
+		//MasterNode2.Mod3.Process();
+		// Node 2 - Modulation 4
+		//MasterNode2.Mod4.Process();
 		
 		// // Node 3 - Seq Nr.
-		// MasterNode3.SeqNr.Process();
+		 MasterNode3.SeqNr.Process();
 		// // Node 3 - Modulation 1
-		// MasterNode3.Mod1.Process();
+		 MasterNode3.Mod1.Process();
 		// // Node 3 - Modulation 2
 		// MasterNode3.Mod2.Process();
 		// // Node 3 - Modulation 3
@@ -280,9 +279,9 @@ void loop() {
 		// MasterNode3.Mod4.Process();
 		
 		// // Node 4 - Seq Nr.
-		// MasterNode4.SeqNr.Process();
+		 MasterNode4.SeqNr.Process();
 		// // Node 4 - Modulation 1
-		// MasterNode4.Mod1.Process();
+		 MasterNode4.Mod1.Process();
 		// // Node 4 - Modulation 2
 		// MasterNode4.Mod2.Process();
 		// // Node 4 - Modulation 3
@@ -291,9 +290,9 @@ void loop() {
 		// MasterNode4.Mod4.Process();
 		
 		// // Node 5 - Seq Nr.
-		// MasterNode5.SeqNr.Process();
+		 MasterNode5.SeqNr.Process();
 		// // Node 5 - Modulation 1
-		// MasterNode5.Mod1.Process();
+		 MasterNode5.Mod1.Process();
 		// // Node 5 - Modulation 2
 		// MasterNode5.Mod2.Process();
 		// // Node 5 - Modulation 3
@@ -302,9 +301,9 @@ void loop() {
 		// MasterNode5.Mod4.Process();
 		
 		// // Node 6 - Seq Nr.
-		// MasterNode6.SeqNr.Process();
+		 MasterNode6.SeqNr.Process();
 		// // Node 6 - Modulation 1
-		// MasterNode6.Mod1.Process();
+		 MasterNode6.Mod1.Process();
 		// // Node 6 - Modulation 2
 		// MasterNode6.Mod2.Process();
 		// // Node 6 - Modulation 3
@@ -313,9 +312,9 @@ void loop() {
 		// MasterNode6.Mod4.Process();
 
 		// // Node 7 - Seq Nr.
-		// MasterNode7.SeqNr.Process();
+		 MasterNode7.SeqNr.Process();
 		// // Node 7 - Modulation 1
-		// MasterNode7.Mod1.Process();
+		 MasterNode7.Mod1.Process();
 		// // Node 7 - Modulation 2
 		// MasterNode7.Mod2.Process();
 		// // Node 7 - Modulation 3
@@ -324,9 +323,9 @@ void loop() {
 		// MasterNode7.Mod4.Process();
 		
 		// // Node 8 - Seq Nr.
-		// MasterNode8.SeqNr.Process();
+		 MasterNode8.SeqNr.Process();
 		// // Node 8 - Modulation 1
-		// MasterNode8.Mod1.Process();
+		 MasterNode8.Mod1.Process();
 		// // Node 8 - Modulation 2
 		// MasterNode8.Mod2.Process();
 		// // Node 8 - Modulation 3
@@ -335,9 +334,9 @@ void loop() {
 		// MasterNode8.Mod4.Process();
 		
 		// // Node 9 - Seq Nr.
-		// MasterNode9.SeqNr.Process();
+		 MasterNode9.SeqNr.Process();
 		// // Node 9 - Modulation 1
-		// MasterNode9.Mod1.Process();
+		 MasterNode9.Mod1.Process();
 		// // Node 9 - Modulation 2
 		// MasterNode9.Mod2.Process();
 		// // Node 9 - Modulation 3
@@ -346,9 +345,9 @@ void loop() {
 		// MasterNode9.Mod4.Process();
 		
 		// // Node 10 - Seq Nr.
-		// MasterNode10.SeqNr.Process();
+		 MasterNode10.SeqNr.Process();
 		// // Node 10 - Modulation 1
-		// MasterNode10.Mod1.Process();
+		 MasterNode10.Mod1.Process();
 		// // Node 10 - Modulation 2
 		// MasterNode10.Mod2.Process();
 		// // Node 10 - Modulation 3
@@ -357,9 +356,9 @@ void loop() {
 		// MasterNode10.Mod4.Process();
 		
 		// // Node 11 - Seq Nr.
-		// MasterNode11.SeqNr.Process();
+		 MasterNode11.SeqNr.Process();
 		// // Node 11 - Modulation 1
-		// MasterNode11.Mod1.Process();
+		 MasterNode11.Mod1.Process();
 		// // Node 11 - Modulation 2
 		// MasterNode11.Mod2.Process();
 		// // Node 11 - Modulation 3
@@ -368,9 +367,9 @@ void loop() {
 		// MasterNode11.Mod4.Process();
 		
 		// // Node 12 - Seq Nr.
-		// MasterNode12.SeqNr.Process();
+		 MasterNode12.SeqNr.Process();
 		// // Node 12 - Modulation 1
-		// MasterNode12.Mod1.Process();
+		 MasterNode12.Mod1.Process();
 		// // Node 12 - Modulation 2
 		// MasterNode12.Mod2.Process();
 		// // Node 12 - Modulation 3

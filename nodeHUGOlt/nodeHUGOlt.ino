@@ -503,7 +503,7 @@ void loop() {
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
     //prox = (float) changed;
-    //prox = (changed - 50) / 900;
+    //prox = (changed - 50.0) / 900.0;
     //prox = map(changed, 50, 500, 0.5, 0.0);
     //Serial.println(prox);
     if (vol != mainVolume) {
