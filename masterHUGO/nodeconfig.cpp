@@ -33,7 +33,7 @@ uint8_t nodeconfig_read(void)
   }
   else
   {
-    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 or ';',':','<' via serial to set node address\n\r"));
+    Serial.printf_P(PSTR("*** No valid address found.  Send 0-9 or ':',';','<' via serial to set node address\n\r"));
     while(1)
     {
       nodeconfig_listen();
