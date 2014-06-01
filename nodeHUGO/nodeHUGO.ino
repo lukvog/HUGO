@@ -476,7 +476,7 @@ void loop() {
     // calculate the average:
     averageL = totalL / numReadingsL; 
     
-    int mapped = map(averageL, 0, 255, 7, 500);
+    int mapped = map(averageL, 0, 255, 255, 0);
    
     analogWrite(bulb, mapped);
     peakMix.begin();
