@@ -18,7 +18,7 @@ extern bool seqReset;
 class Sequence
 {
 public:
-	Sequence(int* _seq, int _seqLength)
+	Sequence(const int* _seq, int _seqLength)
 		:seq(_seq),
 		pSeq(_seq),
 		seqLength(_seqLength)
@@ -38,9 +38,9 @@ public:
 	float speed = 1.0;
 	int stepCounter = 0;
 	int seqCounter = 0;
-	int* seq;
-	int* pSeq;
-	int* pSeqNext;
+	const int* seq;
+	const int* pSeq;
+	const int* pSeqNext;
 	int seqLength = 0;
 	bool loop = true;
 };
@@ -55,7 +55,7 @@ extern AudioMixer4 mixSources;
 class ToneVolumeSeq : public Sequence
 {
 public:
-	ToneVolumeSeq(int* _seq, int _seqLength)
+	ToneVolumeSeq(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~ToneVolumeSeq() {}
@@ -124,7 +124,7 @@ extern uint8_t inputVolume;
 class InVolumeSeq : public Sequence
 {
 public:
-	InVolumeSeq(int* _seq, int _seqLength)
+	InVolumeSeq(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~InVolumeSeq() {}
@@ -194,7 +194,7 @@ extern float delayVolume;
 class DelayStateSeq : public Sequence
 {
 public:	
-	DelayStateSeq(int* _seq, int _seqLength)
+	DelayStateSeq(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~DelayStateSeq() {}
@@ -252,7 +252,7 @@ public:
 class DelayLoopLengthSeq : public Sequence
 {
 public:	
-	DelayLoopLengthSeq(int* _seq, int _seqLength)
+	DelayLoopLengthSeq(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~DelayLoopLengthSeq() {}
@@ -291,7 +291,7 @@ extern AudioMixer4 mixFormants;
 class FormantFilterSequence : public Sequence
 {
 public:
-	FormantFilterSequence(int* _seq, int _seqLength)
+	FormantFilterSequence(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~FormantFilterSequence() {}
@@ -445,7 +445,7 @@ extern AudioFilterBiquad LowPass;
 class LPFilterSequence : public Sequence
 {
 public:
-	LPFilterSequence(int* _seq, int _seqLength)
+	LPFilterSequence(const int* _seq, int _seqLength)
 		: Sequence(_seq, _seqLength)
 	{}
 	~LPFilterSequence() {}
@@ -523,7 +523,7 @@ public:
 class ToneSequence : public Sequence
 {
 public:	
-	ToneSequence(int* _seq, int _seqLength, AudioSynthWaveform* _osc, short _waveform)
+	ToneSequence(const int* _seq, int _seqLength, AudioSynthWaveform* _osc, short _waveform)
 		: Sequence(_seq, _seqLength),
 		osc(_osc),
 		waveform(_waveform)
