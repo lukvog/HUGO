@@ -69,6 +69,7 @@ const int delayStateSeq3_raw[2] = {0, 1000};
 // int delayStateSeq4_raw[2] = {0, 1000};
 
 
+
 DelayStateSeq delayStateSeq1(delayStateSeq1_raw, 2);
 DelayStateSeq delayStateSeq2(delayStateSeq2_raw, 4);
 DelayStateSeq delayStateSeq3(delayStateSeq3_raw, 1);
@@ -94,7 +95,7 @@ const int delayLoopLengthSeq3_raw[2] = {40, 1000};
 // const int delayLoopLengthSeq4_raw[2] = {40, 1000};
 
 
-DelayLoopLengthSeq delayLoopLengthSeq1(delayLoopLengthSeq1_raw, 2);
+DelayLoopLengthSeq delayLoopLengthSeq1(delayLoopLengthSeq1_raw, 3);
 DelayLoopLengthSeq delayLoopLengthSeq2(delayLoopLengthSeq2_raw, 4);
 DelayLoopLengthSeq delayLoopLengthSeq3(delayLoopLengthSeq3_raw, 1);
 // DelayLoopLengthSeq delayLoopLengthSeq4(delayLoopLengthSeq4_raw, 1);
@@ -123,6 +124,7 @@ FormantFilterSequence formantSeq2(formantSeq2_raw, 1);
 FormantFilterSequence formantSeq3(formantSeq3_raw, 1);
 // FormantFilterSequence formantSeq4(formantSeq4_raw, 1);
 
+
 FormantFilterSequence* masterFormantSeq[4];
 
 void setFormantSeq()
@@ -136,6 +138,7 @@ void setFormantSeq()
 //------------------------------------------------
 //----------------- LowPass Filter ---------------
 //------------------------------------------------
+//{ const interpolation, Freq, De}
 
 const int LPSeq1_raw[8+1] = { 0, 400, 1000, 1000, 1000, 200, 1000, 6000, 1000};
 const int LPSeq2_raw[2+1] = { 1, 700, 1000};
@@ -143,11 +146,13 @@ const int LPSeq3_raw[12+1] = {1, 1000 , 750 , 1000 , 0 , 500 , 1050 , 500 , 2226
 const int LPSeq4_raw[2+1] = { 0, 100, 1000};
 // const int LPSeq5_raw[2+1] = { 0, 100, 1000};
 
-LPFilterSequence LPSeq1(LPSeq1_raw, 4);
+
+LPFilterSequence LPSeq1(LPSeq1_raw, 8);
 LPFilterSequence LPSeq2(LPSeq2_raw, 1);
 LPFilterSequence LPSeq3(LPSeq3_raw, 6);
 LPFilterSequence LPSeq4(LPSeq4_raw, 1);
 // LPFilterSequence LPSeq5(LPSeq5_raw, 1);
+
 
 LPFilterSequence* masterLPSeq[5];
 
@@ -186,13 +191,14 @@ const int toneSeq3_3_raw[3] = {
 // const int toneSeq4_3_raw[3] = {
   // 0, 42, 1000 };
   
+
 ToneSequence toneSeq1_1(toneSeq1_1_raw, 2, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq1_2(toneSeq1_2_raw, 3, &osc2, TONE_TYPE_SQUARE);
 ToneSequence toneSeq1_3(toneSeq1_3_raw, 2, &osc3, TONE_TYPE_SQUARE);
 
-ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SQUARE);
-ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SQUARE);
-ToneSequence toneSeq2_3(toneSeq2_3_raw, 9, &osc3, TONE_TYPE_SQUARE);
+ToneSequence toneSeq2_1(toneSeq2_1_raw, 4, &osc1, TONE_TYPE_SINE);
+ToneSequence toneSeq2_2(toneSeq2_2_raw, 4, &osc2, TONE_TYPE_SINE);
+ToneSequence toneSeq2_3(toneSeq2_3_raw, 9, &osc3, TONE_TYPE_SINE);
 
 ToneSequence toneSeq3_1(toneSeq3_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence toneSeq3_2(toneSeq3_2_raw, 1, &osc2, TONE_TYPE_SQUARE);

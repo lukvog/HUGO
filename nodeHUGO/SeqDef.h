@@ -5,7 +5,7 @@
  * 
  */
  
- #ifndef DeqDef_h_
+#ifndef DeqDef_h_
 #define SeqDef_h_
 
 #include <vector>
@@ -178,7 +178,7 @@ public:
 		}
 	}
 	
-	float mainGainLevel = 0;
+	float mainGainLevel = 3.0;
 	float gain_dB;
 	float gain_dB_step;
 };
