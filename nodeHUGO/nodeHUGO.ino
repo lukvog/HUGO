@@ -85,6 +85,7 @@ AudioFilterBiquad    formantFilter2(ToneFilter2);
 AudioFilterBiquad    formantFilter3(ToneFilter3);
 AudioMixer4        mixFormants;
 AudioFilterBiquad	LowPass(LowPassFilter);
+AudioPeak            peakMix2;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
 // Create Audio connections between the components
@@ -108,6 +109,7 @@ AudioConnection c12(formantFilter1, 0, mixFormants, 1);
 AudioConnection c13(formantFilter2, 0, mixFormants, 2);
 AudioConnection c14(formantFilter3, 0, mixFormants, 3);
 AudioConnection c15(mixFormants, 0, LowPass, 0);
+AudioConnection c18(LowPass, 0, peakMix2, 0);
 AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
@@ -157,16 +159,17 @@ int valueRF = 1;
 int bulb = 5;           // the pin that the LED is attached to
 int brightness = 0;    // how bright the LED is
 int fadeAmount = 1;    // how many points to fade the LED by
-int lookUpIndexes = 63;
+int lookUpIndexes = 31;
 
-/*
+
 int pwmActual[] = {
  0, 1, 2, 3, 4, 5, 7, 9,
  12, 15, 18, 22, 27, 32, 37, 44,
  50, 58, 66, 75, 85, 96, 107, 120,
  133, 147, 163, 179, 196, 215, 234, 255
  };
- */
+
+/*
 
 int pwmActual[] = {
   1,1,1,1,2,2,2,2,2,2,
@@ -175,12 +178,14 @@ int pwmActual[] = {
   15,16,17,19,21,23,25,27,29,32,35,
   38,42,45,49,54,59,64,70,76,83,91,
   99,108,117,128,140,152,166,181,
-  197,215,235,256
+  197,215,235,255
 };
+
+*/
 
 
 //smoothing
-const int numReadingsL = 10;
+const int numReadingsL = 5;
 int readingsL[numReadingsL];      // the readings from the analog input
 int indxL = 0;                  // the index of the current reading
 int totalL = 0;                  // the running total
@@ -456,9 +461,12 @@ void loop() {
 
   if (LightMetro.check() == 1) {
 
-    uint8_t brightness=peakMix.Dpp()/1024;
-    brightness = pwmActual[brightness];
-
+    
+    int factor = 150;	// with this factor, the amount of the ligth ducking can be set (bigger values -> more ducking)
+    uint8_t brightness=peakMix2.Dpp()/256;
+    brightness = factor * log10(brightness);
+    //brightness = pwmActual[brightness];
+    
     // subtract the last reading:
     totalL= totalL - readingsL[indxL];        
     // read from the sensor:  
@@ -467,19 +475,19 @@ void loop() {
     totalL= totalL + readingsL[indxL];      
     // advance to the next position in the array:  
     indxL = indxL + 1;                    
-
     // if we're at the end of the array...
     if (indxL >= numReadingsL)              
       // ...wrap around to the beginning:
       indxL = 0;                          
-
     // calculate the average:
     averageL = totalL / numReadingsL; 
     
-    int mapped = map(averageL, 0, 255, 255, 0);
+    Serial.println(averageL);
+    int mapped = map(averageL, 0, 200, 255, 0);
    
     analogWrite(bulb, mapped);
-    peakMix.begin();
+       Serial.println(mapped);
+    peakMix2.begin();
      
      /*
 
@@ -491,8 +499,8 @@ void loop() {
     }
     analogWrite(bulb, brightness);
 
-
 */
+
     //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
     //LightMetro.reset();
 
@@ -508,7 +516,7 @@ void loop() {
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
     prox = (float) changed;
-    prox = (changed - 50.0) / 900.0;
+    prox = (changed - 50.0) / 1000.0;
     //Serial.println(prox);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
@@ -524,8 +532,8 @@ void loop() {
 	int factor = 4;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
 	float tempInputVol = peakMix.Dpp()/1024.0;
 	inputVolume = factor * log10(tempInputVol);
-	Serial.print(inputVolume);
-	Serial.print("\n");
+	//Serial.print(inputVolume);
+	//Serial.print("\n");
     peakMix.begin();
 
     // In volume sequence
