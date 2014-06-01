@@ -88,6 +88,7 @@ AudioFilterBiquad	LowPass(LowPassFilter);
 AudioPeak            peakMix2;
 AudioOutputI2S      audioOutput;        // audio shield: headphones & line-out
 
+
 // Create Audio connections between the components
 // Both channels of the audio input go to the FIR filter
 
@@ -148,8 +149,6 @@ void handle_N(RF24NetworkHeader& header);
 void handle_V(RF24NetworkHeader& header);
 void add_node(uint16_t node);
 
-//data
-int valueRF = 1;
 
 
 //___________________________________________________________________________________
@@ -163,25 +162,25 @@ int lookUpIndexes = 31;
 
 
 int pwmActual[] = {
- 0, 1, 2, 3, 4, 5, 7, 9,
- 12, 15, 18, 22, 27, 32, 37, 44,
- 50, 58, 66, 75, 85, 96, 107, 120,
- 133, 147, 163, 179, 196, 215, 234, 255
- };
+  0, 1, 2, 3, 4, 5, 7, 9,
+  12, 15, 18, 22, 27, 32, 37, 44,
+  50, 58, 66, 75, 85, 96, 107, 120,
+  133, 147, 163, 179, 196, 215, 234, 255
+};
 
 /*
 
-int pwmActual[] = {
-  1,1,1,1,2,2,2,2,2,2,
-  3,3,3,3,4,4,4,5,5,6,
-  6,7,7,8,9,10,10,11,12,13,
-  15,16,17,19,21,23,25,27,29,32,35,
-  38,42,45,49,54,59,64,70,76,83,91,
-  99,108,117,128,140,152,166,181,
-  197,215,235,255
-};
-
-*/
+ int pwmActual[] = {
+ 1,1,1,1,2,2,2,2,2,2,
+ 3,3,3,3,4,4,4,5,5,6,
+ 6,7,7,8,9,10,10,11,12,13,
+ 15,16,17,19,21,23,25,27,29,32,35,
+ 38,42,45,49,54,59,64,70,76,83,91,
+ 99,108,117,128,140,152,166,181,
+ 197,215,235,255
+ };
+ 
+ */
 
 
 //smoothing
@@ -200,6 +199,7 @@ int irPin = 21;
 int changed;
 int wallDist;
 float irVal;
+int changedOld;
 
 //smoothing
 const int numReadings = 10;
@@ -210,7 +210,11 @@ int average = 0;                // the average
 
 
 
+
+//________________________________________________________________________________________
 //___________________________________________________________________________________
+////////////////////////////////////////
+
 void setup() 
 {
 
@@ -245,13 +249,13 @@ void setup()
       count++;
     }
     delay(50);
-  };
+  }
 
   //Serial.println(count);
 
   for(int i=0; i < count; i++){
     sum += wall[i];
-  };
+  }
 
   //Serial.println(sum);
 
@@ -364,10 +368,10 @@ void setup()
 Metro LightMetro = Metro(50);
 Metro ComMetro = Metro(1000);
 Metro SensMetro = Metro(100);
-Metro WriteMetro = Metro(500);
+Metro PrintOutMetro = Metro(500);
 Metro MonitorMetro = Metro(1000);
 Metro VolMetro = Metro(10);
-Metro PeakMetro = Metro(100);
+Metro ForgetMetro = Metro(200);
 
 Metro TimingMetro = Metro(MOD_RATE);
 
@@ -375,11 +379,12 @@ Metro TimingMetro = Metro(MOD_RATE);
 float mainVolume = 0;
 int oldValue = 0;
 float prox = 0.0;
+float mainVolumeChange;
 
 // sequence indices
-int actLPSeq = 2;
+int actLPSeq = 0;
 int actFromSeq = 0;
-int actToneSeq = 3;
+int actToneSeq = 0; //tone * 3
 int actDelStateSeq = 0;
 int actDelLoLeSeq = 0;
 int actToneVolSeq = 0;
@@ -387,33 +392,37 @@ int actInVolSeq = 0;
 
 bool seqReset = true;
 
+
 //////////////////////
 //Peak
-uint8_t cnt=0;
 uint8_t inputVolume = 0.0;
 
 
+
+//_________________________________________________________________________________________
 //_________________________________________________________________________________________
 /////////////////////////////////////////////
 
 
 void loop() {
 
-  //_____________________________________
-  //Read Peak
 
-/*
-  if (PeakMetro.check() == 1) {
-    uint8_t peakRead=peakMix.Dpp()/2184.5321; // 65536 / 2184.5321 ~ 30.
-    for(cnt=0;cnt<peakRead;cnt++) Serial.print(">");
-    while(cnt++<30) Serial.print(" ");
-    Serial.println();
-    peakMix.begin(); // no need to call .stop if all you want
-  };
-  
-  */
+  /////////////////////////////
+  //___________________________________________________________________________________
+  //PrintOut aka. Debug
 
+  if (PrintOutMetro.check() == 1) {
+    Serial.print("prox: ");
+    Serial.println(prox);
+    Serial.print("mainVol: ");
+    Serial.println(mainVolume);
+    Serial.print("wallDist: ");
+    Serial.println(wallDist, DEC);
+    Serial.print("changed: ");
+    Serial.println(changed, DEC);
+  }
 
+  /////////////////////////////
   //___________________________________________________________________________________
   //IR Sensor
 
@@ -441,7 +450,6 @@ void loop() {
 
     // calculate the average:
     average = total / numReadings; 
-
     //Serial.println(irDist, DEC);
 
     if (average >= 50 && average <= wallDist)
@@ -449,24 +457,40 @@ void loop() {
       changed = average;
     }
 
-    Serial.print("wallDist: ");
-    Serial.println(wallDist, DEC);
-    Serial.print("changed: ");
-    Serial.println(changed, DEC);
+    //Serial.print("wallDist: ");
+    //Serial.println(wallDist, DEC);
+    //Serial.print("changed: ");
+    //Serial.println(changed, DEC);
   }
 
+
+
+  if (ForgetMetro.check() == 1) {
+
+    if (changed != changedOld) {
+      prox = (changed - 50.0) / 900.0;
+      //Serial.println(prox);
+      changedOld = changed;
+    }
+
+    if (prox > 0.0) {
+      prox = prox - 0.005;
+    };
+
+
+  };
 
   //___________________________________________________________________________________
   //LIGHT
 
   if (LightMetro.check() == 1) {
 
-    
-    int factor = 150;	// with this factor, the amount of the ligth ducking can be set (bigger values -> more ducking)
+
+    int factor = 100;	// with this factor, the amount of the ligth ducking can be set (bigger values -> more ducking)
     uint8_t brightness=peakMix2.Dpp()/256;
     brightness = factor * log10(brightness);
     //brightness = pwmActual[brightness];
-    
+
     // subtract the last reading:
     totalL= totalL - readingsL[indxL];        
     // read from the sensor:  
@@ -481,31 +505,34 @@ void loop() {
       indxL = 0;                          
     // calculate the average:
     averageL = totalL / numReadingsL; 
-    
-    Serial.println(averageL);
-    int mapped = map(averageL, 0, 200, 255, 0);
-   
+    //Serial.println(averageL);
+
+    //----> scaling factor!
+    int mappedMax = 255 * (mainVolumeChange * 0.5);
+    //Serial.println(mappedMax);
+    int mapped = map(averageL, 0, 100, 0, mappedMax);
+    mapped = constrain(mapped, 5, 255);
+    //Serial.println(mapped);
     analogWrite(bulb, mapped);
-       Serial.println(mapped);
+    //Serial.println(mapped);
     peakMix2.begin();
+
+    /*
+
+     // change the brightness for next time through the loop:
+     brightness = brightness + fadeAmount;
+     // reverse the direction of the fading at the ends of the fade:
+     if (brightness == 0 || brightness == lookUpIndexes) {
+     fadeAmount = -fadeAmount ;
+     }
+     analogWrite(bulb, brightness);
      
-     /*
-
-    // change the brightness for next time through the loop:
-    brightness = brightness + fadeAmount;
-    // reverse the direction of the fading at the ends of the fade:
-    if (brightness == 0 || brightness == lookUpIndexes) {
-      fadeAmount = -fadeAmount ;
-    }
-    analogWrite(bulb, brightness);
-
-*/
+     */
 
     //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
     //LightMetro.reset();
 
   }
-
 
   //___________________________________________________________________________________
   //AUDIO
@@ -515,25 +542,22 @@ void loop() {
 
   if (VolMetro.check() == 1) {
     int vol = analogRead(15);
-    prox = (float) changed;
-    prox = (changed - 50.0) / 1000.0;
-    //Serial.println(prox);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
-      float mainVolumeChange = mainVolume + prox;
+      mainVolumeChange = mainVolume + prox;
       audioShield.volume(mainVolumeChange);
       mainVolume = vol;
     }
   }
 
   if (TimingMetro.check() == 1) {
-  
-	// detect input volume
-	int factor = 4;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
-	float tempInputVol = peakMix.Dpp()/1024.0;
-	inputVolume = factor * log10(tempInputVol);
-	//Serial.print(inputVolume);
-	//Serial.print("\n");
+
+    // detect input volume
+    float factor = 1.8;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
+    float tempInputVol = peakMix.Dpp()/1024.0;
+    inputVolume = factor * log10(tempInputVol);
+    //Serial.print(inputVolume);
+    //Serial.print("\n");
     peakMix.begin();
 
     // In volume sequence
@@ -752,18 +776,6 @@ void loop() {
     };
   }
 
-
-  //////////////////////////////
-  ////////////////////////////////
-  //////////////////////////
-  if (WriteMetro.check() == 1) {
-    Serial.print("valueRF = "); 
-    Serial.println(valueRF);
-Serial.println(prox);
-
-    //LightMetro.interval(map(valueRF, 0, 1023, 5, 500));
-    //LightMetro.reset();
-  }
 
   //////////////////////////////
   ////////////////////////////////
@@ -993,6 +1005,15 @@ void handle_S(RF24NetworkHeader& header)
 // Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
 // }
 // }
+
+
+
+
+
+
+
+
+
 
 
 
