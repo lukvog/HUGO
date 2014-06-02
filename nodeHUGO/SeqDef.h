@@ -51,6 +51,7 @@ public:
 //------------------------------------------------
 
 extern AudioMixer4 mixSources;
+extern float mainToneLevel;
 
 class ToneVolumeSeq : public Sequence
 {
@@ -79,7 +80,7 @@ public:
 					pSeq = seq;
 			}
 			
-			gain_dB = *pSeq++ + mainGainLevel;			
+			gain_dB = *pSeq++ + mainToneLevel;			
 			float gain = pow(10.0, (float)gain_dB/20.0);
 			mixSources.gain(0, gain);
 			
@@ -93,7 +94,7 @@ public:
 			else
 				pSeqNext = seq;
 				
-			float nextGain_dB= *pSeqNext + mainGainLevel;
+			float nextGain_dB= *pSeqNext + mainToneLevel;
 			setInterpolation(nextGain_dB);
 
 		}
@@ -109,7 +110,6 @@ public:
 		}
 	}
 	
-	float mainGainLevel = 6.0;
 	float gain_dB;
 	float gain_dB_step;
 };
@@ -120,6 +120,7 @@ public:
 
 extern AudioMixer4 inMix;
 extern uint8_t inputVolume;
+extern float mainInputLevel;
 
 class InVolumeSeq : public Sequence
 {
@@ -148,7 +149,7 @@ public:
 					pSeq = seq;
 			}
 			
-			gain_dB = *pSeq++ + mainGainLevel - (inputVolume);			
+			gain_dB = *pSeq++ + mainInputLevel - (inputVolume);			
 			float gain = pow(10.0, (float)gain_dB/20.0);
 			inMix.gain(0, gain);
 			
@@ -162,7 +163,7 @@ public:
 			else
 				pSeqNext = seq;
 				
-			float nextGain_dB= *pSeqNext + mainGainLevel - (inputVolume);
+			float nextGain_dB= *pSeqNext + mainToneLevel - (inputVolume);
 			setInterpolation(nextGain_dB);
 
 		}
@@ -178,7 +179,6 @@ public:
 		}
 	}
 	
-	float mainGainLevel = 3.0;
 	float gain_dB;
 	float gain_dB_step;
 };

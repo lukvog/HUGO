@@ -115,6 +115,11 @@ AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
+float mainToneLevel = 6.0;
+float mainInputLevel = 3.0;
+
+
+
 //___________________________________________________________________________________
 /////////////////////////
 //RF24
