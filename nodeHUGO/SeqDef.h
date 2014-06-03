@@ -351,6 +351,8 @@ public:
 							break;
 				case u1:	setFormants(sopranU_fc, sopranU_gain, sopranU_BW);
 							break;
+				case open:	setFormants(open_fc, open_gain, open_BW);
+							break;
 				default:	break;
 			}
 			formantInterpolation = *pSeq++;
@@ -378,6 +380,8 @@ public:
 								break;          
 					case u1:	setInterpolation(sopranU_fc, sopranU_gain, sopranU_BW);
 								break;
+					case open:	setInterpolation(open_fc, open_gain, open_BW);
+					break;
 					default:	break;
 				}
 				formantIsInterpolating = true;
@@ -433,6 +437,10 @@ public:
 	float sopranU_fc[3] = {325, 700, 2700};
 	float sopranU_gain[3] = {0, -16, -35};
 	float sopranU_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
+	
+	float open_fc[3] = {50, 500, 5000};
+	float open_gain[3] = {0, 0, 0};
+	float open_BW[3] = {5, 5, 5};
 	
 };
 
