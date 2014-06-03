@@ -115,8 +115,8 @@ AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
-float mainToneLevel = 6.0;
-float mainInputLevel = 3.0;
+float mainToneLevel = 4.0;
+float mainInputLevel = 6.0;
 
 
 
@@ -426,65 +426,8 @@ void loop() {
     Serial.print("changed: ");
     Serial.println(changed, DEC);
   }
-
-  /////////////////////////////
-  //___________________________________________________________________________________
-  //IR Sensor
-
-  if (SensMetro.check() == 1) {
-    irVal = analogRead(irPin);
-    // Linearize Sharp GP2YOA1YK
-    float irDist = 11.0e8 * pow(irVal, -2.438);
-    //Serial.println(irVal, DEC);
-
-    //float irDist = 1000/irVal;
-
-    // subtract the last reading:
-    total= total - readings[indx];        
-    // read from the sensor:  
-    readings[indx] = irDist;
-    // add the reading to the total:
-    total= total + readings[indx];      
-    // advance to the next position in the array:  
-    indx = indx + 1;                    
-
-    // if we're at the end of the array...
-    if (indx >= numReadings)              
-      // ...wrap around to the beginning:
-      indx = 0;                          
-
-    // calculate the average:
-    average = total / numReadings; 
-    //Serial.println(irDist, DEC);
-
-    if (average >= 50 && average <= wallDist)
-    {
-      changed = average;
-    }
-
-    //Serial.print("wallDist: ");
-    //Serial.println(wallDist, DEC);
-    //Serial.print("changed: ");
-    //Serial.println(changed, DEC);
-  }
-
-
-
-  if (ForgetMetro.check() == 1) {
-
-    if (changed != changedOld) {
-      prox = (changed - 50.0) / 900.0;
-      //Serial.println(prox);
-      changedOld = changed;
-    }
-
-    if (prox > 0.0) {
-      prox = prox - 0.005;
-    };
-
-
-  };
-
+  
+  
   //___________________________________________________________________________________
   //LIGHT
 
@@ -539,6 +482,65 @@ void loop() {
 
   }
 
+  /////////////////////////////
+  //___________________________________________________________________________________
+  //IR Sensor
+
+  if (SensMetro.check() == 1) {
+    irVal = analogRead(irPin);
+    // Linearize Sharp GP2YOA1YK
+    float irDist = 11.0e8 * pow(irVal, -2.438);
+    //Serial.println(irVal, DEC);
+
+    //float irDist = 1000/irVal;
+
+    // subtract the last reading:
+    total= total - readings[indx];        
+    // read from the sensor:  
+    readings[indx] = irDist;
+    // add the reading to the total:
+    total= total + readings[indx];      
+    // advance to the next position in the array:  
+    indx = indx + 1;                    
+
+    // if we're at the end of the array...
+    if (indx >= numReadings)              
+      // ...wrap around to the beginning:
+      indx = 0;                          
+
+    // calculate the average:
+    average = total / numReadings; 
+    //Serial.println(irDist, DEC);
+
+    if (average >= 50 && average <= wallDist)
+    {
+      changed = average;
+    }
+
+    //Serial.print("wallDist: ");
+    //Serial.println(wallDist, DEC);
+    //Serial.print("changed: ");
+    //Serial.println(changed, DEC);
+  }
+
+
+
+  if (ForgetMetro.check() == 1) {
+
+    if (changed != changedOld) {
+      int changedInv = map(changed, 0, 550, 0, 550);
+      prox = (changed - 50.0) / 1000.0;
+      //Serial.println(prox);
+      changedOld = changed;
+    }
+
+    if (prox > 0.0) {
+      prox = prox - 0.008;
+    };
+
+
+  }
+
   //___________________________________________________________________________________
   //AUDIO
   // volume control
@@ -558,7 +560,7 @@ void loop() {
   if (TimingMetro.check() == 1) {
 
     // detect input volume
-    float factor = 1.8;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
+    float factor = 2.0;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
     float tempInputVol = peakMix.Dpp()/1024.0;
     inputVolume = factor * log10(tempInputVol);
     //Serial.print(inputVolume);
@@ -727,6 +729,7 @@ void loop() {
   For PlaySynthMusic this produces:
    Proc = 20 (21),  Mem = 2 (8)
    */
+   /*
   if (MonitorMetro.check() == 1) {
     Serial.print("Proc = ");
     Serial.print(AudioProcessorUsage());
@@ -738,6 +741,8 @@ void loop() {
     Serial.print(AudioMemoryUsageMax());
     Serial.println(")");
   }
+  
+  */
 
   //___________________________________________________________________________________
   //RF24
