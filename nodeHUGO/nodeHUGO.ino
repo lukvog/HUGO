@@ -528,14 +528,14 @@ void loop() {
   if (ForgetMetro.check() == 1) {
 
     if (changed != changedOld) {
-      int changedInv = map(changed, 0, 550, 0, 550);
-      prox = (changed - 50.0) / 1000.0;
+      int changedInv = map(changed, 60, 500, 450, 60);
+      prox = (changedInv - 50.0) / 1100.0;
       //Serial.println(prox);
       changedOld = changed;
     }
 
     if (prox > 0.0) {
-      prox = prox - 0.008;
+      prox = prox - 0.01;
     };
 
 

@@ -41,9 +41,10 @@ ToneVolumeSeq* toneVolumeSeq2 = new ToneVolumeSeq(toneVolumeSeq2_raw, 2);
 ToneVolumeSeq* toneVolumeSeq3 = new ToneVolumeSeq(toneVolumeSeq3_raw, 1);
 ToneVolumeSeq* toneVolumeSeq4 = new ToneVolumeSeq(toneVolumeSeq4_raw, 1);
 ToneVolumeSeq* toneVolumeSeq5 = new ToneVolumeSeq(toneVolumeSeq5_raw, 1);
+ToneVolumeSeq* toneVolumeSeq6 = new ToneVolumeSeq(toneVolumeSeq6_raw, 1);
 
 
-ToneVolumeSeq* masterToneVolSeq[5];
+ToneVolumeSeq* masterToneVolSeq[6];
 
 void setToneVolSeq()
 {
@@ -52,6 +53,7 @@ void setToneVolSeq()
   masterToneVolSeq[2] = toneVolumeSeq3;
   masterToneVolSeq[3] = toneVolumeSeq4;
   masterToneVolSeq[4] = toneVolumeSeq5;
+    masterToneVolSeq[5] = toneVolumeSeq6;
 }
 
 //------------------------------------------------
@@ -61,21 +63,24 @@ void setToneVolSeq()
 const int inVolumeSeq1_raw[8] = { 
   -10, 1000, 0, 2000, -10, 1000,  0, 2000};
 const int inVolumeSeq2_raw[4] = { 
-  -20, 1000, -40, 1000 };
+  -30, 1000, -40, 1000 };
 const int inVolumeSeq3_raw[2] = { 
   -60, 1000};
 const int inVolumeSeq4_raw[2] = { 
   0, 1000};
 const int inVolumeSeq5_raw[2] = { 
   -60, 1000};
+  const int inVolumeSeq6_raw[2] = { 
+  0, 1000};
 
 InVolumeSeq* inVolumeSeq1 = new InVolumeSeq(inVolumeSeq1_raw, 4);
 InVolumeSeq* inVolumeSeq2 = new InVolumeSeq(inVolumeSeq2_raw, 2);
 InVolumeSeq* inVolumeSeq3 = new InVolumeSeq(inVolumeSeq3_raw, 1);
 InVolumeSeq* inVolumeSeq4 = new InVolumeSeq(inVolumeSeq4_raw, 1);
 InVolumeSeq* inVolumeSeq5 = new InVolumeSeq(inVolumeSeq5_raw, 1);
+InVolumeSeq* inVolumeSeq6 = new InVolumeSeq(inVolumeSeq6_raw, 1);
 
-InVolumeSeq* masterInVolSeq[5];
+InVolumeSeq* masterInVolSeq[6];
 
 void setInVolSeq()
 {
@@ -84,6 +89,7 @@ void setInVolSeq()
   masterInVolSeq[2] = inVolumeSeq3;
   masterInVolSeq[3] = inVolumeSeq4;
   masterInVolSeq[4] = inVolumeSeq5;
+    masterInVolSeq[5] = inVolumeSeq6;
 }
 
 //------------------------------------------------
@@ -101,6 +107,8 @@ const int delayStateSeq4_raw[2] = {
   2, 1000};
 const int delayStateSeq5_raw[2] = {
   1, 2000};
+  const int delayStateSeq6_raw[2] = {
+  1, 2000};
 
 
 
@@ -109,8 +117,9 @@ DelayStateSeq* delayStateSeq2 = new DelayStateSeq(delayStateSeq2_raw, 4);
 DelayStateSeq* delayStateSeq3 = new DelayStateSeq(delayStateSeq3_raw, 1);
 DelayStateSeq* delayStateSeq4 = new DelayStateSeq(delayStateSeq4_raw, 1);
 DelayStateSeq* delayStateSeq5 = new DelayStateSeq(delayStateSeq5_raw, 1);
+DelayStateSeq* delayStateSeq6 = new DelayStateSeq(delayStateSeq6_raw, 1);
 
-DelayStateSeq* masterDelayStateSeq[5];
+DelayStateSeq* masterDelayStateSeq[6];
 
 void setDelayStateSeq()
 {
@@ -119,6 +128,7 @@ void setDelayStateSeq()
   masterDelayStateSeq[2] = delayStateSeq3;
   masterDelayStateSeq[3] = delayStateSeq4;
   masterDelayStateSeq[4] = delayStateSeq5;
+    masterDelayStateSeq[5] = delayStateSeq6;
 }
 
 //------------------------------------------------
@@ -131,18 +141,21 @@ const int delayLoopLengthSeq2_raw[8] = {
   20, 50, 65, 300, 20, 1000, 65, 300};
 const int delayLoopLengthSeq3_raw[2] = {
   40, 1000};
-const int delayLoopLengthSeq4_raw[6] = {
-  40, 1000, 65, 1000, 60, 1000};
+const int delayLoopLengthSeq4_raw[10] = {
+  40, 1000, 65, 1000, 60, 1000, 45, 1000, 30, 1000};
 const int delayLoopLengthSeq5_raw[2] = {
   65, 1000};
+const int delayLoopLengthSeq6_raw[6] = {
+  40, 1000, 65, 1000, 50, 1000};
 
 DelayLoopLengthSeq* delayLoopLengthSeq1 = new DelayLoopLengthSeq(delayLoopLengthSeq1_raw, 3);
 DelayLoopLengthSeq* delayLoopLengthSeq2 = new DelayLoopLengthSeq(delayLoopLengthSeq2_raw, 4);
 DelayLoopLengthSeq* delayLoopLengthSeq3 = new DelayLoopLengthSeq(delayLoopLengthSeq3_raw, 1);
-DelayLoopLengthSeq* delayLoopLengthSeq4 = new DelayLoopLengthSeq(delayLoopLengthSeq4_raw, 3);
+DelayLoopLengthSeq* delayLoopLengthSeq4 = new DelayLoopLengthSeq(delayLoopLengthSeq4_raw, 5);
 DelayLoopLengthSeq* delayLoopLengthSeq5 = new DelayLoopLengthSeq(delayLoopLengthSeq5_raw, 1);
+DelayLoopLengthSeq* delayLoopLengthSeq6 = new DelayLoopLengthSeq(delayLoopLengthSeq6_raw, 3);
 
-DelayLoopLengthSeq* masterDelayLoopLengthSeq[5];
+DelayLoopLengthSeq* masterDelayLoopLengthSeq[6];
 
 void setDelayLoopLengthSeq()
 {
@@ -151,6 +164,7 @@ void setDelayLoopLengthSeq()
   masterDelayLoopLengthSeq[2] = delayLoopLengthSeq3;
   masterDelayLoopLengthSeq[3] = delayLoopLengthSeq4;
   masterDelayLoopLengthSeq[4] = delayLoopLengthSeq5;
+    masterDelayLoopLengthSeq[5] = delayLoopLengthSeq6;
 }
 
 //------------------------------------------------
@@ -165,18 +179,21 @@ const int formantSeq2_raw[24] = {
 const int formantSeq3_raw[3] = { 
   a1, 0, 1000};
 const int formantSeq4_raw[24] = { 
-  a1, 0, 1000, e1, 0, 1000, i1, 0, 1000, o1, 0, 1000, u1, 0, 1000, o1, 0, 1000, i1, 0, 1000, e1, 0, 1000 };
+  a1, 1, 1000, e1, 1, 1000, i1, 1, 1000, o1, 1, 1000, u1, 1, 2000, o1, 1, 1000, i1, 1, 1000, e1, 1, 1000 };
 const int formantSeq5_raw[3] = { 
   a1, 0, 1000};
+const int formantSeq6_raw[24] = { 
+  a1, 1, 2000, u1, 1, 3000, i1, 1, 2000, o1, 1, 2000, a1, 1, 3000, i1, 1, 2300, a1, 1, 1200, e1, 1, 1000 };
 
 FormantFilterSequence* formantSeq1 = new FormantFilterSequence(formantSeq1_raw, 8);
 FormantFilterSequence* formantSeq2 = new FormantFilterSequence(formantSeq2_raw, 8);
 FormantFilterSequence* formantSeq3 = new FormantFilterSequence(formantSeq3_raw, 1);
 FormantFilterSequence* formantSeq4 = new FormantFilterSequence(formantSeq4_raw, 8);
 FormantFilterSequence* formantSeq5 = new FormantFilterSequence(formantSeq5_raw, 1);
+FormantFilterSequence* formantSeq6 = new FormantFilterSequence(formantSeq6_raw, 8);
 
 
-FormantFilterSequence* masterFormantSeq[5];
+FormantFilterSequence* masterFormantSeq[6];
 
 void setFormantSeq()
 {
@@ -185,6 +202,7 @@ void setFormantSeq()
   masterFormantSeq[2] = formantSeq3;
   masterFormantSeq[3] = formantSeq4;
   masterFormantSeq[4] = formantSeq5;
+    masterFormantSeq[5] = formantSeq6;
 }
 
 //------------------------------------------------
@@ -204,10 +222,10 @@ const int LPSeq4_raw[13] = {
   1, 1000 , 750 , 1000 , 0 , 500 , 1050 , 500 , 2226 , 2000 , 0 , 100 , 1335 };
 const int LPSeq5_raw[3] = { 
   1, 7000, 1000};
+  const int LPSeq6_raw[13] = {
+  1, 1000 , 750 , 1000 , 0 , 500 , 1050 , 500 , 2226 , 2000 , 0 , 100 , 1335 };
   
 /*
-const int LPSeq6_raw[3] = { 
-  0, 100, 1000};
 const int LPSeq7_raw[3] = { 
   0, 100, 1000};
 const int LPSeq8_raw[3] = { 
@@ -223,8 +241,8 @@ LPFilterSequence* LPSeq2 = new LPFilterSequence(LPSeq2_raw, 1);
 LPFilterSequence* LPSeq3 = new LPFilterSequence(LPSeq3_raw, 1);
 LPFilterSequence* LPSeq4 = new LPFilterSequence(LPSeq4_raw, 6);
 LPFilterSequence* LPSeq5 = new LPFilterSequence(LPSeq5_raw, 1);
+LPFilterSequence* LPSeq6 = new LPFilterSequence(LPSeq6_raw, 6);
 /*
-LPFilterSequence* LPSeq6 = new LPFilterSequence(LPSeq6_raw, 1);
 LPFilterSequence* LPSeq7 = new LPFilterSequence(LPSeq7_raw, 1);
 LPFilterSequence* LPSeq8 = new LPFilterSequence(LPSeq8_raw, 1);
 LPFilterSequence* LPSeq9 = new LPFilterSequence(LPSeq9_raw, 1);
@@ -232,7 +250,7 @@ LPFilterSequence* LPSeq10 = new LPFilterSequence(LPSeq10_raw, 1);
 */
 
 
-LPFilterSequence* masterLPSeq[5];
+LPFilterSequence* masterLPSeq[6];
 
 void setLPSeq()
 {
@@ -241,8 +259,8 @@ void setLPSeq()
   masterLPSeq[2] = LPSeq3;
   masterLPSeq[3] = LPSeq4;
   masterLPSeq[4] = LPSeq5;
-  /*
   masterLPSeq[5] = LPSeq6;
+    /*
   masterLPSeq[6] = LPSeq7;
   masterLPSeq[7] = LPSeq8;
   masterLPSeq[8] = LPSeq9;
@@ -289,11 +307,18 @@ const int toneSeq4_3_raw[3] = {
   0, 42, 1000 };
 
 const int toneSeq5_1_raw[24] = {
-  127, 18, 1000, 121, 18, 1000, 115, 18, 1000, 121, 18, 1000, 107, 18, 1000, 121, 18, 1000, 127, 18, 1000, 100, 18, 1000   };
+  127, 30, 1000, 121, 30, 1000, 115, 30, 1000, 121, 30, 1000, 107, 30, 1000, 121, 30, 1000, 127, 30, 1000, 100, 30, 1000   };
 const int toneSeq5_2_raw[24] = {
-  127, 50, 1000, 121, 50, 1000, 117, 18, 1000, 111, 18, 1000, 103, 18, 1000, 127, 18, 1000, 127, 18, 1000, 101, 18, 1000   };
+  127, 50, 1000, 121, 50, 1000, 117, 50, 1000, 111, 50, 1000, 103, 50, 1000, 127, 50, 1000, 127, 50, 1000, 101, 50, 1000   };
 const int toneSeq5_3_raw[24] = {
-  127, 52, 1000, 121, 52, 1000, 122, 18, 1000, 101, 18, 1000, 107, 18, 1000, 121, 18, 1000, 127, 18, 1000, 121, 18, 1000   };
+  127, 52, 1000, 121, 52, 1000, 122, 52, 1000, 101, 52, 1000, 107, 52, 1000, 121, 52, 1000, 127, 52, 1000, 121, 52, 1000   };
+  
+  const int toneSeq6_1_raw[3] = {
+  0, 38, 1000 };
+const int toneSeq6_2_raw[3] = {
+  0, 40, 1000 };
+const int toneSeq6_3_raw[3] = {
+  0, 42, 1000 };
 
 
 ToneSequence* toneSeq1_1 = new ToneSequence(toneSeq1_1_raw, 2, &osc1, TONE_TYPE_SQUARE);
@@ -316,8 +341,12 @@ ToneSequence* toneSeq5_1 = new ToneSequence(toneSeq5_1_raw, 8, &osc1, TONE_TYPE_
 ToneSequence* toneSeq5_2 = new ToneSequence(toneSeq5_2_raw, 8, &osc2, TONE_TYPE_SINE);
 ToneSequence* toneSeq5_3 = new ToneSequence(toneSeq5_3_raw, 8, &osc3, TONE_TYPE_SINE);
 
+ToneSequence* toneSeq6_1 = new ToneSequence(toneSeq4_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
+ToneSequence* toneSeq6_2 = new ToneSequence(toneSeq4_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
+ToneSequence* toneSeq6_3 = new ToneSequence(toneSeq4_3_raw, 1, &osc3, TONE_TYPE_SQUARE);
 
-ToneSequence* masterToneSeq[15];
+
+ToneSequence* masterToneSeq[18];
 
 void setToneSeq()
 {
@@ -340,6 +369,10 @@ void setToneSeq()
   masterToneSeq[12] = toneSeq5_1;
   masterToneSeq[13] = toneSeq5_2;
   masterToneSeq[14] = toneSeq5_3;
+  
+    masterToneSeq[15] = toneSeq6_1;
+  masterToneSeq[16] = toneSeq6_2;
+  masterToneSeq[17] = toneSeq6_3;
 }
 
 #endif
