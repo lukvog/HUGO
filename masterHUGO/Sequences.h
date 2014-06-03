@@ -112,7 +112,7 @@ struct MasterNode
 //change array length and step length
 /////////////////////
 
-int node1_seqNr[18] = { 0, 1000, 2, 20, 1, 1000, 2, 20, 3, 1000, 2, 20, 4, 1000, 5, 1000, 2, 20};
+int node1_seqNr[18] = { 0, 200, 2, 20, 1, 200, 2, 20, 3, 200, 2, 20, 4, 200, 5, 200, 2, 20};
 int node1_Mod1[2] = { 1, 10};
 int node1_Mod2[2] = { 1, 10};
 int node1_Mod3[2] = { 1, 10};
@@ -120,7 +120,7 @@ int node1_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode1 = new MasterNode(1, node1_seqNr, 9, node1_Mod1, 1, node1_Mod2, 1, node1_Mod3, 1, node1_Mod4, 1);
 
-int node2_seqNr[18] = { 0, 1000, 2, 20, 1, 1000, 2, 20, 3, 1000, 2, 20, 4, 1000, 5, 1000, 2, 20};
+int node2_seqNr[18] = { 0, 200, 2, 20, 1, 200, 2, 20, 3, 200, 2, 20, 4, 200, 5, 200, 2, 20};
 int node2_Mod1[2] = { 1, 10};
 int node2_Mod2[2] = { 1, 10};
 int node2_Mod3[2] = { 1, 10};

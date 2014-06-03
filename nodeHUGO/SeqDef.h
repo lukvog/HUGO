@@ -285,6 +285,7 @@ public:
 #define i1 2
 #define o1 3
 #define u1 4
+#define open 5
 
 extern AudioMixer4 mixFormants;
 
@@ -439,7 +440,7 @@ public:
 	float sopranU_BW[3] = {0.5*factor, 0.4*factor, 0.3*factor};
 	
 	float open_fc[3] = {50, 500, 5000};
-	float open_gain[3] = {0, 0, 0};
+	float open_gain[3] = {0, -60, -60};
 	float open_BW[3] = {5, 5, 5};
 	
 };

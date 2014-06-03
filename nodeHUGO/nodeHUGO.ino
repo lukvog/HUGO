@@ -115,8 +115,10 @@ AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
-float mainToneLevel = 4.0;
-float mainInputLevel = 6.0;
+float mainToneLevel = -6.0;
+float mainInputLevel = 0.0;
+
+int vol;
 
 
 
@@ -372,7 +374,7 @@ void setup()
 //Metros
 Metro LightMetro = Metro(50);
 Metro ComMetro = Metro(1000);
-Metro SensMetro = Metro(100);
+Metro SensMetro = Metro(50);
 Metro PrintOutMetro = Metro(500);
 Metro MonitorMetro = Metro(1000);
 Metro VolMetro = Metro(10);
@@ -421,6 +423,8 @@ void loop() {
     Serial.println(prox);
     Serial.print("mainVol: ");
     Serial.println(mainVolume);
+    Serial.print("analogueVolKnob: ");
+    Serial.println(vol);
     Serial.print("wallDist: ");
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
@@ -528,8 +532,8 @@ void loop() {
   if (ForgetMetro.check() == 1) {
 
     if (changed != changedOld) {
-      int changedInv = map(changed, 60, 500, 450, 60);
-      prox = (changedInv - 50.0) / 1100.0;
+      int changedInv = map(changed, 60, 500, 60, 450);
+      prox = (changedInv - 50.0) / 1000.0;
       //Serial.println(prox);
       changedOld = changed;
     }
@@ -548,7 +552,7 @@ void loop() {
   // volume control
 
   if (VolMetro.check() == 1) {
-    int vol = analogRead(15);
+    vol = analogRead(15);
     if (vol != mainVolume) {
       mainVolume = vol / 1023.0;
       mainVolumeChange = mainVolume + prox;
@@ -560,7 +564,7 @@ void loop() {
   if (TimingMetro.check() == 1) {
 
     // detect input volume
-    float factor = 2.0;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
+    float factor = 1.3;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
     float tempInputVol = peakMix.Dpp()/1024.0;
     inputVolume = factor * log10(tempInputVol);
     //Serial.print(inputVolume);

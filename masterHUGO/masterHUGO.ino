@@ -250,7 +250,7 @@ void loop() {
   if (SeqMetro.check() == 1)
 	{
 		int time = millis();
-
+int count = 0
 		// // Node 1 - Seq Nr.
      MasterNode1->SeqNr.Process();
 
