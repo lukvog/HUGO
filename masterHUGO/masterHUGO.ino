@@ -249,7 +249,7 @@ void loop() {
   //////////////////////////
   if (SeqMetro.check() == 1)
   {
-    int time = millis();
+    //int time = millis();
     int count = 0;
     // // Node 1 - Seq Nr.
     MasterNode1->SeqNr.Process();
@@ -404,11 +404,11 @@ void loop() {
      
      */
 
-    int timeDif = millis();
-    timeDif = timeDif - time;
-    Serial.print("timeDif: ");
-    Serial.print(timeDif);
-    Serial.print("\n");
+    //int timeDif = millis();
+    //timeDif = timeDif - time;
+    //Serial.print("timeDif: ");
+    //Serial.print(timeDif);
+    //Serial.print("\n");
   }
 
 

@@ -28,11 +28,11 @@ const int toneVolumeSeq2_raw[6] = {
 ToneVolumeSeq* toneVolumeSeq2 = new ToneVolumeSeq(toneVolumeSeq2_raw, 3);
 
 const int toneVolumeSeq3_raw[2] = { 
-  -60, 1000};
+  -80, 1000};
 ToneVolumeSeq* toneVolumeSeq3 = new ToneVolumeSeq(toneVolumeSeq3_raw, 1);
 
 const int toneVolumeSeq4_raw[2] = { 
-  -60, 1000};
+  -80, 1000};
 ToneVolumeSeq* toneVolumeSeq4 = new ToneVolumeSeq(toneVolumeSeq4_raw, 1);
 
 const int toneVolumeSeq5_raw[2] = { 
@@ -40,15 +40,15 @@ const int toneVolumeSeq5_raw[2] = {
 ToneVolumeSeq* toneVolumeSeq5 = new ToneVolumeSeq(toneVolumeSeq5_raw, 1);
 
 const int toneVolumeSeq6_raw[2] = { 
-  -60, 1000};
+  -80, 1000};
 ToneVolumeSeq* toneVolumeSeq6 = new ToneVolumeSeq(toneVolumeSeq6_raw, 1);
 
 const int toneVolumeSeq7_raw[2] = { 
-  -60, 1000};
+  -80, 1000};
 ToneVolumeSeq* toneVolumeSeq7 = new ToneVolumeSeq(toneVolumeSeq7_raw, 1);
 
 const int toneVolumeSeq8_raw[2] = { 
-  -60, 1000};
+  -80, 2000};
 ToneVolumeSeq* toneVolumeSeq8 = new ToneVolumeSeq(toneVolumeSeq8_raw, 1);
 
 ToneVolumeSeq* masterToneVolSeq[8];
@@ -82,7 +82,7 @@ const int inVolumeSeq3_raw[2] = {
 InVolumeSeq* inVolumeSeq3 = new InVolumeSeq(inVolumeSeq3_raw, 1);
 
 const int inVolumeSeq4_raw[2] = { 
-  0, 1000};
+  -1, 1000};
 InVolumeSeq* inVolumeSeq4 = new InVolumeSeq(inVolumeSeq4_raw, 1);
 
 const int inVolumeSeq5_raw[2] = { 
@@ -90,16 +90,16 @@ const int inVolumeSeq5_raw[2] = {
 InVolumeSeq* inVolumeSeq5 = new InVolumeSeq(inVolumeSeq5_raw, 1);
 
 const int inVolumeSeq6_raw[2] = { 
-  0, 2000};
+  -1, 2000};
 InVolumeSeq* inVolumeSeq6 = new InVolumeSeq(inVolumeSeq6_raw, 1);
 
 const int inVolumeSeq7_raw[2] = { 
-  0, 2000};
+  -1, 2000};
 InVolumeSeq* inVolumeSeq7 = new InVolumeSeq(inVolumeSeq7_raw, 1);
 
 const int inVolumeSeq8_raw[4] = { 
-  -30, 1000, -40, 1000 };
-InVolumeSeq* inVolumeSeq8 = new InVolumeSeq(inVolumeSeq7_raw, 2);
+  -50, 1000, -40, 1000 };
+InVolumeSeq* inVolumeSeq8 = new InVolumeSeq(inVolumeSeq8_raw, 2);
 
 InVolumeSeq* masterInVolSeq[8];
 
@@ -141,12 +141,12 @@ const int delayStateSeq5_raw[2] = {
 DelayStateSeq* delayStateSeq5 = new DelayStateSeq(delayStateSeq5_raw, 1);
 
 const int delayStateSeq6_raw[2] = {
-  1, 2000};
+  1, 500};
 DelayStateSeq* delayStateSeq6 = new DelayStateSeq(delayStateSeq6_raw, 1);
 
-const int delayStateSeq7_raw[2] = {
-  1, 2000};
-DelayStateSeq* delayStateSeq7 = new DelayStateSeq(delayStateSeq7_raw, 1);
+const int delayStateSeq7_raw[12] = {
+  1, 1000, 1, 250, 1, 500, 1, 250, 1, 500, 1, 500};
+DelayStateSeq* delayStateSeq7 = new DelayStateSeq(delayStateSeq7_raw, 6);
 
 const int delayStateSeq8_raw[8] = {
   1, 50, 2, 300, 1, 1000, 2, 300};
@@ -352,21 +352,21 @@ ToneSequence* toneSeq2_3 = new ToneSequence(toneSeq2_3_raw, 9, &osc3, TONE_TYPE_
 
 
 const int toneSeq3_1_raw[3] = {
-  0, 38, 1000 };
+  1, 38, 1000 };
 const int toneSeq3_2_raw[3] = {
-  0, 40, 1000 };
+  1, 40, 1000 };
 const int toneSeq3_3_raw[3] = {
-  0, 42, 1000 };
+  1, 42, 1000 };
 ToneSequence* toneSeq3_1 = new ToneSequence(toneSeq3_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq3_2 = new ToneSequence(toneSeq3_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq3_3 = new ToneSequence(toneSeq3_3_raw, 1, &osc3, TONE_TYPE_SQUARE);
 
 const int toneSeq4_1_raw[3] = {
-  0, 38, 1000 };
+  1, 38, 1000 };
 const int toneSeq4_2_raw[3] = {
-  0, 40, 1000 };
+  1, 40, 1000 };
 const int toneSeq4_3_raw[3] = {
-  0, 42, 1000 };
+  1, 42, 1000 };
 ToneSequence* toneSeq4_1 = new ToneSequence(toneSeq4_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq4_2 = new ToneSequence(toneSeq4_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq4_3 = new ToneSequence(toneSeq4_3_raw, 1, &osc3, TONE_TYPE_SQUARE);
@@ -382,31 +382,31 @@ ToneSequence* toneSeq5_2 = new ToneSequence(toneSeq5_2_raw, 8, &osc2, TONE_TYPE_
 ToneSequence* toneSeq5_3 = new ToneSequence(toneSeq5_3_raw, 8, &osc3, TONE_TYPE_SINE);
 
 const int toneSeq6_1_raw[3] = {
-  0, 38, 1000 };
+  1, 38, 1000 };
 const int toneSeq6_2_raw[3] = {
-  0, 40, 1000 };
+  1, 40, 1000 };
 const int toneSeq6_3_raw[3] = {
-  0, 42, 1000 };
+  1, 42, 1000 };
 ToneSequence* toneSeq6_1 = new ToneSequence(toneSeq6_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq6_2 = new ToneSequence(toneSeq6_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq6_3 = new ToneSequence(toneSeq6_3_raw, 1, &osc3, TONE_TYPE_SQUARE);
 
 const int toneSeq7_1_raw[3] = {
-  0, 38, 1000 };
+  1, 38, 1000 };
 const int toneSeq7_2_raw[3] = {
-  0, 40, 1000 };
+  1, 40, 1000 };
 const int toneSeq7_3_raw[3] = {
-  0, 42, 1000 };
+  1, 42, 1000 };
 ToneSequence* toneSeq7_1 = new ToneSequence(toneSeq7_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq7_2 = new ToneSequence(toneSeq7_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq7_3 = new ToneSequence(toneSeq7_3_raw, 1, &osc3, TONE_TYPE_SQUARE);
 
 const int toneSeq8_1_raw[3] = {
-  0, 38, 1000 };
+  1, 38, 4000 };
 const int toneSeq8_2_raw[3] = {
-  0, 40, 1000 };
+  1, 40, 4000 };
 const int toneSeq8_3_raw[3] = {
-  0, 42, 1000 };
+  1, 42, 4000 };
 ToneSequence* toneSeq8_1 = new ToneSequence(toneSeq8_1_raw, 1, &osc1, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq8_2 = new ToneSequence(toneSeq8_2_raw, 1, &osc2, TONE_TYPE_SQUARE);
 ToneSequence* toneSeq8_3 = new ToneSequence(toneSeq8_3_raw, 1, &osc3, TONE_TYPE_SQUARE);

@@ -115,8 +115,8 @@ AudioConnection c17(LowPass, 0, audioOutput, 0);
 
 AudioControlSGTL5000 audioShield;
 
-float mainToneLevel = -6.0;
-float mainInputLevel = 0.0;
+float mainToneLevel = -1.0;
+float mainInputLevel = 3.0;
 
 int vol;
 
@@ -423,8 +423,6 @@ void loop() {
     Serial.println(prox);
     Serial.print("mainVol: ");
     Serial.println(mainVolume);
-    Serial.print("analogueVolKnob: ");
-    Serial.println(vol);
     Serial.print("wallDist: ");
     Serial.println(wallDist, DEC);
     Serial.print("changed: ");
@@ -564,7 +562,7 @@ void loop() {
   if (TimingMetro.check() == 1) {
 
     // detect input volume
-    float factor = 1.3;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
+    float factor = 2.0;	// with this factor, the amount of the ducking can be set (bigger values -> more ducking)
     float tempInputVol = peakMix.Dpp()/1024.0;
     inputVolume = factor * log10(tempInputVol);
     //Serial.print(inputVolume);
