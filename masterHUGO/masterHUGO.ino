@@ -177,8 +177,6 @@ Metro ReadMetro = Metro(10);
 Metro SeqMetro = Metro(MOD_RATE);
 
 int count = 1;
-int countStep[15]=  {1000, 20, 1000, 500, 40, 1000, 20, 500, 20, 1000, 20, 1000, 20, 1000, 20};
-int cntStepIndex = 0;
 
 void loop() {
 
@@ -253,14 +251,13 @@ void loop() {
   if (SeqMetro.check() == 1)
   {
     //int time = millis();
-//    int countReal = countstep[cntStepIndex];
+    //    int countReal = countstep[cntStepIndex];
 
-    if (count > 5) {
+    if (count > 7) {
       count = 1;
-      //countStep = 0;
     }
 
-    switch (count) {
+    switch (count++) {
     case 1:
       // // Node 1 - Seq Nr.
       MasterNode1->SeqNr.Process();
@@ -275,7 +272,7 @@ void loop() {
       MasterNode10->SeqNr.Process();
       MasterNode11->SeqNr.Process();
       MasterNode12->SeqNr.Process();
-      Serial.println("case1");
+      //Serial.println("case1");
       break;
 
     case 2:
@@ -291,7 +288,7 @@ void loop() {
       MasterNode3->SeqNr.Process();
       MasterNode2->SeqNr.Process();
       MasterNode1->SeqNr.Process();
-      Serial.println("case2");
+      //Serial.println("case2");
       break;
 
     case 3:
@@ -307,7 +304,7 @@ void loop() {
       MasterNode11->SeqNr.Process();
       MasterNode1->SeqNr.Process();
       MasterNode12->SeqNr.Process();
-      Serial.println("case3");
+      //Serial.println("case3");
       break;
 
     case 4:
@@ -322,8 +319,8 @@ void loop() {
       MasterNode11->SeqNr.Process();
       MasterNode2->SeqNr.Process();
       MasterNode12->SeqNr.Process();
-      MasterNode11->SeqNr.Process();
-      Serial.println("case4");
+      MasterNode1->SeqNr.Process();
+      //Serial.println("case4");
       break;
 
     case 5:
@@ -339,8 +336,42 @@ void loop() {
       MasterNode8->SeqNr.Process();
       MasterNode6->SeqNr.Process();
       MasterNode7->SeqNr.Process();
-      Serial.println("case5");
+      //Serial.println("case5");
       break;
+
+    case 6:
+      MasterNode12->SeqNr.Process();
+      MasterNode1->SeqNr.Process();
+      MasterNode11->SeqNr.Process();
+      MasterNode2->SeqNr.Process();
+      MasterNode10->SeqNr.Process();
+      MasterNode3->SeqNr.Process();
+      MasterNode9->SeqNr.Process();
+      MasterNode4->SeqNr.Process();
+      MasterNode8->SeqNr.Process();
+      MasterNode5->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
+      //Serial.println("case6");
+      break;
+
+    case 7:
+      // // Node 1 - Seq Nr.
+      MasterNode1->SeqNr.Process();
+      MasterNode2->SeqNr.Process();
+      MasterNode3->SeqNr.Process();
+      MasterNode4->SeqNr.Process();
+      MasterNode5->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
+      MasterNode8->SeqNr.Process();
+      MasterNode9->SeqNr.Process();
+      MasterNode10->SeqNr.Process();
+      MasterNode11->SeqNr.Process();
+      MasterNode12->SeqNr.Process();
+      //Serial.println("case7");
+      break;
+
     }
 
 
@@ -672,6 +703,8 @@ void loop() {
 // Serial.printf_P(PSTR("%lu: APP Added 0%o to list of active nodes.\n\r"),millis(),node);
 // }
 // }
+
+
 
 
 

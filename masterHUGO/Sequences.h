@@ -112,7 +112,7 @@ struct MasterNode
 //change array length and step length
 /////////////////////
 
-int node1_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node1_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node1_Mod1[2] = { 1, 10};
 int node1_Mod2[2] = { 1, 10};
 int node1_Mod3[2] = { 1, 10};
@@ -120,7 +120,7 @@ int node1_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode1 = new MasterNode(1, node1_seqNr, 15, node1_Mod1, 1, node1_Mod2, 1, node1_Mod3, 1, node1_Mod4, 1);
 
-int node2_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node2_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node2_Mod1[2] = { 1, 10};
 int node2_Mod2[2] = { 1, 10};
 int node2_Mod3[2] = { 1, 10};
@@ -128,7 +128,7 @@ int node2_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode2 = new MasterNode(2, node2_seqNr, 15, node2_Mod1, 1, node2_Mod2, 1, node2_Mod3, 1, node2_Mod4, 1);
 
-int node3_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node3_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node3_Mod1[2] = { 1, 10};
 int node3_Mod2[2] = { 1, 10};
 int node3_Mod3[2] = { 1, 10};
@@ -136,7 +136,7 @@ int node3_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode3 = new MasterNode(3, node3_seqNr, 15, node3_Mod1, 1, node3_Mod2, 1, node3_Mod3, 1, node3_Mod4, 1);
 
-int node4_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node4_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node4_Mod1[2] = { 1, 10};
 int node4_Mod2[2] = { 1, 10};
 int node4_Mod3[2] = { 1, 10};
@@ -144,7 +144,7 @@ int node4_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode4 = new MasterNode(4, node4_seqNr, 15, node4_Mod1, 1, node4_Mod2, 1, node4_Mod3, 1, node4_Mod4, 1);
 
-int node5_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node5_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node5_Mod1[2] = { 1, 10};
 int node5_Mod2[2] = { 1, 10};
 int node5_Mod3[2] = { 1, 10};
@@ -152,7 +152,7 @@ int node5_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode5 = new MasterNode(5, node5_seqNr, 15, node5_Mod1, 1, node5_Mod2, 1, node5_Mod3, 1, node5_Mod4, 1);
 
-int node6_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node6_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node6_Mod1[2] = { 1, 10};
 int node6_Mod2[2] = { 1, 10};
 int node6_Mod3[2] = { 1, 10};
@@ -160,7 +160,7 @@ int node6_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode6 = new MasterNode(6, node6_seqNr, 15, node6_Mod1, 1, node6_Mod2, 1, node6_Mod3, 1, node6_Mod4, 1);
 
-int node7_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node7_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node7_Mod1[2] = { 1, 10};
 int node7_Mod2[2] = { 1, 10};
 int node7_Mod3[2] = { 1, 10};
@@ -168,7 +168,7 @@ int node7_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode7 = new MasterNode(7, node7_seqNr, 15, node7_Mod1, 1, node7_Mod2, 1, node7_Mod3, 1, node7_Mod4, 1);
 
-int node8_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node8_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node8_Mod1[2] = { 1, 10};
 int node8_Mod2[2] = { 1, 10};
 int node8_Mod3[2] = { 1, 10};
@@ -176,7 +176,7 @@ int node8_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode8 = new MasterNode(8, node8_seqNr, 15, node8_Mod1, 1, node8_Mod2, 1, node8_Mod3, 1, node8_Mod4, 1);
 
-int node9_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node9_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node9_Mod1[2] = { 1, 10};
 int node9_Mod2[2] = { 1, 10};
 int node9_Mod3[2] = { 1, 10};
@@ -184,7 +184,7 @@ int node9_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode9 = new MasterNode(9, node9_seqNr, 15, node9_Mod1, 1, node9_Mod2, 1, node9_Mod3, 1, node9_Mod4, 1);
 
-int node10_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node10_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node10_Mod1[2] = { 1, 10};
 int node10_Mod2[2] = { 1, 10};
 int node10_Mod3[2] = { 1, 10};
@@ -192,7 +192,7 @@ int node10_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode10 = new MasterNode(10, node10_seqNr, 15, node10_Mod1, 1, node10_Mod2, 1, node10_Mod3, 1, node10_Mod4, 1);
 
-int node11_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node11_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node11_Mod1[2] = { 1, 10};
 int node11_Mod2[2] = { 1, 10};
 int node11_Mod3[2] = { 1, 10};
@@ -200,7 +200,7 @@ int node11_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode11 = new MasterNode(11, node11_seqNr, 15, node11_Mod1, 1, node11_Mod2, 1, node11_Mod3, 1, node11_Mod4, 1);
 
-int node12_seqNr[30] = { 0, 1000, 2, 20, 1, 1000, 7, 500, 2, 40, 3, 1000, 2, 20, 4, 500, 2, 20, 5, 1000, 2, 20, 6, 1000, 2, 20, 7, 1000, 2, 20};
+int node12_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
 int node12_Mod1[2] = { 1, 10};
 int node12_Mod2[2] = { 1, 10};
 int node12_Mod3[2] = { 1, 10};
