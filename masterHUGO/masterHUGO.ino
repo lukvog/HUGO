@@ -256,16 +256,26 @@ void loop() {
     if (count > 7) {
       count = 1;
     }
-
+    
+    //remapping
+    //6 --> 1
+    //1 --> 6
+    //2 --> 1
+    //3 --> 2
+    //4 --> 3
+    //5 --> 4
+    //7 --> 5
+    
+ 
     switch (count++) {
     case 1:
       // // Node 1 - Seq Nr.
+      MasterNode6->SeqNr.Process();
       MasterNode1->SeqNr.Process();
       MasterNode2->SeqNr.Process();
       MasterNode3->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode5->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
       MasterNode7->SeqNr.Process();
       MasterNode8->SeqNr.Process();
       MasterNode9->SeqNr.Process();
@@ -282,87 +292,87 @@ void loop() {
       MasterNode9->SeqNr.Process();
       MasterNode8->SeqNr.Process();
       MasterNode7->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
       MasterNode5->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode3->SeqNr.Process();
       MasterNode2->SeqNr.Process();
       MasterNode1->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
       //Serial.println("case2");
       break;
 
     case 3:
       MasterNode6->SeqNr.Process();
-      MasterNode7->SeqNr.Process();
       MasterNode5->SeqNr.Process();
-      MasterNode8->SeqNr.Process();
       MasterNode4->SeqNr.Process();
-      MasterNode9->SeqNr.Process();
+      MasterNode8->SeqNr.Process();
       MasterNode3->SeqNr.Process();
-      MasterNode10->SeqNr.Process();
+      MasterNode9->SeqNr.Process();
       MasterNode2->SeqNr.Process();
-      MasterNode11->SeqNr.Process();
+      MasterNode10->SeqNr.Process();
       MasterNode1->SeqNr.Process();
+      MasterNode11->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
       MasterNode12->SeqNr.Process();
       //Serial.println("case3");
       break;
 
     case 4:
-      MasterNode7->SeqNr.Process();
+      MasterNode5->SeqNr.Process();
       MasterNode6->SeqNr.Process();
       MasterNode8->SeqNr.Process();
-      MasterNode5->SeqNr.Process();
-      MasterNode9->SeqNr.Process();
       MasterNode4->SeqNr.Process();
-      MasterNode10->SeqNr.Process();
+      MasterNode9->SeqNr.Process();
       MasterNode3->SeqNr.Process();
-      MasterNode11->SeqNr.Process();
+      MasterNode10->SeqNr.Process();
       MasterNode2->SeqNr.Process();
-      MasterNode12->SeqNr.Process();
+      MasterNode11->SeqNr.Process();
       MasterNode1->SeqNr.Process();
+      MasterNode12->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
       //Serial.println("case4");
       break;
 
     case 5:
-      MasterNode1->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
       MasterNode12->SeqNr.Process();
-      MasterNode2->SeqNr.Process();
+      MasterNode1->SeqNr.Process();
       MasterNode11->SeqNr.Process();
-      MasterNode3->SeqNr.Process();
+      MasterNode2->SeqNr.Process();
       MasterNode10->SeqNr.Process();
-      MasterNode4->SeqNr.Process();
+      MasterNode3->SeqNr.Process();
       MasterNode9->SeqNr.Process();
-      MasterNode5->SeqNr.Process();
+      MasterNode4->SeqNr.Process();
       MasterNode8->SeqNr.Process();
       MasterNode6->SeqNr.Process();
-      MasterNode7->SeqNr.Process();
+      MasterNode5->SeqNr.Process();
       //Serial.println("case5");
       break;
 
     case 6:
       MasterNode12->SeqNr.Process();
-      MasterNode1->SeqNr.Process();
+      MasterNode6->SeqNr.Process();
       MasterNode11->SeqNr.Process();
-      MasterNode2->SeqNr.Process();
+      MasterNode1->SeqNr.Process();
       MasterNode10->SeqNr.Process();
       MasterNode3->SeqNr.Process();
       MasterNode9->SeqNr.Process();
-      MasterNode4->SeqNr.Process();
+      MasterNode3->SeqNr.Process();
       MasterNode8->SeqNr.Process();
+      MasterNode4->SeqNr.Process();
       MasterNode5->SeqNr.Process();
-      MasterNode7->SeqNr.Process();
       MasterNode6->SeqNr.Process();
       //Serial.println("case6");
       break;
 
     case 7:
       // // Node 1 - Seq Nr.
+      MasterNode6->SeqNr.Process();
       MasterNode1->SeqNr.Process();
       MasterNode2->SeqNr.Process();
       MasterNode3->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode5->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
       MasterNode7->SeqNr.Process();
       MasterNode8->SeqNr.Process();
       MasterNode9->SeqNr.Process();
