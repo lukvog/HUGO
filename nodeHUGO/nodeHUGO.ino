@@ -458,7 +458,7 @@ void loop() {
     //Serial.println(averageL);
 
     //----> scaling factor!
-    int mappedMax = 255 * (mainVolumeChange * 0.7);
+    int mappedMax = 255 * (mainVolumeChange * 1.1);
     //Serial.println(mappedMax);
     int mapped = map(averageL, 0, 100, 0, mappedMax);
     mapped = constrain(mapped, 5, 255);
@@ -531,7 +531,7 @@ void loop() {
 
     if (changed != changedOld) {
       int changedInv = map(changed, 60, 500, 60, 500);
-      prox = (changedInv - 50.0) / 1000.0;
+      prox = (changedInv - 50.0) / 800.0;
       //Serial.println(prox);
       changedOld = changed;
     }
