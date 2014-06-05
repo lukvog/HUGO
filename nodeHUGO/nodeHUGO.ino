@@ -531,7 +531,7 @@ void loop() {
 
     if (changed != changedOld) {
       int changedInv = map(changed, 60, 500, 60, 500);
-      prox = (changedInv - 50.0) / 800.0;
+      prox = (changedInv - 50.0) / 600.0;
       //Serial.println(prox);
       changedOld = changed;
     }
