@@ -36,7 +36,7 @@ const int toneVolumeSeq4_raw[2] = {
 ToneVolumeSeq* toneVolumeSeq4 = new ToneVolumeSeq(toneVolumeSeq4_raw, 1);
 
 const int toneVolumeSeq5_raw[2] = { 
-  -10, 2000};
+  -15, 2000};
 ToneVolumeSeq* toneVolumeSeq5 = new ToneVolumeSeq(toneVolumeSeq5_raw, 1);
 
 const int toneVolumeSeq6_raw[2] = { 

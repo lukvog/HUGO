@@ -302,7 +302,7 @@ void loop() {
       break;
 
     case 3:
-      MasterNode6->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
       MasterNode5->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode8->SeqNr.Process();
@@ -319,7 +319,7 @@ void loop() {
 
     case 4:
       MasterNode5->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
       MasterNode8->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode9->SeqNr.Process();
@@ -344,7 +344,7 @@ void loop() {
       MasterNode9->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode8->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
       MasterNode5->SeqNr.Process();
       //Serial.println("case5");
       break;
@@ -361,7 +361,7 @@ void loop() {
       MasterNode8->SeqNr.Process();
       MasterNode4->SeqNr.Process();
       MasterNode5->SeqNr.Process();
-      MasterNode6->SeqNr.Process();
+      MasterNode7->SeqNr.Process();
       //Serial.println("case6");
       break;
 

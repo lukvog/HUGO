@@ -184,7 +184,7 @@ int node9_Mod4[2] = { 1, 10};
 
 MasterNode* MasterNode9 = new MasterNode(9, node9_seqNr, 15, node9_Mod1, 1, node9_Mod2, 1, node9_Mod3, 1, node9_Mod4, 1);
 
-int node10_seqNr[30] = { 0, 500, 2, 20, 1, 500, 7, 100, 2, 40, 3, 500, 2, 20, 4, 250, 2, 20, 5, 500, 2, 20, 6, 500, 2, 20, 7, 500, 2, 20};
+int node10_seqNr[30] = { 0, 400, 2, 20, 1, 400, 7, 80, 2, 40, 3, 400, 2, 20, 4, 200, 2, 20, 5, 400, 2, 20, 6, 400, 2, 20, 7, 400, 2, 20};
 int node10_Mod1[2] = { 1, 10};
 int node10_Mod2[2] = { 1, 10};
 int node10_Mod3[2] = { 1, 10};
